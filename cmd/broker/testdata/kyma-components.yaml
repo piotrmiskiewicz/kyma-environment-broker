@@ -1,0 +1,5 @@
+---
+defaultNamespace: kyma-system
+components:
+  - name: "ory"
+  - name: "monitoring"

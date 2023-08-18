@@ -1,0 +1,5 @@
+components:
+  - name: "uaa-activator"
+    namespace: "kyma-system"
+  - name: "compass-runtime-agent"
+    namespace: "kyma-system"

@@ -1,0 +1,5 @@
+components:
+  - name: "btp-operator"
+    namespace: "kyma-system"
+    source:
+      url: "https://btp-operator"
