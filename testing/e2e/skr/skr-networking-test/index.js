@@ -1,0 +1,58 @@
+const {
+  gatherOptions,
+} = require('../skr-test');
+const {getOrProvisionSKR} = require('../skr-test/provision/provision-skr');
+const {deprovisionAndUnregisterSKR} = require('../skr-test/provision/deprovision-skr');
+const {withCustomParams} = require('../skr-test');
+const {expect} = require('chai');
+const {KEBClient, KEBConfig} = require('../kyma-environment-broker');
+const axios = require("axios");
+const keb = new KEBClient(KEBConfig.fromEnv());
+
+const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
+const provisioningTimeout = 1000 * 60 * 30; // 30m
+const deprovisioningTimeout = 1000 * 60 * 95; // 95m
+let globalTimeout = 1000 * 60 * 30; // 20m
+const slowTime = 5000;
+
+describe('SKR AWS networking test', function() {
+  if (!skipProvisioning) {
+    globalTimeout += provisioningTimeout + deprovisioningTimeout;
+  }
+  this.timeout(globalTimeout);
+  this.slow(slowTime);
+
+  let skr;
+
+  const customParams = {
+    'networking': {'nodes': '10.253.0.0/21'},
+  };
+  let options = gatherOptions(
+      withCustomParams(customParams),
+  );
+  console.log('Using custom parameters: %o', customParams);
+
+  it('Try networking params which overlaps with restricted IP range', async function() {
+    const customParams = {'networking': {'nodes': '10.242.0.0/22'}};
+    const payload = keb.buildPayload('wrong-nodes', 'id01234876', null, null, customParams);
+    const endpoint = `service_instances/id01234876`;
+    const config = await keb.buildRequest(payload, endpoint, 'put');
+
+    try {
+      await axios.request(config);
+      fail('KEB must return an error');
+    } catch (err) {
+      expect(err.response.status).equal(400);
+    }
+  });
+  it('Perform provisioning', async function() {
+    this.timeout(provisioningTimeout);
+    skr = await getOrProvisionSKR(options, skipProvisioning, provisioningTimeout);
+    options = skr.options;
+  });
+
+  after('Cleanup the resources', async function() {
+    this.timeout(deprovisioningTimeout);
+    await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning, false);
+  });
+});
