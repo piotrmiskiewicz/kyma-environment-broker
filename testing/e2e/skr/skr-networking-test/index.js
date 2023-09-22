@@ -43,6 +43,7 @@ describe('SKR AWS networking test', function() {
       fail('KEB must return an error');
     } catch (err) {
       expect(err.response.status).equal(400);
+      expect(err.response.data.description).to.include('overlap');
     }
   });
   it('Perform provisioning', async function() {
