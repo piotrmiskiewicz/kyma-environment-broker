@@ -6,7 +6,7 @@ const {deprovisionAndUnregisterSKR} = require('../skr-test/provision/deprovision
 const {withCustomParams} = require('../skr-test');
 const {expect} = require('chai');
 const {KEBClient, KEBConfig} = require('../kyma-environment-broker');
-const axios = require("axios");
+const axios = require('axios');
 const keb = new KEBClient(KEBConfig.fromEnv());
 
 const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
