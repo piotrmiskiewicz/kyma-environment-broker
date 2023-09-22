@@ -44,6 +44,23 @@ describe('SKR AWS networking test', function() {
     } catch (err) {
       expect(err.response.status).equal(400);
       expect(err.response.data.description).to.include('overlap');
+      console.log('Got response:');
+      console.log(err.response.data);
+    }
+  });
+  it('Try networking params with invalid IP range', async function() {
+    const customParams = {'networking': {'nodes': '333.242.0.0/22'}};
+    const payload = keb.buildPayload('wrong-nodes', 'id01234873', null, null, customParams);
+    const endpoint = `service_instances/id01234876`;
+    const config = await keb.buildRequest(payload, endpoint, 'put');
+
+    try {
+      await axios.request(config);
+      fail('KEB must return an error');
+    } catch (err) {
+      console.log('Got response:');
+      console.log(err.response.data);
+      expect(err.response.status).equal(400);
     }
   });
   it('Perform provisioning', async function() {
