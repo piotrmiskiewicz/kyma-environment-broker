@@ -37,7 +37,7 @@ func (ars *AvsEvaluationRemovalStep) Name() string {
 func (ars *AvsEvaluationRemovalStep) Run(operation internal.Operation, logger logrus.FieldLogger) (internal.Operation, time.Duration, error) {
 	logger.Infof("Avs lifecycle %+v", operation.Avs)
 
-	// the delegator saves (update in the storage) is executed inside the DeleteAvsEvaluation
+	// the delegator saves the operation (update in the storage) - it is executed inside the DeleteAvsEvaluation
 
 	operation, err := ars.delegator.DeleteAvsEvaluation(operation, logger, ars.internalEvalAssistant)
 	if err != nil {
