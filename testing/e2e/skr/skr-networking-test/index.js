@@ -32,7 +32,7 @@ describe('SKR AWS networking test', function() {
   );
   console.log('Using custom parameters: %o', customParams);
 
-  it('Try networking params which overlaps with restricted IP range', async function() {
+  it('Try networking params which overlap with restricted IP range', async function() {
     const customParams = {'networking': {'nodes': '10.242.0.0/22'}};
     const payload = keb.buildPayload('wrong-nodes', 'id01234876', null, null, customParams);
     const endpoint = `service_instances/id01234876`;
