@@ -69,7 +69,7 @@ describe('SKR AWS networking test', function() {
     options = skr.options;
   });
 
-  after('Cleanup the resources', async function() {
+  after('Clean up the resources', async function() {
     this.timeout(deprovisioningTimeout);
     await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning, false);
   });
