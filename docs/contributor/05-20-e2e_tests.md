@@ -83,12 +83,14 @@ make skr-aws-upgrade-integration
 ### Usage
 
 The test executes the following steps:
-1. Calls KEB endpoints without an authorization token.
+1. Calls KEB endpoints with invalid networking parameters
 2. Checks whether the call was rejected.
+3. Provisions a cluster with custom networking parameters.
+4. Deprovisions the cluster.
 
 ### Test execution 
 
-1. Before you run the test, prepare the `.env` file based on the following [`.env.template`](/testing/e2e/skr/keb-endpoints-test/.env.template):
+1. Before you run the test, prepare the `.env` file based on the following [`.env.template`](/testing/e2e/skr/skr-networking-test/.env.template):
 2. To set up the environment variables in your system, run:
 
 ```bash
@@ -97,10 +99,36 @@ export $(xargs < .env)
 
 3. Run the test scenario.
 ```bash
-make keb-endpoints
+make skr-networking
 ```
 
-### CI pipelines
+## Networking parameter tests
+
+### Usage
+
+The test executes the following steps:
+1. Provisions an SKR cluster.
+2. Runs Kyma upgrade.
+3. Deprovisions the SKR instance and cleans up the resources.
+
+### Test execution
+
+1. Before you run the test, prepare the `.env` file based on the following [`.env.template`](/testing/e2e/skr/skr-aws-upgrade-integration/.env.template):
+2. To set up the environment variables in your system, run:
+
+```bash
+export $(xargs < .env)
+```
+
+3. Run the test scenario:
+```bash
+make skr-aws-upgrade-integration
+```
+
+
+
+
+## CI pipelines
 
 The tests are run once per day at 01:05 by the given Prow jobs:
 - `skr-azure-integration-dev` - SKR test
