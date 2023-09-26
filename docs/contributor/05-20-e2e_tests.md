@@ -124,9 +124,6 @@ export $(xargs < .env)
 make skr-networking-test
 ```
 
-
-
-
 ## CI pipelines
 
 The tests are run once per day at 01:05 by the given Prow jobs:
