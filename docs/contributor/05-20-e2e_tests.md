@@ -105,14 +105,14 @@ make keb-endpoints
 ### Usage
 
 The test executes the following steps:
-1. Calls KEB endpoints with invalid networking parameters
+1. Calls KEB endpoints with invalid networking parameters.
 2. Checks whether the call was rejected.
 3. Provisions a cluster with custom networking parameters.
 4. Deprovisions the cluster.
 
 ### Test execution
 
-1. Before you run the test, prepare the `.env` file based on the following [`.env.template`](/testing/e2e/skr/skr-networking-test/.env.template):
+1. Before you run the test, prepare the `.env` file based on this [`.env.template`](/testing/e2e/skr/skr-networking-test/.env.template).
 2. To set up the environment variables in your system, run:
 
 ```bash
