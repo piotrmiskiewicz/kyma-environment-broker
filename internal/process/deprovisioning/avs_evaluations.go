@@ -18,7 +18,6 @@ type AvsEvaluationRemovalStep struct {
 	externalEvalAssistant avs.EvalAssistant
 	internalEvalAssistant avs.EvalAssistant
 	deProvisioningManager *process.OperationManager
-	operationManager      *process.OperationManager
 }
 
 func NewAvsEvaluationsRemovalStep(delegator *avs.Delegator, operationsStorage storage.Operations, externalEvalAssistant, internalEvalAssistant avs.EvalAssistant) *AvsEvaluationRemovalStep {
