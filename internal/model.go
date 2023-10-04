@@ -317,7 +317,7 @@ type InstanceDetails struct {
 	CompassRuntimeId *string
 }
 
-// IsRegisteredInCompassByProvisioner returns true, if the runtime was registered in OCmpass by Provisioner
+// IsRegisteredInCompassByProvisioner returns true, if the runtime was registered in Compass by Provisioner
 func (i *InstanceDetails) IsRegisteredInCompassByProvisioner() bool {
 	return i.CompassRuntimeId == nil || *i.CompassRuntimeId != ""
 }
