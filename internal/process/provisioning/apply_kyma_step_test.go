@@ -109,7 +109,7 @@ func TestCreatingInternalKymaResource(t *testing.T) {
 		assert.Equal(t, 1, len(aList.Items))
 		assertLabelsExistsForInternalKymaResource(t, aList.Items[0])
 
-		assertCompassRuntimeIdAnnotationExists(t, aList.Items[0])
+		assertCompassRuntimeIdAnnotationNotExists(t, aList.Items[0])
 		svc.Run(operation, logrus.New())
 	})
 }
@@ -246,6 +246,11 @@ func assertLabelsExistsForInternalKymaResource(t *testing.T, obj unstructured.Un
 func assertCompassRuntimeIdAnnotationExists(t *testing.T, obj unstructured.Unstructured) {
 	t.Helper()
 	assert.Contains(t, obj.GetAnnotations(), "compass-runtime-id-for-migration")
+}
+
+func assertCompassRuntimeIdAnnotationNotExists(t *testing.T, obj unstructured.Unstructured) {
+	t.Helper()
+	assert.NotContains(t, obj.GetAnnotations(), "compass-runtime-id-for-migration")
 }
 
 func assertLabelsExistsForExternalKymaResource(t *testing.T, obj unstructured.Unstructured) {
