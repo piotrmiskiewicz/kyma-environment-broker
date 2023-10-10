@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"time"
+
 	orchestrationExt "github.com/kyma-project/kyma-environment-broker/common/orchestration"
 	"github.com/kyma-project/kyma-environment-broker/internal/avs"
 	"github.com/kyma-project/kyma-environment-broker/internal/event"
@@ -17,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 	"github.com/sirupsen/logrus"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
 )
 
 func NewKymaOrchestrationProcessingQueue(ctx context.Context, db storage.BrokerStorage,
