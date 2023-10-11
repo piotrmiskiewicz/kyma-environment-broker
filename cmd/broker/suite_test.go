@@ -1018,9 +1018,9 @@ func fixConfig() *Config {
 		EuAccessWhitelistedGlobalAccountsFilePath: "testdata/eu_access_whitelist.yaml",
 		EuAccessRejectionMessage:                  "EU Access Rejection Message - see: http://google.pl",
 
-		Provisioning:   process.StagedManagerConfiguration{ProcessingTime: time.Minute},
-		Deprovisioning: process.StagedManagerConfiguration{ProcessingTime: time.Minute},
-		Update:         process.StagedManagerConfiguration{ProcessingTime: time.Minute},
+		Provisioning:   process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
+		Deprovisioning: process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
+		Update:         process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
 	}
 }
 

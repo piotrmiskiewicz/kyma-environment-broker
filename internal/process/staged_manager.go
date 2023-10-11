@@ -33,8 +33,9 @@ type StagedManager struct {
 }
 
 type StagedManagerConfiguration struct {
-	ProcessingTime time.Duration `envconfig:"default=2m"`
-	WorkersAmount  int           `envconfig:"default=20"`
+	// Max time of processing step by a worker without returning to the queue
+	MaxStepProcessingTime time.Duration `envconfig:"default=2m"`
+	WorkersAmount         int           `envconfig:"default=20"`
 }
 
 type Step interface {
@@ -244,7 +245,7 @@ func (m *StagedManager) runStep(step Step, operation internal.Operation, logger 
 		// - the step does not need a retry
 		// - step returns an error
 		// - the loop takes too much time (to not block the worker too long)
-		if backoff == 0 || err != nil || time.Since(begin) > m.cfg.ProcessingTime {
+		if backoff == 0 || err != nil || time.Since(begin) > m.cfg.MaxStepProcessingTime {
 			return processedOperation, backoff, err
 		}
 		operation.EventInfof("step %v sleeping for %v", step.Name(), backoff)
