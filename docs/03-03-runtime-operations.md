@@ -34,7 +34,7 @@ All provisioning steps can be found in the [update.go file](../cmd/broker/update
 ## Upgrade Cluster
 
 Upgrade cluster process is triggered by upgrade cluster orchestration.
-All provisioning steps are collected steps can be found in the [upgrade_cluster.go file](../cmd/broker/upgrade_cluster.go).
+All provisioning steps can be found in the [upgrade_cluster.go file](../cmd/broker/upgrade_cluster.go).
 
 ## Upgrade Kyma
 
