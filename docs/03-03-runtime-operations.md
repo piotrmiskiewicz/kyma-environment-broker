@@ -11,7 +11,7 @@ Kyma Environment Broker (KEB) allows you to configure operations that you can ru
 
 Provisioning process is executed when the instance is being created and when an unsuspension is triggered.
 Each provisioning step is responsible for a separate part of preparing Kyma runtime. For example, in a step you can provide tokens, credentials, or URLs to integrate SAP BTP, Kyma runtime with external systems.
-All provisioning steps are collected steps can be found in the [provisioning.go file](../cmd/broker/provisioning.go).
+All provisioning steps can be found in the [provisioning.go file](../cmd/broker/provisioning.go).
 
 **NOTE:** The timeout for processing this operation is set to `24h`.
 
@@ -22,14 +22,14 @@ Each deprovisioning step is responsible for a separate part of cleaning Kyma run
 None of the deprovisioning steps should block the entire deprovisioning operation. Use the `RetryOperationWithoutFail` function from the `DeprovisionOperationManager` struct to skip a step in case of a retry timeout. Set a 5-minute, at the most, timeout for retries in a step.
 There is only one step, which fails the operation - `Check_Runtime_Removal`. It fails the operation in case of a timeout when checking for the Provisioner to remove the shoot. 
 Once the step is successfully executed, it isn't retried (every deprovisioning step is defined in a separate stage). If a step has been skipped due to a retry timeout or error, a [Cron Job](03-16-deprovision-retrigger-cronjob.md) tries to deprovision all remaining Kyma runtime dependencies again at a scheduled time.
-All provisioning steps are collected steps can be found in the [deprovisioning.go file](../cmd/broker/deprovisioning.go).
+All deprovisioning steps can be found in the [deprovisioning.go file](../cmd/broker/deprovisioning.go).
 
 **NOTE:** The timeout for processing this operation is set to `24h`.
 
 ## Update
 
 The update process is triggered by [an OSB API update operation](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#updating-a-service-instance) request.
-All provisioning steps are collected steps can be found in the [update.go file](../cmd/broker/update.go).
+All provisioning steps can be found in the [update.go file](../cmd/broker/update.go).
 
 ## Upgrade Cluster
 
