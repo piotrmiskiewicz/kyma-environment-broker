@@ -9,7 +9,7 @@ Kyma Environment Broker (KEB) allows you to configure operations that you can ru
 
 ## Provisioning
 
-Provisioning process is executed when the instance is being created and when an unsuspension is triggered.
+Provisioning process is executed when the instance is being created or when an unsuspension is triggered.
 Each provisioning step is responsible for a separate part of preparing Kyma runtime. For example, in a step you can provide tokens, credentials, or URLs to integrate SAP BTP, Kyma runtime with external systems.
 All provisioning steps can be found in the [provisioning.go file](../cmd/broker/provisioning.go).
 
