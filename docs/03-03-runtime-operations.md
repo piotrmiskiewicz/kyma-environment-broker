@@ -7,7 +7,7 @@ Kyma Environment Broker (KEB) allows you to configure operations that you can ru
 
 > **NOTE:** It's important to set lower timeouts for the Kyma installation in the Runtime Provisioner.
 
-## Provisioning
+## Provision
 
 Provisioning process is executed when the instance is being created or when an unsuspension is triggered.
 Each provisioning step is responsible for a separate part of preparing Kyma runtime. For example, in a step you can provide tokens, credentials, or URLs to integrate SAP BTP, Kyma runtime with external systems.
@@ -15,7 +15,7 @@ All provisioning steps can be found in the [provisioning.go file](../cmd/broker/
 
 **NOTE:** The timeout for processing this operation is set to `24h`.
 
-## Deprovisioning
+## Deprovision
 
 Each deprovisioning step is responsible for a separate part of cleaning Kyma runtime dependencies. To properly deprovision all the dependencies, you need the data used during the Kyma runtime provisioning. The first step finds the previous operation and copies the data.
 
@@ -29,17 +29,17 @@ All deprovisioning steps can be found in the [deprovisioning.go file](../cmd/bro
 ## Update
 
 The update process is triggered by [an OSB API update operation](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#updating-a-service-instance) request.
-All provisioning steps can be found in the [update.go file](../cmd/broker/update.go).
+All updating steps can be found in the [update.go file](../cmd/broker/update.go).
 
 ## Upgrade Cluster
 
 Upgrade cluster process is triggered by upgrade cluster orchestration.
-All provisioning steps can be found in the [upgrade_cluster.go file](../cmd/broker/upgrade_cluster.go).
+All upgrading cluster steps can be found in the [upgrade_cluster.go file](../cmd/broker/upgrade_cluster.go).
 
 ## Upgrade Kyma
 
 Upgrade kyma process is triggered by upgrade kyma orchestration.
-All provisioning steps are collected steps can be found in the [upgrade_kyma.go file](../cmd/broker/upgrade_kyma.go).
+All upgrading kyma steps steps can be found in the [upgrade_kyma.go file](../cmd/broker/upgrade_kyma.go).
 
 ## Provide additional steps
 
