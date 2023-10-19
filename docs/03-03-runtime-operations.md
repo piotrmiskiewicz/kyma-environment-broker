@@ -39,7 +39,7 @@ All upgrading cluster steps can be found in the [upgrade_cluster.go file](../cmd
 ## Upgrade Kyma
 
 Upgrade kyma process is triggered by upgrade kyma orchestration.
-All upgrading kyma steps steps can be found in the [upgrade_kyma.go file](../cmd/broker/upgrade_kyma.go).
+All upgrading kyma steps can be found in the [upgrade_kyma.go file](../cmd/broker/upgrade_kyma.go).
 
 ## Provide additional steps
 
