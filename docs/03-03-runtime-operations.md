@@ -9,37 +9,37 @@ Kyma Environment Broker (KEB) allows you to configure operations that you can ru
 
 ## Provision
 
-Provisioning process is executed when the instance is being created or when an unsuspension is triggered.
+The provisioning process is executed when the instance is created, or an unsuspension is triggered.
 Each provisioning step is responsible for a separate part of preparing Kyma runtime. For example, in a step you can provide tokens, credentials, or URLs to integrate SAP BTP, Kyma runtime with external systems.
-All provisioning steps can be found in the [provisioning.go file](../cmd/broker/provisioning.go).
+You can find all the provisioning steps in the [provisioning](../cmd/broker/provisioning.go) file.
 
-**NOTE:** The timeout for processing this operation is set to `24h`.
+> **NOTE:** The timeout for processing this operation is set to `24h`.
 
 ## Deprovision
 
 Each deprovisioning step is responsible for a separate part of cleaning Kyma runtime dependencies. To properly deprovision all the dependencies, you need the data used during the Kyma runtime provisioning. The first step finds the previous operation and copies the data.
 
 None of the deprovisioning steps should block the entire deprovisioning operation. Use the `RetryOperationWithoutFail` function from the `DeprovisionOperationManager` struct to skip a step in case of a retry timeout. Set a 5-minute, at the most, timeout for retries in a step.
-There is only one step, which fails the operation - `Check_Runtime_Removal`. It fails the operation in case of a timeout when checking for the Provisioner to remove the shoot. 
-Once the step is successfully executed, it isn't retried (every deprovisioning step is defined in a separate stage). If a step has been skipped due to a retry timeout or error, a [Cron Job](03-16-deprovision-retrigger-cronjob.md) tries to deprovision all remaining Kyma runtime dependencies again at a scheduled time.
-All deprovisioning steps can be found in the [deprovisioning.go file](../cmd/broker/deprovisioning.go).
+Only one step fails the operation, namely `Check_Runtime_Removal`. It fails the operation in case of a timeout while checking for the Provisioner to remove the shoot. 
+Once the step is successfully executed, it isn't retried (every deprovisioning step is defined in a separate stage). If a step has been skipped due to a retry timeout or error, the [Cron Job](03-16-deprovision-retrigger-cronjob.md) tries to deprovision all remaining Kyma runtime dependencies again at a scheduled time.
+You can find all the deprovisioning steps in the [deprovisioning](../cmd/broker/deprovisioning.go) file.
 
-**NOTE:** The timeout for processing this operation is set to `24h`.
+> **NOTE:** The timeout for processing this operation is set to `24h`.
 
 ## Update
 
-The update process is triggered by [an OSB API update operation](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#updating-a-service-instance) request.
-All updating steps can be found in the [update.go file](../cmd/broker/update.go).
+The update process is triggered by an [OSB API update operation](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#updating-a-service-instance) request.
+You can find all the updating steps in the [update](../cmd/broker/update.go) file.
 
-## Upgrade Cluster
+## Upgrade cluster
 
-Upgrade cluster process is triggered by upgrade cluster orchestration.
-All upgrading cluster steps can be found in the [upgrade_cluster.go file](../cmd/broker/upgrade_cluster.go).
+The upgrade cluster process is triggered by upgrade cluster orchestration.
+You can find all the upgrading cluster steps in the [upgrade_cluster](../cmd/broker/upgrade_cluster.go) file.
 
 ## Upgrade Kyma
 
-Upgrade kyma process is triggered by upgrade kyma orchestration.
-All upgrading kyma steps can be found in the [upgrade_kyma.go file](../cmd/broker/upgrade_kyma.go).
+The upgrade Kyma process is triggered by upgrade Kyma orchestration.
+You can find all the upgrading Kyma steps in the [upgrade_kyma](../cmd/broker/upgrade_kyma.go) file.
 
 ## Provide additional steps
 
