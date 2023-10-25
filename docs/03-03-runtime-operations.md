@@ -20,7 +20,7 @@ You can find all the provisioning steps in the [provisioning](../cmd/broker/prov
 Each deprovisioning step is responsible for a separate part of cleaning Kyma runtime dependencies. To properly deprovision all the dependencies, you need the data used during the Kyma runtime provisioning. The first step finds the previous operation and copies the data.
 
 None of the deprovisioning steps should block the entire deprovisioning operation. Use the `RetryOperationWithoutFail` function from the `DeprovisionOperationManager` struct to skip a step in case of a retry timeout. Set a 5-minute, at the most, timeout for retries in a step.
-Only one step fails the operation, namely `Check_Runtime_Removal`. It fails the operation in case of a timeout while checking for the Provisioner to remove the shoot. 
+Only one step may fail the operation, namely `Check_Runtime_Removal`. It fails the operation in case of a timeout while checking for the Provisioner to remove the shoot. 
 Once the step is successfully executed, it isn't retried (every deprovisioning step is defined in a separate stage). If a step has been skipped due to a retry timeout or error, the [Cron Job](03-16-deprovision-retrigger-cronjob.md) tries to deprovision all remaining Kyma runtime dependencies again at a scheduled time.
 You can find all the deprovisioning steps in the [deprovisioning](../cmd/broker/deprovisioning.go) file.
 
@@ -183,7 +183,7 @@ You can configure SAP BTP, Kyma runtime operations by providing additional steps
     }
     ```
 
-3. Add the step to the [`/cmd/broker/main.go`](../cmd/broker/main.go) file:
+3. Add the step to the [`/cmd/broker/provisioning.go`](../cmd/broker/provisioning.go) file:
 
     ```go
     provisioningSteps := []struct {
@@ -321,7 +321,7 @@ You can configure SAP BTP, Kyma runtime operations by providing additional steps
     }
     ```
 
-3. Add the step to the [`/cmd/broker/main.go`](../cmd/broker/main.go) file:
+3. Add the step to the [`/cmd/broker/upgrade_cluster.go`](../cmd/broker/upgrade_cluster.go) or [`/cmd/broker/upgrade_kyma.go`](../cmd/broker/upgrade_kyma.go) file:
 
     ```go
     upgradeSteps := []struct {
