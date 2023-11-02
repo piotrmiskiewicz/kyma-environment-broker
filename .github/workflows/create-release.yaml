@@ -126,7 +126,7 @@ jobs:
       - name: Create draft release
         id: create-draft
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: piotrmiskiewicz/kyma-environment-broker
         run: |
           RELEASE_ID=$(./scripts/create_draft_release.sh ${{ github.event.inputs.name }})
@@ -136,6 +136,9 @@ jobs:
         run: |
           git pull
           git tag ${{ github.event.inputs.name }}
+
+      - name: Push the tag
+        run: |
           git push origin ${{ github.event.inputs.name }}
 
     outputs:
