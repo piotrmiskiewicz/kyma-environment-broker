@@ -14,7 +14,6 @@ on:
         description: 'Create release'
         default: ""
         required: true
-      credentials:
 # TODO: enable sec. scanners
 #      sec-scanners-config:
 #        type: boolean
