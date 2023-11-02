@@ -135,7 +135,7 @@ jobs:
         run: |
           git pull
           git tag ${{ github.event.inputs.name }}
-#          git push origin ${{ github.event.inputs.name }}
+          git push origin ${{ github.event.inputs.name }}
 
     outputs:
       release_id: ${{ steps.create-draft.outputs.release_id }}
