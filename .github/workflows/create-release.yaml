@@ -1,7 +1,7 @@
 name: "Create release"
 
 env:
-  IMAGE_REPO: europe-docker.pkg.dev/kyma-project/prod/kyma-environment-broke
+  IMAGE_REPO: europe-docker.pkg.dev/kyma-project/prod/kyma-environment-broker
 #  KYMA_BTP_MANAGER_REPO: ${{ github.repository_owner }}/btp-manager
 #  GIT_EMAIL: team-gopher+1@sap.com
 #  GIT_NAME: kyma-btp-manager-bot
