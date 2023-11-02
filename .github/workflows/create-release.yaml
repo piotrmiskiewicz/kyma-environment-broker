@@ -126,7 +126,7 @@ jobs:
       - name: Create draft release
         id: create-draft
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
           # TODO: remove
           REPOSITORY: piotrmiskiewicz/kyma-environment-broker
         run: |
