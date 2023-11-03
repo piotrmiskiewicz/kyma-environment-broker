@@ -108,8 +108,8 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-#      - name: Run make verify
-#        run: make verify
+      - name: Run make verify
+        run: make verify
 
   create-draft:
     name: Create draft release
