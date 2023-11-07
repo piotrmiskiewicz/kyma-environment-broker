@@ -110,7 +110,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - name: Run make verify
+      - name: Run make test
         run: make test
 
   create-draft:
