@@ -97,7 +97,7 @@ jobs:
 #            echo "Step skipped"
 #          fi
 
-  run-verify:
+  run-unit-tests:
     name: Unit tests
     needs: create-draft
     runs-on: ubuntu-latest
