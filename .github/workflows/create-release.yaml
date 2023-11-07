@@ -14,6 +14,7 @@ on:
         description: 'Create release'
         default: ""
         required: true
+
 # TODO: enable sec. scanners
 #      sec-scanners-config:
 #        type: boolean
@@ -43,12 +44,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "./scripts/check_artifacts_existence.sh ${{ inputs.name }}"
 
+# TODO: uncomment - labels validation
 #      - name: Validate Labels
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        run: ./scripts/label_validator.sh "RELEASE"
 
-# TODO: uncomment
+# TODO: uncomment - sec. scanning
 #  bump-sec-scanners-config:
 #    name: Bump sec-scanners-config
 #    needs: validate-release
@@ -107,10 +109,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version-file: 'go.mod'
-          go-version: '1.21'
 
       - name: Run make verify
-        run: make verify
+        run: make test
 
   create-draft:
     name: Create draft release
@@ -163,4 +164,3 @@ jobs:
           # TODO: remove
           REPOSITORY: piotrmiskiewicz/kyma-environment-broker
         run: ./scripts/publish_release.sh ${{ needs.create-draft.outputs.release_id }}
-#
