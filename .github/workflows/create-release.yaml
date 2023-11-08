@@ -98,7 +98,7 @@ jobs:
 #          fi
 
   run-unit-tests:
-    name: Unit tests
+    name: Unit tests, go mod tidy
     needs: create-draft
     runs-on: ubuntu-latest
     steps:
@@ -109,6 +109,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version-file: 'go.mod'
+
+      - name: go mod check
+        run: make go-mod-check
 
       - name: Run make test
         run: make test
