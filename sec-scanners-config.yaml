@@ -1,0 +1,9 @@
+module-name: kyma-environment-broker
+rc-tag: 0.0.2
+protecode:
+  - europe-docker.pkg.dev/kyma-project/prod/btp-manager:0.0.2
+whitesource:
+  language: golang-mod
+  subprojects: false
+  exclude:
+    - "**/*_test.go"
