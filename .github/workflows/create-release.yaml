@@ -2,7 +2,6 @@ name: "Create release"
 
 env:
   IMAGE_REPO: europe-docker.pkg.dev/kyma-project/prod/kyma-environment-broker
-  KYMA_REPO: ${{ github.repository_owner }}/kyma-environment-broker
 #  GIT_EMAIL: team-gopher+1@sap.com
 #  GIT_NAME: kyma-btp-manager-bot
 #  BRANCH_NAME: sec-scanners-config-${{ inputs.name }}
@@ -89,10 +88,23 @@ jobs:
         run: |
           if [ "$PR_NUMBER" -gt 0 ]; then
             scripts/await_pr_merge.sh
-            sleep 15
           else
             echo "Step skipped"
           fi
+
+      - name: Save latest commit ref
+        id: pull-ref
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git checkout main
+          git pull
+          LATEST_COMMIT=$(git rev-parse HEAD)
+          echo "latest_commit=$LATEST_COMMIT" >> $GITHUB_OUTPUT
+          echo "Latest commit ref $LATEST_COMMIT"
+
+    outputs:
+      latest_commit: ${{ steps.pull-ref.outputs.latest_commit }}
 
   run-unit-tests:
     name: Unit tests, go mod tidy
@@ -122,6 +134,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ needs.bump-sec-scanners-config.outputs.latest_commit}}
 
       - name: Create draft release
         id: create-draft
