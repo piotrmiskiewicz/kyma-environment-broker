@@ -4,8 +4,8 @@
 #                       binary image reference (mandatory)
 #                       filename of file to be created (optional)
 #                       release tag (optional)
-# ./create_scan_config image temp_scan_congitfig.yaml          - use when building module image
-# ./create_scan_config image temp_scan_congitfig.yaml tag      - use when bumping the config on the main branch
+# ./create_scan_config image temp_scan_config.yaml          - use when building module image
+# ./create_scan_config image temp_scan_config.yaml tag      - use when bumping the config on the main branch
 
 FILENAME=${1-../sec-scanners-config.yaml}
 TAG=${2:-}
@@ -40,7 +40,7 @@ whitesource:
 EOF
 else
   cat <<EOF | tee ${FILENAME}
-module-name: btp-operator
+module-name: kyma-environment-broker
 protecode:
   - ${IMAGE}
 whitesource:
