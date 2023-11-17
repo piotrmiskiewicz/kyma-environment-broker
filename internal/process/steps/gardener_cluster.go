@@ -45,14 +45,17 @@ func (s *syncGardenerCluster) Run(operation internal.Operation, log logrus.Field
 	ApplyLabelsAndAnnotationsForLM(obj, operation)
 
 	if gardenerCluster.ExistsInTheCluster() {
-		err = s.k8sClient.Update(context.Background(), obj)
+		err := s.k8sClient.Update(context.Background(), obj)
+		if err != nil {
+			log.Errorf("unable to update GardenerCluster %s/%s: %s", operation.KymaResourceNamespace, operation.RuntimeID, err.Error())
+			return s.operationManager.RetryOperation(operation, "unable to update GardenerCluster", err, 3*time.Second, 20*time.Second, log)
+		}
 	} else {
-		err = s.k8sClient.Create(context.Background(), obj)
-	}
-	if err != nil {
-		log.Errorf("unable to apply GardenerCluster %s/%s", operation.KymaResourceNamespace, operation.RuntimeID)
-		return s.operationManager.RetryOperation(operation, "unable to apply GardenerCluster", err, 3*time.Second, 20*time.Second, log)
-
+		err := s.k8sClient.Create(context.Background(), obj)
+		if err != nil {
+			log.Errorf("unable to create GardenerCluster %s/%s: ", operation.KymaResourceNamespace, operation.RuntimeID, err.Error())
+			return s.operationManager.RetryOperation(operation, "unable to create GardenerCluster", err, 3*time.Second, 20*time.Second, log)
+		}
 	}
 
 	return operation, 0, nil
