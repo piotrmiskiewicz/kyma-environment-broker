@@ -2,6 +2,7 @@ package steps
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -16,11 +17,63 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func NewSyncGardenerCluster(os storage.Operations, k8sClient client.Client) syncGardenerCluster {
-	return syncGardenerCluster{
+const GardenerClusterStateReady = "Ready"
+
+func NewSyncGardenerCluster(os storage.Operations, k8sClient client.Client) *syncGardenerCluster {
+	return &syncGardenerCluster{
 		k8sClient:        k8sClient,
 		operationManager: process.NewOperationManager(os),
 	}
+}
+
+func NewCheckGardenerCluster(os storage.Operations, k8sClient client.Client) *checkGardenerCluster {
+	return &checkGardenerCluster{
+		k8sClient:        k8sClient,
+		operationManager: process.NewOperationManager(os),
+	}
+}
+
+type checkGardenerCluster struct {
+	k8sClient        client.Client
+	operationManager *process.OperationManager
+}
+
+func (s *checkGardenerCluster) Run(operation internal.Operation, log logrus.FieldLogger) (internal.Operation, time.Duration, error) {
+	gc, err := s.GetGardenerCluster(operation.RuntimeID, operation.KymaResourceNamespace)
+	if err != nil {
+		log.Errorf("unable to get gardener cluster %s/%s", operation.KymaResourceNamespace, operation.RuntimeID)
+		return s.operationManager.RetryOperation(operation, "unable to get gardener cluster", err, time.Second, 10*time.Second, log)
+	}
+
+	// check status
+	state := gc.GetState()
+	log.Infof("GardenerCluster state: %s", state)
+	if state != GardenerClusterStateReady {
+		if time.Since(operation.UpdatedAt) > 15*time.Second {
+			description := fmt.Sprintf("Waiting for Gardener cluster (%s/%s) ready state timeout.", operation.KymaResourceNamespace, operation.RuntimeID)
+			log.Error(description)
+			log.Infof("GardenerCluster status: %s", gc.StatusAsString())
+			return s.operationManager.OperationFailed(operation, description, nil, log)
+		}
+		return operation, 200 * time.Millisecond, nil
+	}
+	return operation, 0, nil
+}
+
+func (s *checkGardenerCluster) GetGardenerCluster(name string, namespace string) (*GardenerCluster, error) {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(GardenerClusterGVK())
+	err := s.k8sClient.Get(context.Background(), client.ObjectKey{
+		Namespace: namespace,
+		Name:      name,
+	}, obj)
+	if err != nil {
+		return nil, err
+	}
+
+	gc := NewGardenerClusterFromUnstructured(obj)
+
+	return gc, nil
 }
 
 type syncGardenerCluster struct {
@@ -134,4 +187,31 @@ func (c *GardenerCluster) ToYaml() ([]byte, error) {
 
 func (c *GardenerCluster) ExistsInTheCluster() bool {
 	return c.obj.GetResourceVersion() != ""
+}
+
+func (c *GardenerCluster) GetState() string {
+	val, found, _ := unstructured.NestedString(c.obj.Object, "status", "state")
+	if found {
+		return val
+	}
+	return ""
+}
+
+func (c *GardenerCluster) StatusAsString() string {
+	st, found := c.obj.Object["status"]
+	if !found {
+		return "{}"
+	}
+	bytes, err := json.Marshal(st)
+	// we do not expect errors
+	if err != nil {
+		return err.Error()
+	}
+	return string(bytes)
+}
+
+func (c *GardenerCluster) SetState(s string) {
+	c.obj.Object["status"] = map[string]interface{}{
+		"state": s,
+	}
 }
