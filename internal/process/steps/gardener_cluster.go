@@ -38,6 +38,10 @@ type checkGardenerCluster struct {
 	operationManager *process.OperationManager
 }
 
+func (_ *checkGardenerCluster) Name() string {
+	return "Check_GardenerCluster"
+}
+
 func (s *checkGardenerCluster) Run(operation internal.Operation, log logrus.FieldLogger) (internal.Operation, time.Duration, error) {
 	gc, err := s.GetGardenerCluster(operation.RuntimeID, operation.KymaResourceNamespace)
 	if err != nil {
