@@ -45,8 +45,8 @@ func (_ *checkGardenerCluster) Name() string {
 func (s *checkGardenerCluster) Run(operation internal.Operation, log logrus.FieldLogger) (internal.Operation, time.Duration, error) {
 	gc, err := s.GetGardenerCluster(operation.RuntimeID, operation.KymaResourceNamespace)
 	if err != nil {
-		log.Errorf("unable to get gardener cluster %s/%s", operation.KymaResourceNamespace, operation.RuntimeID)
-		return s.operationManager.RetryOperation(operation, "unable to get gardener cluster", err, time.Second, 10*time.Second, log)
+		log.Errorf("unable to get GardenerCluster %s/%s", operation.KymaResourceNamespace, operation.RuntimeID)
+		return s.operationManager.RetryOperation(operation, "unable to get GardenerCluster", err, time.Second, 10*time.Second, log)
 	}
 
 	// check status
@@ -54,7 +54,7 @@ func (s *checkGardenerCluster) Run(operation internal.Operation, log logrus.Fiel
 	log.Infof("GardenerCluster state: %s", state)
 	if state != GardenerClusterStateReady {
 		if time.Since(operation.UpdatedAt) > 15*time.Second {
-			description := fmt.Sprintf("Waiting for Gardener cluster (%s/%s) ready state timeout.", operation.KymaResourceNamespace, operation.RuntimeID)
+			description := fmt.Sprintf("Waiting for GardenerCluster (%s/%s) ready state timeout.", operation.KymaResourceNamespace, operation.RuntimeID)
 			log.Error(description)
 			log.Infof("GardenerCluster status: %s", gc.StatusAsString())
 			return s.operationManager.OperationFailed(operation, description, nil, log)
@@ -214,8 +214,10 @@ func (c *GardenerCluster) StatusAsString() string {
 	return string(bytes)
 }
 
-func (c *GardenerCluster) SetState(s string) {
-	c.obj.Object["status"] = map[string]interface{}{
-		"state": s,
-	}
+func (c *GardenerCluster) SetState(state string) {
+	unstructured.SetNestedField(c.obj.Object, state, "status", "state")
+}
+
+func (c *GardenerCluster) SetStatusConditions(conditions interface{}) {
+	unstructured.SetNestedField(c.obj.Object, conditions, "status", "conditions")
 }
