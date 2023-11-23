@@ -166,19 +166,13 @@ func (c *GardenerCluster) ObjectKey() client.ObjectKey {
 }
 
 func (c *GardenerCluster) SetShootName(shootName string) {
-	c.obj.Object["spec"].(map[string]interface{})["shoot"] = map[string]interface{}{
-		"name": shootName,
-	}
+	unstructured.SetNestedField(c.obj.Object, shootName, "spec", "shoot", "name")
 }
 
 func (c *GardenerCluster) SetKubecofigSecret(name, namespace string) {
-	c.obj.Object["spec"].(map[string]interface{})["kubeconfig"] = map[string]interface{}{
-		"secret": map[string]interface{}{
-			"name":      name,
-			"namespace": namespace,
-			"key":       "config",
-		},
-	}
+	unstructured.SetNestedField(c.obj.Object, name, "spec", "kubeconfig", "secret", "name")
+	unstructured.SetNestedField(c.obj.Object, namespace, "spec", "kubeconfig", "secret", "namespace")
+	unstructured.SetNestedField(c.obj.Object, "config", "spec", "kubeconfig", "secret", "key")
 }
 
 func (c *GardenerCluster) ToUnstructured() *unstructured.Unstructured {
