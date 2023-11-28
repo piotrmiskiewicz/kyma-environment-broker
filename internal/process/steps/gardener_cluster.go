@@ -54,8 +54,8 @@ func (s *checkGardenerCluster) Run(operation internal.Operation, log logrus.Fiel
 	state := gc.GetState()
 	log.Infof("GardenerCluster state: %s", state)
 	if state != GardenerClusterStateReady {
-		// TODO: extract the timeout as a configuration setting, update the operation in the previous step to make the measurement correct way
-		if time.Since(operation.UpdatedAt) > 15*time.Minute {
+		// TODO: extract the timeout as a configuration setting
+		if time.Since(operation.UpdatedAt) > 2*time.Minute {
 			description := fmt.Sprintf("Waiting for GardenerCluster (%s/%s) ready state timeout.", operation.KymaResourceNamespace, operation.RuntimeID)
 			log.Error(description)
 			log.Infof("GardenerCluster status: %s", gc.StatusAsString())
