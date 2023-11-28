@@ -32,20 +32,22 @@ func (step *DeleteGardenerClusterStep) Name() string {
 }
 
 func (step *DeleteGardenerClusterStep) Run(operation internal.Operation, logger logrus.FieldLogger) (internal.Operation, time.Duration, error) {
-	if operation.KymaResourceNamespace == "" {
-		logger.Warnf("namespace for GardenerCluster resource not specified")
-		return operation, 0, nil
+	namespace := operation.KymaResourceNamespace
+	if namespace == "" {
+		logger.Warnf("namespace for Kyma resource not specified, setting 'kcp-system'")
+		namespace = "kcp-system"
 	}
-	if operation.GardenerClusterName == "" {
-		logger.Info("GardenerCluster is empty, skipping")
-		return operation, 0, nil
+	resourceName := operation.GardenerClusterName
+	if resourceName == "" {
+		logger.Infof("GardenerCluster resource name is empty, using runtime-id")
+		resourceName = steps.GardenerClusterName(&operation)
 	}
 
 	logger.Infof("Deleting GardenerCluster resource: %s in namespace:%s", operation.GardenerClusterName, operation.KymaResourceNamespace)
 
 	gardenerClusterUnstructured := &unstructured.Unstructured{}
-	gardenerClusterUnstructured.SetName(operation.GardenerClusterName)
-	gardenerClusterUnstructured.SetNamespace(operation.KymaResourceNamespace)
+	gardenerClusterUnstructured.SetName(resourceName)
+	gardenerClusterUnstructured.SetNamespace(namespace)
 	gardenerClusterUnstructured.SetGroupVersionKind(steps.GardenerClusterGVK())
 
 	err := step.kcpClient.Delete(context.Background(), gardenerClusterUnstructured)
