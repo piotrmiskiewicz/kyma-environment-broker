@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/edp"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
-	"os"
-	"strings"
 )
 
 type Config struct {
