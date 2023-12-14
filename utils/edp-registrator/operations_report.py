@@ -4,8 +4,23 @@ import subprocess
 
 # This script reads operations.csv file, which contains rows from Operations DB table i the format:
 # "id","type","state","instance_id","created_at","updated_at","subaccountid","globalid"
+# Such data can be taken from DB by using the following query:
+# select id, type, state, instance_id,
+# created_at, updated_at, provisioning_parameters->'ers_context'->'subaccount_id' as SubID, provisioning_parameters->'ers_context'->'globalaccount_id' as GlobID
+#   from operations
+#   where provisioning_parameters->'ers_context'->>'subaccount_id' in
+#   (<list of subaccount ids>) and type in ('provision','deprovision')
+# order by instance_id, created_at;
+#
 # It groups operations with one subaccount and prints provisioning and deprovisioning operations for every subaccount.
+#
+# Preprequisites:
+#   * Before running the script run kcp cli to be authorized.
+#   * set the following vars in the code: kcpBinary, kcpConfigFile, homeDir
 
+kcpBinary = '/Users/i321040/go/src/github.com/kyma-project/control-plane/tools/cli/./kcp-darwin'
+kcpConfigFile = '/Users/i321040/Downloads/Downloads/kcp-stage.yaml'
+homeDir = '/Users/i321040'
 
 class Operation:
     def __init__(self, row):
@@ -43,9 +58,8 @@ class Subaccount:
                     existingInstances[op.instance_id] = op.created_at
                 elif op.instance_id in existingInstances:
                     del existingInstances[op.instance_id]
-                    # lastDeprovision = op.created_at
         print("    Still exists: " + str(existingInstances))
-        # print("    LastDeprovision: " + lastDeprovision)
+
 
 
 subaccounts = {}
@@ -67,12 +81,9 @@ for id in subaccounts:
     # print("------")
     if sid == 'subid':
         continue
-    # res = subprocess.run('/Users/i321040/go/src/github.com/kyma-project/control-plane/tools/cli/./kcp-darwin', ['rt', '--help'],
-    #                 {"KCPCONFIG":"/Users/i321040/Downloads/Downloads/kcp-prod.yaml", "HOME":"/Users/i321040"} )
-    # os.execve("echo", ['$KCPCONFIG'], {"KCPCONFIG":"/Users/i321040/Downloads/Downloads/kcp-prod.yaml", "HOME":"/Users/i321040"})
 
-    result = subprocess.run(['/Users/i321040/go/src/github.com/kyma-project/control-plane/tools/cli/./kcp-darwin', "rt", "-s", sid, "-o", "json"],
-                   stdout=subprocess.PIPE, text=True, env = {"KCPCONFIG":"/Users/i321040/Downloads/Downloads/kcp-prod.yaml", "HOME":"/Users/i321040"})
+    result = subprocess.run([kcpBinary, "rt", "-s", sid, "-o", "json"],
+                   stdout=subprocess.PIPE, text=True, env = {"KCPCONFIG":kcpConfigFile, "HOME":homeDir}, timeout=3)
     obj = json.loads(result.stdout)
     plaftormRegion = obj['data'][0]['subAccountRegion']
     gid = obj['data'][0]['globalAccountID']
@@ -84,9 +95,12 @@ for id in subaccounts:
     else:
         planType = 'standard'
     # print(v, plaftormRegion, gid, plan)
-    # print("\n\n# SID: " + sid + " GID: " + gid + " plan: "
-    #       + plan + " plantype: " + planType + " region: "+ plaftormRegion)
-    # print("echo \"registering SID=" + sid + "\"")
-    # print("./edp register " + sid + " " + plaftormRegion + " " + planType)
+    print("\n\n# SID: " + sid + " GID: " + gid + " plan: "
+          + plan + " plantype: " + planType + " region: "+ plaftormRegion)
+    print("echo \"registering SID=" + sid + "\"")
+    print("./edp register " + sid + " " + plaftormRegion + " " + planType)
+
+    # print("./edp deregister " + sid)
+
     # print("./edp get " + sid)
-    print(gid + " " + sid + " " + plan + " " + plaftormRegion + " " + obj['data'][0]['userID'])
+    #print(gid + " " + sid + " " + plan + " " + plaftormRegion + " " + obj['data'][0]['userID'])

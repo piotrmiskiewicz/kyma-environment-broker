@@ -2,6 +2,8 @@ import json
 
 # This script reads EDP registration data (edp-subaccounts.json) and compares it with SKRs stored in a file with format (skr-subaccounts.txt):
 # Subaccount                             InstanceID                             Plan         state          createdat
+# You can use the following command to get those rows:
+# ./kcp rt -o custom=Subaccount:subAccountID,InstanceID:instanceID,Plan:servicePlanName,state:status.state,createdat:status.createdAt > skr-subaccounts.txt
 
 f = open("edp-subaccounts.json")
 data = json.load(f)
