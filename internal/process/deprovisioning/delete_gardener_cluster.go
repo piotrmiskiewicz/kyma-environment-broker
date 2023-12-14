@@ -44,6 +44,10 @@ func (step *DeleteGardenerClusterStep) Run(operation internal.Operation, logger 
 		logger.Infof("GardenerCluster resource name is empty, using runtime-id")
 		resourceName = steps.GardenerClusterName(&operation)
 	}
+	if resourceName == "" {
+		logger.Infof("Runtime ID is empty, skipping")
+		return operation, 0, nil
+	}
 
 	logger.Infof("Deleting GardenerCluster resource: %s in namespace:%s", operation.GardenerClusterName, operation.KymaResourceNamespace)
 
