@@ -25,10 +25,13 @@ go build -o edp main.go
 
 Before using the `edp` tool, you must set environment variables:
 
-1. Copy existing template file, for example: 
+1. Copy an existing template file, for example:
+
 `cp env.dev.template env.dev`
+
 2. Set the missing secret value in the file.
 3. Export the environment variables:
+
 `export $(grep -v '^#' env.dev | xargs)`
 
 #### Run a Command
