@@ -1,15 +1,15 @@
-# EDP tools
+# Event Data Platform Tools
 
-This folder contains tools which allows to get information about subaccounts registered in EDP and execute registraion.
+This folder contains tools that allow you to get information about subaccounts registered in the Event Data Platform (EDP) and execute registration.
 
-## EDP tool
+## EDP Tool
 
-EDP tool allows to connect to the EDP and execute the following commands:
- - `get` - gathers information about registered subaccount. If not found, returns a message `Not found`
+The EDP tool allows you to connect to the EDP and execute the following commands:
+ - `get` - gathers information about a registered subaccount; if not found, returns the message `Not found`
  - `register` - performs registration 
  - `deregister` - removes the registration
 
-Above commands implementation contains a copied code from existing steps implementation. Before running check if the command implementation is up-to-date.
+The above command implementation contains a copied code from the implementation of existing steps. Before running, check if the command implementation is up-to-date.
 
 ### Build
 
@@ -21,24 +21,24 @@ go build -o edp main.go
 
 ### Running
 
-#### Setting environment variables
+#### Set Environment Variables
 
-Before using `edp` tool you must set environment variables:
+Before using the `edp` tool, you must set environment variables:
 
 1. Copy existing template file, for example: 
 `cp env.dev.template env.dev`
-2. Set missing secret value in the file
-3. Export environment variables:
+2. Set the missing secret value in the file.
+3. Export the environment variables:
 `export $(grep -v '^#' env.dev | xargs)`
 
-#### Running a command
+#### Run a Command
 
-Get metadata from EDP:
+Get metadata from the EDP:
 ```shell
 ./edp get <subaccountID>
 ```
 
-Register subaccount in EDP:
+Register a subaccount in the EDP:
 ```shell
 ./edp register <subaccount ID> <platform region> <plan>
 ```
@@ -47,7 +47,7 @@ for example:
 ./edp register 41ba3cf2-041d-4223-adfe-c5de3458acbe cf-us21 standard
 ```
 
-Deregister subaccount from EDP:
+Deregister a subaccount from the EDP:
 ```shell
 ./edp deregister 41ba3cf2-041d-4223-adfe-c5de3458acbe
 ```
