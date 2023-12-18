@@ -33,12 +33,12 @@ Before using the `edp` tool, you must set environment variables:
 
 #### Run a Command
 
-Get metadata from the EDP:
+1. Get metadata from the EDP:
 ```shell
 ./edp get <subaccountID>
 ```
 
-Register a subaccount in the EDP:
+2. Register a subaccount in the EDP:
 ```shell
 ./edp register <subaccount ID> <platform region> <plan>
 ```
@@ -47,7 +47,7 @@ for example:
 ./edp register 41ba3cf2-041d-4223-adfe-c5de3458acbe cf-us21 standard
 ```
 
-Deregister a subaccount from the EDP:
+3. Deregister a subaccount from the EDP:
 ```shell
-./edp deregister 41ba3cf2-041d-4223-adfe-c5de3458acbe
+./edp deregister <subaccount>
 ```
