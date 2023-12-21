@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 	"testing"
 	"time"
 
@@ -102,7 +103,7 @@ func NewDeprovisioningSuite(t *testing.T) *DeprovisioningSuite {
 
 	deprovisioningQueue := NewDeprovisioningProcessingQueue(ctx, workersAmount, deprovisionManager, cfg, db, eventBroker,
 		provisionerClient, avsDel, internalEvalAssistant, externalEvalAssistant,
-		bundleBuilder, edpClient, accountProvider, reconcilerClient, fakeK8sClientProvider(fakeK8sSKRClient), fakeK8sSKRClient, configProvider, logs,
+		bundleBuilder, edpClient, accountProvider, reconcilerClient, kubeconfig.NewFakeK8sClientProvider(fakeK8sSKRClient), fakeK8sSKRClient, configProvider, logs,
 	)
 
 	deprovisioningQueue.SpeedUp(10000)
