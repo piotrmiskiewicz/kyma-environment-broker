@@ -23,6 +23,67 @@ import (
 
 const envTestAssets = "KUBEBUILDER_ASSETS"
 
+func TestSecretProvider_NoValueInSecret(t *testing.T) {
+	// given
+	kcpClient := fake.NewClientBuilder().Build()
+	kcpClient.Create(context.Background(), &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "kubeconfig-runtime00",
+			Namespace: "kcp-system",
+		},
+	})
+	provider := SecretProvider{
+		kcpK8sClient: kcpClient,
+	}
+
+	// when
+	_, errKubeconfig := provider.KubeconfigForRuntimeID("runtime00")
+	_, errClient := provider.K8sClientForRuntimeID("runtime00")
+
+	// then
+	assert.Error(t, errKubeconfig)
+	assert.Error(t, errClient)
+}
+
+func TestSecretProvider_NoSecret(t *testing.T) {
+	// given
+	kcpClient := fake.NewClientBuilder().Build()
+	provider := SecretProvider{
+		kcpK8sClient: kcpClient,
+	}
+
+	// when
+	_, errKubeconfig := provider.KubeconfigForRuntimeID("runtime00")
+	_, errClient := provider.K8sClientForRuntimeID("runtime00")
+
+	// then
+	assert.Error(t, errKubeconfig)
+	assert.Error(t, errClient)
+}
+
+func TestSecretProvider_BadKubeconfig(t *testing.T) {
+	// given
+	kcpClient := fake.NewClientBuilder().Build()
+	kcpClient.Create(context.Background(), &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "kubeconfig-runtime00",
+			Namespace: "kcp-system",
+		},
+		Data: map[string][]byte{
+			"config": []byte("bad-kubeconfig"),
+		},
+	})
+	provider := SecretProvider{
+		kcpK8sClient: kcpClient,
+	}
+
+	// when
+	_, errClient := provider.K8sClientForRuntimeID("runtime00")
+
+	// then
+	assert.Error(t, errClient)
+}
+
 func TestSecretProvider_KubernetesAndK8sClientForRuntimeID(t *testing.T) {
 	// Given
 
@@ -56,7 +117,7 @@ func TestSecretProvider_KubernetesAndK8sClientForRuntimeID(t *testing.T) {
 	}
 
 	// when
-	kubeconfig, errKubeconfig := provider.KubecofigForRuntimeID("runtime00")
+	kubeconfig, errKubeconfig := provider.KubeconfigForRuntimeID("runtime00")
 	k8sClient, errClient := provider.K8sClientForRuntimeID("runtime00")
 
 	// then

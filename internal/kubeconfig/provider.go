@@ -22,7 +22,7 @@ func NewK8sClientFromSecretProvider(kcpK8sClient client.Client) *SecretProvider 
 	}
 }
 
-func (p *SecretProvider) KubecofigForRuntimeID(runtimeId string) ([]byte, error) {
+func (p *SecretProvider) KubeconfigForRuntimeID(runtimeId string) ([]byte, error) {
 	kubeConfigSecret := &v1.Secret{}
 	err := p.kcpK8sClient.Get(context.Background(), p.objectKey(runtimeId), kubeConfigSecret)
 	if err != nil {
@@ -46,7 +46,7 @@ func (p *SecretProvider) objectKey(runtimeId string) client.ObjectKey {
 }
 
 func (p *SecretProvider) K8sClientForRuntimeID(runtimeID string) (client.Client, error) {
-	kubeconfig, err := p.KubecofigForRuntimeID(runtimeID)
+	kubeconfig, err := p.KubeconfigForRuntimeID(runtimeID)
 	if err != nil {
 		return nil, err
 	}

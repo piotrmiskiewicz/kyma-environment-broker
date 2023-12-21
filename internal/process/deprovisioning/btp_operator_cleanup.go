@@ -31,7 +31,7 @@ const (
 )
 
 type KubeconfigProvider interface {
-	KubecofigForRuntimeID(runtimeId string) ([]byte, error)
+	KubeconfigForRuntimeID(runtimeId string) ([]byte, error)
 }
 type BTPOperatorCleanupStep struct {
 	operationManager  *process.DeprovisionOperationManager
