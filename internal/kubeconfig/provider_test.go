@@ -2,6 +2,7 @@ package kubeconfig
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"os"
 	"os/exec"
 	"strings"
@@ -95,13 +96,21 @@ func TestSecretProvider_KubernetesAndK8sClientForRuntimeID(t *testing.T) {
 		path := strings.Replace(string(out), "\n", "", -1)
 		os.Setenv(envTestAssets, path)
 	}
-	time.Sleep(time.Second)
 
 	env := envtest.Environment{
 		ControlPlaneStartTimeout: 40 * time.Second,
 	}
-	config, err := env.Start()
-	require.NoError(t, err)
+	var errEnvTest error
+	var config *rest.Config
+	wait.Poll(250*time.Millisecond, 3*time.Second, func() (done bool, err error) {
+		config, errEnvTest = env.Start()
+		if err != nil {
+			t.Logf("envtest could not start, retrying: %w", errEnvTest.Error())
+			return false, nil
+		}
+		return true, nil
+	})
+	require.NoError(t, errEnvTest)
 	defer env.Stop()
 	kubeconfig := createKubeconfigFileForRestConfig(*config)
 
