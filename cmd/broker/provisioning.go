@@ -115,7 +115,7 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 			step:      steps.NewCheckGardenerCluster(db.Operations(), cli),
 			condition: provisioning.SkipForOwnClusterPlan,
 		},
-		{ // TODO: this step must be removed when kubeconfig is created by IM
+		{ // TODO: this step must be removed when kubeconfig is created by IM only
 			stage: createRuntimeStageName,
 			step:  provisioning.NewGetKubeconfigStep(db.Operations(), provisionerClient),
 		},
