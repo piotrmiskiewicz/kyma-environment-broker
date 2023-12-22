@@ -95,6 +95,7 @@ func TestSecretProvider_KubernetesAndK8sClientForRuntimeID(t *testing.T) {
 		path := strings.Replace(string(out), "\n", "", -1)
 		os.Setenv(envTestAssets, path)
 	}
+	time.Sleep(time.Second)
 
 	env := envtest.Environment{
 		ControlPlaneStartTimeout: 40 * time.Second,
