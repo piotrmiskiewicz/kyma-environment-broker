@@ -2,11 +2,12 @@ package kubeconfig
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
