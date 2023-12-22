@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 	"sort"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
 	"sigs.k8s.io/controller-runtime/pkg/client"

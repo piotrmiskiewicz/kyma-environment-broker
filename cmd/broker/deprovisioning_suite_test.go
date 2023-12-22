@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 
 	kebConfig "github.com/kyma-project/kyma-environment-broker/internal/config"
 

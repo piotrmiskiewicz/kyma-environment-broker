@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +12,13 @@ import (
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/google/uuid"

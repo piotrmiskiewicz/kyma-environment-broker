@@ -2,9 +2,10 @@ package provisioning
 
 import (
 	"context"
-	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 	"reflect"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 
 	btpoperatorcredentials "github.com/kyma-project/kyma-environment-broker/internal/btpmanager/credentials"
 
