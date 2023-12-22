@@ -105,7 +105,7 @@ func TestSecretProvider_KubernetesAndK8sClientForRuntimeID(t *testing.T) {
 	wait.Poll(250*time.Millisecond, 3*time.Second, func() (done bool, err error) {
 		config, errEnvTest = env.Start()
 		if err != nil {
-			t.Logf("envtest could not start, retrying: %w", errEnvTest.Error())
+			t.Logf("envtest could not start, retrying: %s", errEnvTest.Error())
 			return false, nil
 		}
 		return true, nil
