@@ -100,7 +100,7 @@ func TestSecretProvider_KubernetesAndK8sClientForRuntimeID(t *testing.T) {
 		ControlPlaneStartTimeout: 40 * time.Second,
 	}
 	config, err := env.Start()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer env.Stop()
 	kubeconfig := createKubeconfigFileForRestConfig(*config)
 
