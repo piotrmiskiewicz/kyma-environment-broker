@@ -15,11 +15,6 @@ import (
 
 	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 
-	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"code.cloudfoundry.org/lager"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
