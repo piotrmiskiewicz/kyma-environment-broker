@@ -142,6 +142,6 @@ func operationStatusData() string {
 			state
 			message
 			runtimeID
-            compassRuntimeID
+			compassRuntimeID
 			lastError { errMessage reason component }`
 }
