@@ -10,7 +10,7 @@ The diagram and steps describe the Kyma Environment Broker (KEB) workflow and th
 
 3. Provisioner creates a new cluster.
 
-4. KEB creates GardenerCluster resource
+4. KEB creates GardenerCluster resource.
 
 5. Infrastructure Manager creates and maintains a Secret containing a kubeconfig.
 
