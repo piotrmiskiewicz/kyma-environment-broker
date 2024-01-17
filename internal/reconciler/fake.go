@@ -90,8 +90,8 @@ func (c *FakeClient) GetCluster(clusterName string, configVersion int64) (*recon
 
 func intKeys(states map[int64]*reconcilerApi.HTTPClusterResponse) string {
 	result := ""
-	for k, _ := range states {
-		result = result + fmt.Sprintf("[%d] ", k)
+	for k, state := range states {
+		result = result + fmt.Sprintf("[%d:%s] ", k, state.Status)
 	}
 	return result
 }
