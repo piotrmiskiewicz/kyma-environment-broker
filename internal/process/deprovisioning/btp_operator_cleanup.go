@@ -3,9 +3,10 @@ package deprovisioning
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
@@ -90,7 +91,7 @@ func (s *BTPOperatorCleanupStep) Run(operation internal.Operation, log logrus.Fi
 	if err != nil {
 		if kubeconfig.IsNotFound(err) {
 			log.Info("Kubeconfig does not exists, skipping")
-			return operation,  0, nil
+			return operation, 0, nil
 		}
 		return s.operationManager.RetryOperationWithoutFail(operation, s.Name(), "failed to get kube client", time.Second, 30*time.Second, log)
 	}

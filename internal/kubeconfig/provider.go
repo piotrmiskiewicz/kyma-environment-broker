@@ -3,6 +3,7 @@ package kubeconfig
 import (
 	"context"
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	v1 "k8s.io/api/core/v1"
@@ -83,5 +84,3 @@ func (p *FakeProvider) K8sClientForRuntimeID(_ string) (client.Client, error) {
 func (p *FakeProvider) KubeconfigForRuntimeID(runtimeId string) ([]byte, error) {
 	return []byte("fake kubeconfig"), nil
 }
-
-
