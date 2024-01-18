@@ -3,6 +3,7 @@ package deprovisioning
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 	"strings"
 	"time"
 
@@ -81,8 +82,16 @@ func (s *BTPOperatorCleanupStep) softDelete(operation internal.Operation, k8sCli
 }
 
 func (s *BTPOperatorCleanupStep) Run(operation internal.Operation, log logrus.FieldLogger) (internal.Operation, time.Duration, error) {
+	if operation.RuntimeID == "" {
+		log.Info("RuntimeID is empty, skipping")
+		return operation, 0, nil
+	}
 	kclient, err := s.k8sClientProvider.K8sClientForRuntimeID(operation.RuntimeID)
 	if err != nil {
+		if kubeconfig.IsNotFound(err) {
+			log.Info("Kubeconfig does not exists, skipping")
+			return operation,  0, nil
+		}
 		return s.operationManager.RetryOperationWithoutFail(operation, s.Name(), "failed to get kube client", time.Second, 30*time.Second, log)
 	}
 	if operation.UserAgent == broker.AccountCleanupJob {

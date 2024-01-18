@@ -3,6 +3,7 @@ package kubeconfig
 import (
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -25,6 +26,9 @@ func NewK8sClientFromSecretProvider(kcpK8sClient client.Client) *SecretProvider 
 func (p *SecretProvider) KubeconfigForRuntimeID(runtimeId string) ([]byte, error) {
 	kubeConfigSecret := &v1.Secret{}
 	err := p.kcpK8sClient.Get(context.Background(), p.objectKey(runtimeId), kubeConfigSecret)
+	if errors.IsNotFound(err) {
+		return nil, NewNotFoundError(err.Error())
+	}
 	if err != nil {
 		return nil, fmt.Errorf("while getting secret from kcp for runtimeId=%s : %w", runtimeId, err)
 	}
@@ -79,3 +83,5 @@ func (p *FakeProvider) K8sClientForRuntimeID(_ string) (client.Client, error) {
 func (p *FakeProvider) KubeconfigForRuntimeID(runtimeId string) ([]byte, error) {
 	return []byte("fake kubeconfig"), nil
 }
+
+
