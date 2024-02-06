@@ -198,24 +198,24 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 		avsDel, internalEvalAssistant, externalEvalCreator, runtimeVerConfigurator, runtimeOverrides,
 		edpClient, accountProvider, reconcilerClient, k8sClientProvider, cli, logs)
 
-	provisioningQueue.SpeedUp(100)
-	provisionManager.SpeedUp(100)
+	provisioningQueue.SpeedUp(10000)
+	provisionManager.SpeedUp(10000)
 
 	updateManager := process.NewStagedManager(db.Operations(), eventBroker, time.Hour, cfg.Update, logs)
 	rvc := runtimeversion.NewRuntimeVersionConfigurator(cfg.KymaVersion, nil, db.RuntimeStates())
 	updateQueue := NewUpdateProcessingQueue(context.Background(), updateManager, 1, db, inputFactory, provisionerClient,
 		eventBroker, rvc, db.RuntimeStates(), componentProvider, reconcilerClient, *cfg, k8sClientProvider, cli, logs)
-	updateQueue.SpeedUp(100)
-	updateManager.SpeedUp(100)
+	updateQueue.SpeedUp(10000)
+	updateManager.SpeedUp(10000)
 
 	deprovisionManager := process.NewStagedManager(db.Operations(), eventBroker, time.Hour, cfg.Deprovisioning, logs.WithField("deprovisioning", "manager"))
 	deprovisioningQueue := NewDeprovisioningProcessingQueue(ctx, workersAmount, deprovisionManager, cfg, db, eventBroker,
 		provisionerClient, avsDel, internalEvalAssistant, externalEvalAssistant,
 		bundleBuilder, edpClient, accountProvider, reconcilerClient, k8sClientProvider, cli, configProvider, logs,
 	)
-	deprovisionManager.SpeedUp(100)
+	deprovisionManager.SpeedUp(10000)
 
-	deprovisioningQueue.SpeedUp(100)
+	deprovisioningQueue.SpeedUp(10000)
 
 	ts := &BrokerSuiteTest{
 		db:                  db,
