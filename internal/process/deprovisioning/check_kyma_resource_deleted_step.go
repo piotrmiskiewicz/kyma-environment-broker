@@ -68,7 +68,7 @@ func (step *CheckKymaResourceDeletedStep) Run(operation internal.Operation, logg
 		return step.operationManager.RetryOperationWithoutFail(operation, step.Name(), "unable to check Kyma resource existence", backoffForK8SOperation, timeoutForK8sOperation, logger)
 	}
 
-	return step.operationManager.UpdateOperation(operation, func(operation *internal.Operation) {
-		operation.KymaResourceName = ""
+	return step.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
+		op.KymaResourceName = ""
 	}, logger)
 }

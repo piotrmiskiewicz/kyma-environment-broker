@@ -56,7 +56,8 @@ func (step *DeleteGardenerClusterStep) Run(operation internal.Operation, logger 
 		resourceName = steps.GardenerClusterNameFromInstance(instance)
 
 		// save the gardener cluster resource name to use for checking step
-		operation, backoff, _ := step.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
+		backoff := time.Duration(0)
+		operation, backoff, _ = step.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
 			op.GardenerClusterName = resourceName
 		}, logger)
 		if backoff > 0 {

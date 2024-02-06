@@ -82,7 +82,8 @@ func (step *DeleteKymaResourceStep) Run(operation internal.Operation, logger log
 		}
 		kymaResourceName = steps.KymaNameFromInstance(instance)
 		// save the kyma resource name if it was taken from the instance.runtimeID
-		operation, backoff, _ := step.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
+		backoff := time.Duration(0)
+		operation, backoff, _ = step.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
 			op.KymaResourceNamespace = kymaResourceName
 		}, logger)
 		if backoff > 0 {
