@@ -1,7 +1,6 @@
 package deprovisioning
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
@@ -10,6 +9,7 @@ import (
 	"github.com/kyma-project/kyma-environment-broker/internal/logger"
 	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
