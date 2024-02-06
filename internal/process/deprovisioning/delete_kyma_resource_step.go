@@ -73,7 +73,7 @@ func (step *DeleteKymaResourceStep) Run(operation internal.Operation, logger log
 	}
 	kymaResourceName := steps.KymaName(operation)
 	if kymaResourceName == "" {
-		logger.Infof("Kyma resource name is empty, using isntance.RuntimeID")
+		logger.Infof("Kyma resource name is empty, using instance.RuntimeID")
 
 		instance, err := step.instances.GetByID(operation.InstanceID)
 		if err != nil {
