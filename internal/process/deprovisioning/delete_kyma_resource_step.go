@@ -30,14 +30,16 @@ type DeleteKymaResourceStep struct {
 	kcpClient          client.Client
 	configProvider     input.ConfigurationProvider
 	defaultKymaVersion string
+	instances          storage.Instances
 }
 
-func NewDeleteKymaResourceStep(operations storage.Operations, kcpClient client.Client, configProvider input.ConfigurationProvider, defaultKymaVersion string) *DeleteKymaResourceStep {
+func NewDeleteKymaResourceStep(operations storage.Operations, instances storage.Instances, kcpClient client.Client, configProvider input.ConfigurationProvider, defaultKymaVersion string) *DeleteKymaResourceStep {
 	return &DeleteKymaResourceStep{
 		operationManager:   process.NewOperationManager(operations),
 		kcpClient:          kcpClient,
 		configProvider:     configProvider,
 		defaultKymaVersion: defaultKymaVersion,
+		instances:          instances,
 	}
 }
 
@@ -71,7 +73,17 @@ func (step *DeleteKymaResourceStep) Run(operation internal.Operation, logger log
 	}
 	kymaResourceName := steps.KymaName(operation)
 	if kymaResourceName == "" {
-		logger.Infof("Kyma resource name is empty, skipping")
+		logger.Infof("Kyma resource name is empty, using isntance.RuntimeID")
+
+		instance, err := step.instances.GetByID(operation.InstanceID)
+		if err != nil {
+			logger.Errorf("Unable to get instance")
+			return step.operationManager.RetryOperation(operation, err.Error(), err, 15*time.Second, 2*time.Minute, logger)
+		}
+		kymaResourceName = steps.KymaNameFromInstance(instance)
+	}
+	if kymaResourceName == "" {
+		logger.Info("KymaResourceName is empty, skipping")
 		return operation, 0, nil
 	}
 
