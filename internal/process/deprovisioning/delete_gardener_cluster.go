@@ -50,10 +50,18 @@ func (step *DeleteGardenerClusterStep) Run(operation internal.Operation, logger 
 		logger.Infof("Using instance.RuntimeID")
 		instance, err := step.instances.GetByID(operation.InstanceID)
 		if err != nil {
-			logger.Errorf("Unable to get instance")
-			return step.operationManager.RetryOperation(operation, err.Error(), err, 15*time.Second, 2*time.Minute, logger)
+			logger.Errorf("Unable to get instance: %s", err.Error())
+			return step.operationManager.RetryOperationWithoutFail(operation, step.Name(), "unable to get instance", 15*time.Second, 2*time.Minute, logger)
 		}
 		resourceName = steps.GardenerClusterNameFromInstance(instance)
+
+		// save the gardener cluster resource name to use for checking step
+		operation, backoff, _ := step.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
+			op.GardenerClusterName = resourceName
+		}, logger)
+		if backoff > 0 {
+			return operation, backoff, nil
+		}
 	}
 
 	if resourceName == "" {

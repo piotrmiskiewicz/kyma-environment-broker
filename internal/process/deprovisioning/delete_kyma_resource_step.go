@@ -77,10 +77,17 @@ func (step *DeleteKymaResourceStep) Run(operation internal.Operation, logger log
 
 		instance, err := step.instances.GetByID(operation.InstanceID)
 		if err != nil {
-			logger.Errorf("Unable to get instance")
-			return step.operationManager.RetryOperation(operation, err.Error(), err, 15*time.Second, 2*time.Minute, logger)
+			logger.Errorf("Unable to get instance: %s", err.Error())
+			return step.operationManager.RetryOperationWithoutFail(operation, err.Error(), "unable to get instance", 15*time.Second, 2*time.Minute, logger)
 		}
 		kymaResourceName = steps.KymaNameFromInstance(instance)
+		// save the kyma resource name if it was taken from the instance.runtimeID
+		operation, backoff, _ := step.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
+			op.KymaResourceNamespace = kymaResourceName
+		}, logger)
+		if backoff > 0 {
+			return operation, backoff, nil
+		}
 	}
 	if kymaResourceName == "" {
 		logger.Info("KymaResourceName is empty, skipping")
