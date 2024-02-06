@@ -20,6 +20,7 @@ type Factory interface {
 
 //go:generate mockery --name=ReadSession
 type ReadSession interface {
+	FindDeletedInstanceIDs() ([]string, error)
 	FindAllInstancesJoinedWithOperation(prct ...predicate.Predicate) ([]dbmodel.InstanceWithOperationDTO, dberr.Error)
 	FindAllInstancesForRuntimes(runtimeIdList []string) ([]dbmodel.InstanceDTO, dberr.Error)
 	FindAllInstancesForSubAccounts(subAccountslist []string) ([]dbmodel.InstanceDTO, dberr.Error)

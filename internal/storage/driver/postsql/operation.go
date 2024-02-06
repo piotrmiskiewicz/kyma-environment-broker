@@ -36,6 +36,11 @@ func NewOperation(sess postsql.Factory, cipher Cipher) *operations {
 	}
 }
 
+func (s *operations) FindDeletedInstanceIDs() ([]string, error) {
+	session := s.NewReadSession()
+	return session.FindDeletedInstanceIDs()
+}
+
 // InsertProvisioningOperation insert new ProvisioningOperation to storage
 func (s *operations) InsertProvisioningOperation(operation internal.ProvisioningOperation) error {
 	dto, err := s.provisioningOperationToDTO(&operation)

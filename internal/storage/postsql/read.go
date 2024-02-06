@@ -21,6 +21,26 @@ type readSession struct {
 	session *dbr.Session
 }
 
+func (r readSession) FindDeletedInstanceIDs() ([]string, error) {
+
+	rows, err  := r.session.Query("select distinct(instance_id) from operations where instance_id not in (select instance_id from instances)")
+	if err != nil {
+		return []string{}, err
+	}
+	defer rows.Close()
+	i := 0
+	for rows.Next() {
+		var id string
+		rows.Scan(&id)
+		fmt.Println(id)
+		i = i + 1
+	}
+	fmt.Println(i)
+
+
+	return []string{}, err
+}
+
 func (r readSession) getInstancesJoinedWithOperationStatement() *dbr.SelectStmt {
 	join := fmt.Sprintf("%s.instance_id = %s.instance_id", InstancesTableName, OperationTableName)
 	stmt := r.session.

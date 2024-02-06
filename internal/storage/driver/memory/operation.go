@@ -39,6 +39,10 @@ func NewOperation() *operations {
 	}
 }
 
+func (s *operations) FindDeletedInstanceIDs() ([]string, error) {
+	panic("not implemented")
+}
+
 func (s *operations) InsertProvisioningOperation(operation internal.ProvisioningOperation) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
