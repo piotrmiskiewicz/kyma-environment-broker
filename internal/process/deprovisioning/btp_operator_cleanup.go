@@ -87,6 +87,14 @@ func (s *BTPOperatorCleanupStep) Run(operation internal.Operation, log logrus.Fi
 		log.Info("RuntimeID is empty, skipping")
 		return operation, 0, nil
 	}
+	if !operation.Temporary {
+		log.Info("cleanup executed only for suspensions")
+		return operation, 0, nil
+	}
+	if operation.ProvisioningParameters.PlanID != broker.TrialPlanID {
+		log.Info("cleanup executed only for trial plan")
+		return operation, 0, nil
+	}
 	kclient, err := s.k8sClientProvider.K8sClientForRuntimeID(operation.RuntimeID)
 	if err != nil {
 		if kubeconfig.IsNotFound(err) {
@@ -100,14 +108,6 @@ func (s *BTPOperatorCleanupStep) Run(operation internal.Operation, log logrus.Fi
 	if operation.UserAgent == broker.AccountCleanupJob {
 		log.Info("executing soft delete cleanup for accountcleanup-job")
 		return s.softDelete(operation, kclient, log)
-	}
-	if !operation.Temporary {
-		log.Info("cleanup executed only for suspensions")
-		return operation, 0, nil
-	}
-	if operation.ProvisioningParameters.PlanID != broker.TrialPlanID {
-		log.Info("cleanup executed only for trial plan")
-		return operation, 0, nil
 	}
 	if operation.RuntimeID == "" {
 		log.Info("instance has been deprovisioned already")
