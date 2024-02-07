@@ -93,6 +93,7 @@ func (s *BTPOperatorCleanupStep) Run(operation internal.Operation, log logrus.Fi
 			log.Info("Kubeconfig does not exists, skipping")
 			return operation, 0, nil
 		}
+		log.Warnf("Error: %+v", err)
 
 		return s.operationManager.RetryOperationWithoutFail(operation, s.Name(), fmt.Sprintf("failed to get kube client: %s", err.Error()), time.Second, 30*time.Second, log)
 	}
