@@ -93,7 +93,8 @@ func (s *BTPOperatorCleanupStep) Run(operation internal.Operation, log logrus.Fi
 			log.Info("Kubeconfig does not exists, skipping")
 			return operation, 0, nil
 		}
-		return s.operationManager.RetryOperationWithoutFail(operation, s.Name(), "failed to get kube client", time.Second, 30*time.Second, log)
+
+		return s.operationManager.RetryOperationWithoutFail(operation, s.Name(), fmt.Sprintf("failed to get kube client: %s", err.Error()), time.Second, 30*time.Second, log)
 	}
 	if operation.UserAgent == broker.AccountCleanupJob {
 		log.Info("executing soft delete cleanup for accountcleanup-job")
