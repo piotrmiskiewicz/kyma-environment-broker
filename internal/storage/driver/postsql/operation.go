@@ -160,7 +160,6 @@ func (s *operations) ListProvisioningOperationsByInstanceID(instanceID string) (
 }
 
 func (s *operations) ListOperationsByInstanceID(instanceID string) ([]internal.Operation, error) {
-
 	operations, err := s.listOperationsByInstanceId(instanceID)
 	if err != nil {
 		return nil, fmt.Errorf("while loading operations list: %w", err)
@@ -939,9 +938,9 @@ func (s *operations) toOperation(dto *dbmodel.OperationDTO, existingOp internal.
 		}
 	}
 	err := s.cipher.DecryptSMCreds(&provisioningParameters)
-	if err != nil {
-		return internal.Operation{}, fmt.Errorf("while decrypting basic auth: %w", err)
-	}
+	//if err != nil {
+	//	return internal.Operation{}, fmt.Errorf("while decrypting basic auth: %w", err)
+	//}
 
 	err = s.cipher.DecryptKubeconfig(&provisioningParameters)
 	if err != nil {

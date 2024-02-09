@@ -241,6 +241,12 @@ type Operation struct {
 	KymaTemplate string `json:"KymaTemplate"`
 }
 
+func (c *Operation) RemoveSensitiveData() {
+	c.ProvisioningParameters.ErsContext.UserID = "_removed_"
+	c.ProvisioningParameters.Parameters.RuntimeAdministrators = []string{"_removed_"}
+	c.ProvisioningParameters.Parameters.OIDC = nil
+}
+
 func (o *Operation) IsFinished() bool {
 	return o.State != orchestration.InProgress && o.State != orchestration.Pending && o.State != orchestration.Canceling && o.State != orchestration.Retrying
 }

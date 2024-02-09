@@ -43,6 +43,24 @@ func (s *runtimeState) Insert(runtimeState internal.RuntimeState) error {
 	})
 }
 
+func (s *runtimeState) ListByOperationID(operationID string) ([]internal.RuntimeState, error) {
+	sess := s.NewReadSession()
+	states, errDb := sess.ListRuntimeStateByOperationID(operationID)
+	if errDb != nil {
+		return []internal.RuntimeState{}, errDb
+	}
+	result, err := s.toRuntimeStates(states)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// DeleteByOperationID deletes all runtime states from given operation, returns number of removed items.
+func (s *runtimeState) DeleteByOperationID(operationID string) (int, error) {
+	return s.NewReadSession().DeleteRuntimeStateByOperationID(operationID)
+}
+
 func (s *runtimeState) ListByRuntimeID(runtimeID string) ([]internal.RuntimeState, error) {
 	sess := s.NewReadSession()
 	states := make([]dbmodel.RuntimeStateDTO, 0)

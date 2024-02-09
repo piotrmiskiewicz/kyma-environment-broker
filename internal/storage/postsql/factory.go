@@ -53,6 +53,8 @@ type ReadSession interface {
 	GetLatestRuntimeStateWithKymaVersionByRuntimeID(runtimeID string) (dbmodel.RuntimeStateDTO, dberr.Error)
 	GetLatestRuntimeStateWithOIDCConfigByRuntimeID(runtimeID string) (dbmodel.RuntimeStateDTO, dberr.Error)
 	ListEvents(filter events.EventFilter) ([]events.EventDTO, error)
+	ListRuntimeStateByOperationID(id string) ([]dbmodel.RuntimeStateDTO, dberr.Error)
+	DeleteRuntimeStateByOperationID() (int, error)
 }
 
 //go:generate mockery --name=WriteSession

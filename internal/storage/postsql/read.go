@@ -22,23 +22,22 @@ type readSession struct {
 }
 
 func (r readSession) FindDeletedInstanceIDs() ([]string, error) {
-
-	rows, err  := r.session.Query("select distinct(instance_id) from operations where instance_id not in (select instance_id from instances)")
+	rows, err  := r.session.Query("select distinct(instance_id) from operations where instance_id not in (select instance_id from instances) limit 100")
 	if err != nil {
 		return []string{}, err
 	}
 	defer rows.Close()
-	i := 0
+	var ids []string
 	for rows.Next() {
 		var id string
-		rows.Scan(&id)
-		fmt.Println(id)
-		i = i + 1
+		err := rows.Scan(&id)
+		if err != nil {
+			fmt.Println("ERROR: ", err.Error())
+			continue
+		}
+		ids = append(ids, id)
 	}
-	fmt.Println(i)
-
-
-	return []string{}, err
+	return ids, err
 }
 
 func (r readSession) getInstancesJoinedWithOperationStatement() *dbr.SelectStmt {
@@ -438,6 +437,22 @@ func (r readSession) GetRuntimeStateByOperationID(operationID string) (dbmodel.R
 
 func (r readSession) ListRuntimeStateByRuntimeID(runtimeID string) ([]dbmodel.RuntimeStateDTO, dberr.Error) {
 	stateCondition := dbr.Eq("runtime_id", runtimeID)
+	var states []dbmodel.RuntimeStateDTO
+
+	_, err := r.session.
+		Select("*").
+		From(RuntimeStateTableName).
+		Where(stateCondition).
+		OrderDesc(CreatedAtField).
+		Load(&states)
+	if err != nil {
+		return nil, dberr.Internal("Failed to get states: %s", err)
+	}
+	return states, nil
+}
+
+func (r readSession) ListRuntimeStateByOperationID(operationID string) ([]dbmodel.RuntimeStateDTO, dberr.Error) {
+	stateCondition := dbr.Eq("operation_id", operationID)
 	var states []dbmodel.RuntimeStateDTO
 
 	_, err := r.session.

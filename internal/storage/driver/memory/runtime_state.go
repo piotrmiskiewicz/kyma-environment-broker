@@ -29,6 +29,10 @@ func (s *runtimeState) Insert(runtimeState internal.RuntimeState) error {
 	return nil
 }
 
+func (s *runtimeState) ListByOperationID(operationID string) ([]internal.RuntimeState, error) {
+	panic("not implented")
+}
+
 func (s *runtimeState) ListByRuntimeID(runtimeID string) ([]internal.RuntimeState, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
