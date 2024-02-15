@@ -28,7 +28,7 @@ Pros:
 
 Cons:
 1. there is a need of a job which periodically runs the cleaning, such job must be maintained etc.
-2. additional column to mark cleaned operations
+2. additional column in the DB to mark cleaned operations
 
 # Solution 2: New entity "instance archived"
 
