@@ -2,7 +2,7 @@
 
 ### Instances 
 
-removed at the end of deprovisioning, no action needed\
+removed at the end of deprovisioning, no action needed.
 
 ### Operations
 
