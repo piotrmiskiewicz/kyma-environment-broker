@@ -1,7 +1,5 @@
 # Soliution 1: No additional entity
 
-## Entities
-
 ### Instances 
 
 removed at the end of deprovisioning, no action needed\
