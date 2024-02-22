@@ -27,7 +27,7 @@ func NewInstanceArchivedFromOperations(operations []internal.Operation) (interna
 	}
 
 	if len(operations) < 2 {
-		return result, fmt.Errorf("cannot creatae archived instacne - not enough operations")
+		return result, fmt.Errorf("cannot create archived instacne - not enough operations")
 	}
 
 	// sort operations - the older one must be the first one
@@ -63,7 +63,6 @@ func NewInstanceArchivedFromOperations(operations []internal.Operation) (interna
 		}
 	}
 	result.LastDeprovisioningFinishedAt = lastDeprovisioning.UpdatedAt
-	result.InternalUser = strings.HasSuffix(provisioningOperation.ProvisioningParameters.ErsContext.UserID, "sap.com")
 
 	return result, nil
 

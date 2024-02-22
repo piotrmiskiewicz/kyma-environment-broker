@@ -52,7 +52,7 @@ func NewFromConfig(cfg Config, evcfg events.Config, cipher postgres.Cipher, log 
 		orchestrations:    postgres.NewOrchestrations(fact),
 		runtimeStates:     postgres.NewRuntimeStates(fact, cipher),
 		events:            events.New(evcfg, eventstorage.New(fact, log)),
-		instancesArchived: postgres.NewInstanceArchivedPostgreSQLStorage(fact),
+		instancesArchived: postgres.NewInstanceArchived(fact),
 	}, connection, nil
 }
 

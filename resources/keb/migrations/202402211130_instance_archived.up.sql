@@ -1,19 +1,18 @@
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS instances_archived (
-    instance_id                      varchar(255) NOT NULL PRIMARY KEY,
-    global_account_id                varchar(255) NOT NULL,
-    last_runtime_id                  varchar(255),
-    subscription_global_account_id   varchar(255),
-    subaccount_id                    varchar(255) NOT NULL,
-    plan_id                          varchar(255) NOT NULL,
-    plan_name                        varchar(255),
-    region                           varchar(255),
-    subaccount_region                varchar(255),
-    provider                         varchar(255),
-    shoot_name                       varchar(255),
+    instance_id                      varchar(64) NOT NULL PRIMARY KEY,
+    global_account_id                varchar(64) NOT NULL,
+    last_runtime_id                  varchar(64) NOT NULL,
+    subscription_global_account_id   varchar(64) NOT NULL,
+    subaccount_id                    varchar(64) NOT NULL,
+    plan_id                          varchar(40) NOT NULL,
+    plan_name                        varchar(32) NOT NULL,
+    region                           varchar(32) NOT NULL,
+    subaccount_region                varchar(32) NOT NULL,
+    provider                         varchar(32) NOT NULL,
+    shoot_name                       varchar(32) NOT NULL,
     internal_user                    boolean NOT NULL,
-
 
     provisioning_started_at           timestamp with time zone NOT NULL,
     provisioning_finished_at          timestamp with time zone NOT NULL,
