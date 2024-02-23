@@ -214,14 +214,8 @@ func (g *Graphqlizer) AWSProviderConfigInputToGraphQL(in gqlschema.AWSProviderCo
 func (g *Graphqlizer) OpenStackProviderConfigInputToGraphQL(in gqlschema.OpenStackProviderConfigInput) (string, error) {
 	return fmt.Sprintf(`{
 				zones: %s,
-{{- if .cloudProfileName}}
-				floatingPoolName: "%s",
-{{- end }}
-{{- if .cloudProfileName}}
-				cloudProfileName: "%s",
-{{- end }}
 				loadBalancerProvider: "%s"
-			}`, g.marshal(in.Zones), in.FloatingPoolName, in.CloudProfileName, in.LoadBalancerProvider), nil
+			}`, g.marshal(in.Zones), in.LoadBalancerProvider), nil
 }
 
 func (g *Graphqlizer) KymaConfigToGraphQL(in gqlschema.KymaConfigInput) (string, error) {
