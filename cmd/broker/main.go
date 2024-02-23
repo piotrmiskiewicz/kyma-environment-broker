@@ -165,9 +165,12 @@ type Config struct {
 
 	Events events.Config
 
-	Provisioning   process.StagedManagerConfiguration
-	Deprovisioning process.StagedManagerConfiguration
-	Update         process.StagedManagerConfiguration
+	Provisioning    process.StagedManagerConfiguration
+	Deprovisioning  process.StagedManagerConfiguration
+	Update          process.StagedManagerConfiguration
+	ArchiveEnabled  bool `envconfig:"default=false"`
+	ArchiveDryRun   bool `envconfig:"default=true"`
+	CleaningEnabled bool `envconfig:"default=false"`
 }
 
 type ProfilerConfig struct {
@@ -487,7 +490,7 @@ func createAPI(router *mux.Router, servicesConfig broker.ServicesConfig, planVal
 			suspensionCtxHandler, cfg.UpdateProcessingEnabled, cfg.UpdateSubAccountMovementEnabled, updateQueue, defaultPlansConfig,
 			planDefaults, logs, cfg.KymaDashboardConfig),
 		GetInstanceEndpoint:          broker.NewGetInstance(cfg.Broker, db.Instances(), db.Operations(), logs),
-		LastOperationEndpoint:        broker.NewLastOperation(db.Operations(), logs),
+		LastOperationEndpoint:        broker.NewLastOperation(db.Operations(), db.InstancesArchived(), logs),
 		BindEndpoint:                 broker.NewBind(cfg.Broker.Binding, db.Instances(), logs),
 		UnbindEndpoint:               broker.NewUnbind(logs),
 		GetBindingEndpoint:           broker.NewGetBinding(logs),
