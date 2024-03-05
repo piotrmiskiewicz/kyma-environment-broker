@@ -171,6 +171,7 @@ type Config struct {
 	ArchiveEnabled  bool `envconfig:"default=false"`
 	ArchiveDryRun   bool `envconfig:"default=true"`
 	CleaningEnabled bool `envconfig:"default=false"`
+	CleaningDryRun  bool `envconfig:"default=true"`
 }
 
 type ProfilerConfig struct {

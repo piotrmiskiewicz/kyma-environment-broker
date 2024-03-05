@@ -11,12 +11,14 @@ import (
 type CleanStep struct {
 	operations    storage.Operations
 	runtimeStates storage.RuntimeStates
+	dryRun        bool
 }
 
-func NewCleanStep(operations storage.Operations, runtimeStates storage.RuntimeStates) *CleanStep {
+func NewCleanStep(operations storage.Operations, runtimeStates storage.RuntimeStates, dryRun bool) *CleanStep {
 	return &CleanStep{
 		operations:    operations,
 		runtimeStates: runtimeStates,
+		dryRun:        dryRun,
 	}
 }
 
@@ -40,6 +42,10 @@ func (s *CleanStep) Run(operation internal.Operation, log logrus.FieldLogger) (i
 	}
 	for _, op := range operations {
 		log.Infof("removing runtime states for operation %s", op.ID)
+		if s.dryRun {
+			log.Infof("dry run mode, skipping")
+			continue
+		}
 		err := s.runtimeStates.DeleteByOperationID(op.ID)
 		if err != nil {
 			log.Errorf("unable to delete runtime states: %s", err.Error())
@@ -48,14 +54,18 @@ func (s *CleanStep) Run(operation internal.Operation, log logrus.FieldLogger) (i
 	}
 	for _, op := range operations {
 		log.Infof("Removing operation %s", op.ID)
+		if s.dryRun {
+			log.Infof("dry run mode, skipping")
+			continue
+		}
 		err := s.operations.DeleteByID(op.ID)
 		if err != nil {
 			log.Errorf("unable to delete operation %s: %s", op.ID, err.Error())
 			return operation, dbRetryBackoff, nil
 		}
 	}
-
-	log.Infof("All runtime states and operations for the instance %s has been completely deleted!", operation.InstanceID)
-
+	if !s.dryRun {
+		log.Infof("All runtime states and operations for the instance %s has been completely deleted!", operation.InstanceID)
+	}
 	return operation, 0, nil
 }

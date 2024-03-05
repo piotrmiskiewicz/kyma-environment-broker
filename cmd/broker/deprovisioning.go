@@ -91,7 +91,7 @@ func NewDeprovisioningProcessingQueue(ctx context.Context, workersAmount int, de
 		},
 		{
 			disabled: !cfg.CleaningEnabled,
-			step:     deprovisioning.NewCleanStep(db.Operations(), db.RuntimeStates()),
+			step:     deprovisioning.NewCleanStep(db.Operations(), db.RuntimeStates(), cfg.CleaningDryRun),
 		},
 	}
 	var stages []string

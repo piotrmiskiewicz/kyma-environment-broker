@@ -20,10 +20,10 @@ type LastOperationEndpoint struct {
 	log logrus.FieldLogger
 }
 
-func NewLastOperation(os storage.Operations, ias storage.InstancesArchived, log logrus.FieldLogger) *LastOperationEndpoint {
+func NewLastOperation(os storage.Operations, ia storage.InstancesArchived, log logrus.FieldLogger) *LastOperationEndpoint {
 	return &LastOperationEndpoint{
 		operationStorage:  os,
-		instancesArchived: ias,
+		instancesArchived: ia,
 		log:               log.WithField("service", "LastOperationEndpoint"),
 	}
 }

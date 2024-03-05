@@ -410,3 +410,4 @@ archiving:
   dryRun: true
 cleaning:
   enabled: false
+  dryRun: true
