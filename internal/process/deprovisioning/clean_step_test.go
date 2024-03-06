@@ -23,7 +23,7 @@ func TestCleanStep_Run(t *testing.T) {
 	err = db.RuntimeStates().Insert(rs)
 	assert.NoError(t, err)
 
-	step := NewCleanStep(db.Operations(), db.RuntimeStates())
+	step := NewCleanStep(db.Operations(), db.RuntimeStates(), false)
 
 	// when
 	_, backoff, err := step.Run(deprovisioning, logrus.New())
@@ -53,7 +53,7 @@ func TestCleanStep_Run_TemporaryOperation(t *testing.T) {
 	rs := fixture.FixRuntimeState("rs", provisioning.RuntimeID, "prov-id")
 	err = db.RuntimeStates().Insert(rs)
 	assert.NoError(t, err)
-	step := NewCleanStep(db.Operations(), db.RuntimeStates())
+	step := NewCleanStep(db.Operations(), db.RuntimeStates(), false)
 
 	// when
 	_, backoff, err := step.Run(deprovisioning, logrus.New())
@@ -83,7 +83,7 @@ func TestCleanStep_Run_ExcutedButNotCompleted(t *testing.T) {
 	rs := fixture.FixRuntimeState("rs", provisioning.RuntimeID, "prov-id")
 	err = db.RuntimeStates().Insert(rs)
 	assert.NoError(t, err)
-	step := NewCleanStep(db.Operations(), db.RuntimeStates())
+	step := NewCleanStep(db.Operations(), db.RuntimeStates(), false)
 
 	// when
 	_, backoff, err := step.Run(deprovisioning, logrus.New())
