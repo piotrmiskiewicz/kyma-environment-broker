@@ -19,19 +19,19 @@ func TestArchiveRun(t *testing.T) {
 	step := NewArchivingStep(db.Operations(), db.Instances(), db.InstancesArchived(), false)
 
 	logger := logrus.New()
-	provOperation := fixture.FixProvisioningOperation("op-prov", "inst-id")
-	deproviaioningOperation := fixture.FixDeprovisioningOperationAsOperation("op-depr", "inst-id")
+	provisioningOperation := fixture.FixProvisioningOperation("op-prov", "inst-id")
+	deprovisioningOperation := fixture.FixDeprovisioningOperationAsOperation("op-depr", "inst-id")
 
 	instance := fixture.FixInstance("inst-id")
 
-	err := db.Operations().InsertOperation(deproviaioningOperation)
+	err := db.Operations().InsertOperation(provisioningOperation)
 	assert.NoError(t, err)
-	err = db.Operations().InsertOperation(provOperation)
+	err = db.Operations().InsertOperation(deprovisioningOperation)
 	assert.NoError(t, err)
 	err = db.Instances().Insert(instance)
 	assert.NoError(t, err)
 
-	_, backoff, err := step.Run(deproviaioningOperation, logger)
+	_, backoff, err := step.Run(deprovisioningOperation, logger)
 
 	// then
 	require.NoError(t, err)

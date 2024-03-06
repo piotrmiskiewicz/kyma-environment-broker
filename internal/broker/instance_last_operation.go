@@ -81,7 +81,7 @@ func (b *LastOperationEndpoint) responseFromInstanceArchived(instanceID string, 
 	case err == nil:
 		return domain.LastOperation{
 			State:       domain.Succeeded,
-			Description: "Operation succeeded.",
+			Description: "Operation succeeded. The instance was deprovisioned.",
 		}, nil
 	case dberr.IsNotFound(err):
 		return domain.LastOperation{}, apiresponses.NewFailureResponse(fmt.Errorf("Operation not found"), http.StatusNotFound, "Instance not found")
