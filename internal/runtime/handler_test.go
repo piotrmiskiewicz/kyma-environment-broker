@@ -3,11 +3,12 @@ package runtime_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
