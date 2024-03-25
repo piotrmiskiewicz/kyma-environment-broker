@@ -63,4 +63,4 @@ A successful call returns the instance details:
    }
    ```
 
-  > **NOTE:**  Fields under the **parameters** field can differ depending on the provisioning input.
+  > **NOTE:**  The fields under the **parameters** field can differ depending on the provisioning input.
