@@ -334,7 +334,7 @@ spec:
               value: "{{ .Values.euAccessRejectionMessage }}"
             - name: APP_FREEMIUM_PROVIDERS
               value: "{{ .Values.gardener.freemiumProviders }}"
-            - name: APP_ONLY_ONE_FREE_PER_GA
+            - name: APP_BROKER_ONLY_ONE_FREE_PER_GA
               value: "{{ .Values.onlyOneFreePerGA }}"
             - name: APP_CATALOG_FILE_PATH
               value: /config/catalog.yaml
