@@ -332,6 +332,8 @@ spec:
               value: "{{ .Values.euAccessRejectionMessage }}"
             - name: APP_FREEMIUM_PROVIDERS
               value: "{{ .Values.gardener.freemiumProviders }}"
+            - name: APP_FREE_EXPIRATION_ENABLED
+              value: "false"
             - name: APP_CATALOG_FILE_PATH
               value: /config/catalog.yaml
             - name: APP_GARDENER_PROJECT
