@@ -172,7 +172,7 @@ type Config struct {
 	CleaningEnabled bool `envconfig:"default=false"`
 	CleaningDryRun  bool `envconfig:"default=true"`
 
-	FreeExpirationEnabled bool `envconfig:"default=false"`
+	OnlyOneFreePerGlobalAccount bool `envconfig:"default=false"`
 }
 
 type ProfilerConfig struct {
