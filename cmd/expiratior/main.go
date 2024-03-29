@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"os"
+	"time"
+
 	"github.com/kyma-project/control-plane/components/schema-migrator/cleaner"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
@@ -11,9 +15,6 @@ import (
 	"github.com/kyma-project/kyma-environment-broker/internal/storage/dbmodel"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
-	"log/slog"
-	"os"
-	"time"
 )
 
 type BrokerClient interface {
