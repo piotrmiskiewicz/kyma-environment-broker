@@ -120,7 +120,8 @@ func (s *CleanupService) PerformCleanup() error {
 		slog.Info(fmt.Sprintf("Instances: %+v, to expire now: %+v, to be left non-expired: %+v", count, instancesToExpireCount, instancesToBeLeftCount))
 	} else {
 		suspensionsAcceptedCount, onlyMarkedAsExpiredCount, failuresCount := s.cleanupInstances(instancesToExpire)
-		slog.Info("Instances: %+v, to expire: %+v, left non-expired: %+v, suspension under way: %+v just marked expired: %+v, failures: %+v", count, instancesToExpireCount, instancesToBeLeftCount, suspensionsAcceptedCount, onlyMarkedAsExpiredCount, failuresCount)
+		slog.Info(fmt.Sprintf("Instances: %+v, to expire: %+v, left non-expired: %+v, suspension under way: %+v just marked expired: %+v, failures: %+v",
+			count, instancesToExpireCount, instancesToBeLeftCount, suspensionsAcceptedCount, onlyMarkedAsExpiredCount, failuresCount))
 	}
 	return nil
 }
