@@ -54,7 +54,7 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 
-	log.Info("Starting cleanup job")
+	slog.Info("Starting cleanup job")
 
 	// create and fill config
 	var cfg Config
@@ -62,10 +62,10 @@ func main() {
 	fatalOnError(err)
 
 	if cfg.DryRun {
-		log.Info("Dry run only - no changes")
+		slog.Info("Dry run only - no changes")
 	}
 
-	log.Infof("Expiration period: %+v", cfg.ExpirationPeriod)
+	slog.Info(fmt.Sprintf("Expiration period: %+v", cfg.ExpirationPeriod))
 
 	ctx := context.Background()
 	brokerClient := broker.NewClient(ctx, cfg.Broker)
@@ -80,7 +80,7 @@ func main() {
 
 	fatalOnError(err)
 
-	log.Info("Trial cleanup job finished successfully!")
+	slog.Info("Trial cleanup job finished successfully!")
 
 	err = conn.Close()
 	if err != nil {
@@ -103,7 +103,7 @@ func (s *CleanupService) PerformCleanup() error {
 	instances, count, err := s.getInstances(filter)
 
 	if err != nil {
-		log.Error(fmt.Sprintf("while getting instances: %s", err))
+		slog.Error(fmt.Sprintf("while getting instances: %s", err))
 		return err
 	}
 
@@ -116,10 +116,10 @@ func (s *CleanupService) PerformCleanup() error {
 
 	if s.cfg.DryRun {
 		s.logInstances(instancesToExpire)
-		log.Infof("Instances: %+v, to expire now: %+v, to be left non-expired: %+v", count, instancesToExpireCount, instancesToBeLeftCount)
+		slog.Info(fmt.Sprintf("Instances: %+v, to expire now: %+v, to be left non-expired: %+v", count, instancesToExpireCount, instancesToBeLeftCount))
 	} else {
 		suspensionsAcceptedCount, onlyMarkedAsExpiredCount, failuresCount := s.cleanupInstances(instancesToExpire)
-		log.Infof("Instances: %+v, to expire: %+v, left non-expired: %+v, suspension under way: %+v just marked expired: %+v, failures: %+v", count, instancesToExpireCount, instancesToBeLeftCount, suspensionsAcceptedCount, onlyMarkedAsExpiredCount, failuresCount)
+		slog.Info("Instances: %+v, to expire: %+v, left non-expired: %+v, suspension under way: %+v just marked expired: %+v, failures: %+v", count, instancesToExpireCount, instancesToBeLeftCount, suspensionsAcceptedCount, onlyMarkedAsExpiredCount, failuresCount)
 	}
 	return nil
 }
@@ -152,7 +152,7 @@ func (s *CleanupService) cleanupInstances(instances []internal.Instance) (int, i
 		suspensionUnderWay, err := s.expireInstance(instance)
 		if err != nil {
 			// ignoring errors - only logging
-			log.Error(fmt.Sprintf("while sending expiration request for instanceID: %s, error: %s", instance.InstanceID, err))
+			slog.Error(fmt.Sprintf("while sending expiration request for instanceID: %s, error: %s", instance.InstanceID, err))
 			continue
 		}
 		if suspensionUnderWay {
@@ -167,16 +167,16 @@ func (s *CleanupService) cleanupInstances(instances []internal.Instance) (int, i
 
 func (s *CleanupService) logInstances(instances []internal.Instance) {
 	for _, instance := range instances {
-		log.Infof("instanceId: %+v createdAt: %+v (%.0f days ago) servicePlanID: %+v servicePlanName: %+v",
-			instance.InstanceID, instance.CreatedAt, time.Since(instance.CreatedAt).Hours()/24, instance.ServicePlanID, instance.ServicePlanName)
+		slog.Info(fmt.Sprintf("instanceId: %+v createdAt: %+v (%.0f days ago) servicePlanID: %+v servicePlanName: %+v",
+			instance.InstanceID, instance.CreatedAt, time.Since(instance.CreatedAt).Hours()/24, instance.ServicePlanID, instance.ServicePlanName))
 	}
 }
 
 func (s *CleanupService) expireInstance(instance internal.Instance) (processed bool, err error) {
-	log.Infof("About to make instance expired for instanceID: %+v", instance.InstanceID)
+	slog.Info(fmt.Sprintf("About to make instance expired for instanceID: %+v", instance.InstanceID))
 	suspensionUnderWay, err := s.brokerClient.SendExpirationRequest(instance)
 	if err != nil {
-		log.Error(fmt.Sprintf("while sending expiration request for instanceID %q: %s", instance.InstanceID, err))
+		slog.Error(fmt.Sprintf("while sending expiration request for instanceID %q: %s", instance.InstanceID, err))
 		return suspensionUnderWay, err
 	}
 	return suspensionUnderWay, nil
@@ -186,13 +186,13 @@ func fatalOnError(err error) {
 	if err != nil {
 		// temporarily we exit with 0 to avoid any side effects - we ignore all errors only logging those
 		//log.Fatal(err)
-		log.Error(err)
+		slog.Error(err.Error())
 		os.Exit(0)
 	}
 }
 
 func logOnError(err error) {
 	if err != nil {
-		log.Error(err)
+		slog.Error(err.Error())
 	}
 }
