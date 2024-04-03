@@ -20,6 +20,7 @@ TAG=$1
 git add resources/keb/values.yaml
 git add resources/keb/Chart.yaml
 git add utils/kyma-environments-cleanup-job/kyma-environments-cleanup-job.yaml
+git add utils/archiver/kyma-environments-broker-archiver-job.yaml
 
 #stash staged changes
 git stash push --staged
@@ -32,7 +33,7 @@ git checkout -B ${BUMP_KEB_BRANCH_NAME}
 git stash apply
 git add resources/keb/values.yaml
 git add resources/keb/Chart.yaml
-git add utils/kyma-environments-cleanup-job/kyma-environments-cleanup-job.yaml
+git add utils/archiver/kyma-environments-broker-archiver-job.yaml
 
 #configure git
 git config --global user.email ${GIT_EMAIL}
