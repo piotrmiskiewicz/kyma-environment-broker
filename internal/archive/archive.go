@@ -26,10 +26,6 @@ func NewInstanceArchivedFromOperations(operations []internal.Operation) (interna
 		return a.CreatedAt.Compare(b.CreatedAt)
 	}
 
-	if len(operations) < 2 {
-		return result, fmt.Errorf("cannot create archived instacne - not enough operations")
-	}
-
 	// sort operations - the older one must be the first one
 	slices.SortFunc(operations, cmp)
 
@@ -46,14 +42,17 @@ func NewInstanceArchivedFromOperations(operations []internal.Operation) (interna
 	result.PlanName = broker.PlanNamesMapping[result.PlanID]
 	result.InstanceID = provisioningOperation.InstanceID
 
-	lastDeprovisioning := operations[len(operations)-1]
-	result.SubaccountID = lastDeprovisioning.SubAccountID
-	result.GlobalAccountID = lastDeprovisioning.GlobalAccountID
+	if len(operations) > 1 {
+		lastDeprovisioning := operations[len(operations)-1]
+		result.SubaccountID = lastDeprovisioning.SubAccountID
+		result.GlobalAccountID = lastDeprovisioning.GlobalAccountID
+		result.ShootName = lastDeprovisioning.ShootName
+		result.Region = lastDeprovisioning.Region
+		result.LastRuntimeID = lastDeprovisioning.RuntimeID
+		result.LastDeprovisioningFinishedAt = lastDeprovisioning.UpdatedAt
+	}
 	result.InternalUser = strings.Contains(provisioningOperation.ProvisioningParameters.ErsContext.UserID, "@sap.com")
-	result.ShootName = lastDeprovisioning.ShootName
-	result.Region = lastDeprovisioning.Region
 	result.SubaccountRegion = provisioningOperation.ProvisioningParameters.PlatformRegion
-	result.LastRuntimeID = lastDeprovisioning.RuntimeID
 
 	// find first deprovisioning
 	for _, op := range operations {
@@ -63,7 +62,6 @@ func NewInstanceArchivedFromOperations(operations []internal.Operation) (interna
 			break
 		}
 	}
-	result.LastDeprovisioningFinishedAt = lastDeprovisioning.UpdatedAt
 
 	return result, nil
 }
