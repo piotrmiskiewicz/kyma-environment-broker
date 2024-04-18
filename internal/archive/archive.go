@@ -25,6 +25,9 @@ func NewInstanceArchivedFromOperations(operations []internal.Operation) (interna
 	cmp := func(a, b internal.Operation) int {
 		return a.CreatedAt.Compare(b.CreatedAt)
 	}
+	if len(operations) == 0 {
+		return result, fmt.Errorf("operations cannot be empty")
+	}
 
 	// sort operations - the older one must be the first one
 	slices.SortFunc(operations, cmp)
