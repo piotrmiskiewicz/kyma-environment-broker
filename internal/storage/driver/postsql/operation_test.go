@@ -115,6 +115,10 @@ func TestOperation(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, latestOperation.ID, lastOp.ID)
 
+		lastProvisioning, err := svc.GetLastOperationByTypes("inst-id", []internal.OperationType{internal.OperationTypeProvision})
+		require.NoError(t, err)
+		assert.Equal(t, lastProvisioning.ID, lastOp.ID)
+
 		latestOp, err := svc.GetOperationByInstanceID("inst-id")
 		require.NoError(t, err)
 		assert.Equal(t, latestPendingOperation.ID, latestOp.ID)
