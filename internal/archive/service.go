@@ -2,9 +2,10 @@ package archive
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"log/slog"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 	"github.com/kyma-project/kyma-environment-broker/internal/storage/dberr"
