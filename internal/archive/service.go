@@ -2,6 +2,7 @@ package archive
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"log/slog"
 	"os"
 
@@ -78,7 +79,8 @@ func (s *Service) Run() (error, int, int) {
 			// do not throw error if the instance is already archived
 			err = s.archived.Insert(archived)
 			if err != nil && !errors.IsAlreadyExists(err) {
-				return err, numberOfInstancesProcessed, numberOfOperationsDeleted
+				log.Warnf("Unable to insert archived instance [%+v]: %s", err.Error())
+				continue
 			}
 		}
 
