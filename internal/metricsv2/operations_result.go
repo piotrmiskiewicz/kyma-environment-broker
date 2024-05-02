@@ -108,9 +108,6 @@ func (s *operationsResult) updateMetrics() (err error) {
 }
 
 func (s *operationsResult) Handler(ctx context.Context, event interface{}) error {
-	defer s.sync.Unlock()
-	s.sync.Lock()
-
 	defer func() {
 		Debug(s.logger, "@metricsv2", "Handler event func end")
 		if recovery := recover(); recovery != nil {
