@@ -16,16 +16,17 @@ Run the archiver (`./apply.sh`).
 
 Run all the SQL statements defined in the [Statements to verify the archiver work](db_scripts.md#statements-to-verify-the-archiver-work) section.
 
-## Delete All instances_archived
+## Delete All Archived Instances
 
-Delete all rows from instances_archived table. It will be recreated once again. Make sure that the number of operations were not decreased (deletion was not performed)
+Make sure that the number of operations were is not decreased (deletion was not performed).
+Delete all rows from the instances_archived table (it will be recreated during next archiver execution).
 ```sql
 delete from instances_archived;
 ```
 
 ## Enable Archiving and Deletion of Operations and Instances at the End of Deprovisioning
 
-Set the following configurations for KEB:
+1. Set the following configurations for KEB:
 ```
 archiving:
     enabled: true
@@ -35,7 +36,7 @@ cleaning:
     dryRun: false
 ```
 
-Wait for KEB to restart with the new configuration.
+2. Wait for KEB to restart with the new configuration.
 
 ## Run the Archiver Job with Enabled Deletion
 
