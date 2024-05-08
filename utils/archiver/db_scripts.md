@@ -23,7 +23,7 @@ select count(*) from runtime_states;
 select count(*) from operations;
 ```
 
-2. Number of operations, which will be deleted by the archiver (belongs to deprovisioned instances):
+2. Number of operations, which will be deleted by the archiver (belonging to deprovisioned instances):
 ```sql
 select count(*) from operations where instance_id not in (select instance_id from instances);
 ```
