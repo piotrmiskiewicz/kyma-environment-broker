@@ -16,7 +16,7 @@ Run the archiver (`./apply.sh`).
 
 Run all the SQL statements defined in the [Statements to verify the archiver work](db_scripts.md#statements-to-verify-the-archiver-work) section.
 
-## Delete all instances_archived
+## Delete All instances_archived
 
 Delete all rows from instances_archived table. It will be recreated once again. Make sure that the number of operations were not decreased (deletion was not performed)
 ```sql
