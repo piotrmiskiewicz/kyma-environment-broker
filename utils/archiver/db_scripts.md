@@ -1,13 +1,13 @@
-# SQL statements to verify the archiver work and check DB about deprovisioned instances
+# SQL Statements to Verify the Archiver Job's Work and Check DB for Deprovisioned Instances
 
-## DB statistics which should be run before the archiver is started
+## DB Statistics to Be Run Before Starting the Archiver Job
 
 1. Number of all operations:
 ```sql
 select count(*) from operations;
 ```
 
-2. Number of operations, which will be deleted by the archiver (belongs to deprovisioned instances):
+2. Number of operations that the archiver job will delete (belongs to deprovisioned instances):
 ```sql
 select count(*) from operations where instance_id not in (select instance_id from instances);
 ```
@@ -17,13 +17,13 @@ select count(*) from operations where instance_id not in (select instance_id fro
 select count(*) from runtime_states;
 ```
 
-## Statements to verify the archiver work
+## Statements to Verify the Archiver Job's Work
 1. Number of all operations:
 ```sql
 select count(*) from operations;
 ```
 
-2. Number of operations, which will be deleted by the archiver (belonging to deprovisioned instances):
+2. Number of operations that the archiver job will delete (belonging to deprovisioned instances):
 ```sql
 select count(*) from operations where instance_id not in (select instance_id from instances);
 ```
