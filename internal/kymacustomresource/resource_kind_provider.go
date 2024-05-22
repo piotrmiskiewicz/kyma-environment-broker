@@ -42,7 +42,7 @@ func (p *ResourceKindProvider) DefaultGvr() (schema.GroupVersionResource, error)
 }
 
 func (p *ResourceKindProvider) DefaultGvk() (schema.GroupVersionKind, error) {
-	kymaCfg, err := p.cfgProvider.ProvideForGivenVersionAndPlan(p.defaultKymaVersion, defaultPlan)
+	kymaCfg, err := p.cfgProvider.ProvideForGivenPlan(defaultPlan)
 	if err != nil {
 		return schema.GroupVersionKind{}, fmt.Errorf("while getting Kyma config: %w", err)
 	}

@@ -170,6 +170,8 @@ type Config struct {
 	CleaningDryRun  bool `envconfig:"default=true"`
 
 	KymaResourceDeletionTimeout time.Duration `envconfig:"default=30s"`
+
+	RuntimeConfigurationConfigMapName string `envconfig:"default=runtime-config"`
 }
 
 type ProfilerConfig struct {
