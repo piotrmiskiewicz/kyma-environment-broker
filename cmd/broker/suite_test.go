@@ -495,7 +495,7 @@ func fixK8sResources(defaultKymaVersion string, additionalKymaVersions []string)
 
 	kebCfg := &coreV1.ConfigMap{
 		ObjectMeta: metaV1.ObjectMeta{
-			Name:      "keb-config",
+			Name:      "keb-runtime-config",
 			Namespace: "kcp-system",
 			Labels: map[string]string{
 				"keb-config": "true",

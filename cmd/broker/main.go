@@ -171,7 +171,7 @@ type Config struct {
 
 	KymaResourceDeletionTimeout time.Duration `envconfig:"default=30s"`
 
-	RuntimeConfigurationConfigMapName string `envconfig:"default=runtime-config"`
+	RuntimeConfigurationConfigMapName string `envconfig:"default=keb-runtime-config"`
 }
 
 type ProfilerConfig struct {
@@ -298,7 +298,7 @@ func main() {
 
 	// provides configuration for specified Kyma version and plan
 	configProvider := kebConfig.NewConfigProvider(
-		kebConfig.NewConfigMapReader(ctx, cli, logs, cfg.KymaVersion),
+		kebConfig.NewConfigMapReader(ctx, cli, logs, cfg.RuntimeConfigurationConfigMapName),
 		kebConfig.NewConfigMapKeysValidator(),
 		kebConfig.NewConfigMapConverter())
 	gardenerClusterConfig, err := gardener.NewGardenerClusterConfig(cfg.Gardener.KubeconfigPath)

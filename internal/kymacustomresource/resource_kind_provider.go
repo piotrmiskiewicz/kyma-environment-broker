@@ -12,8 +12,8 @@ import (
 const defaultPlan = "default"
 
 type ResourceKindProvider struct {
-	defaultKymaVersion string
-	cfgProvider        input.ConfigurationProvider
+	runtimeConfigurationConfigMapName string
+	cfgProvider                       input.ConfigurationProvider
 }
 
 type apiVersionKind struct {
@@ -21,10 +21,10 @@ type apiVersionKind struct {
 	Kind       string `yaml:"kind"`
 }
 
-func NewResourceKindProvider(defaultKymaVersion string, cfgProvider input.ConfigurationProvider) *ResourceKindProvider {
+func NewResourceKindProvider(configMapName string, cfgProvider input.ConfigurationProvider) *ResourceKindProvider {
 	return &ResourceKindProvider{
-		defaultKymaVersion: defaultKymaVersion,
-		cfgProvider:        cfgProvider,
+		runtimeConfigurationConfigMapName: configMapName,
+		cfgProvider:                       cfgProvider,
 	}
 }
 
