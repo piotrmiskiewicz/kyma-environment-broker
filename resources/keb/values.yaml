@@ -120,7 +120,6 @@ broker:
     memory: false
   events:
     enabled: false
-  enableShootAndSeedSameRegion: "false"
 
 binding:
   enabled: false
@@ -375,6 +374,7 @@ subaccountCleanup:
   schedule: "0 1 * * *"
 
 trialCleanup:
+  enabled: true
   schedule: "0,15,30,45 * * * *"
   dryRun: true
   expirationPeriod: 336h
@@ -382,6 +382,7 @@ trialCleanup:
   testSubaccountID: "prow-keb-trial-suspension"
 
 freeCleanup:
+  enabled: true
   schedule: "0,15,30,45 * * * *"
   dryRun: true
   expirationPeriod: 2160h # 90 days
@@ -391,6 +392,7 @@ freeCleanup:
 deprovisionRetrigger:
   schedule: "0 2 * * *"
   dryRun: true
+  enabled: true
 
 subaccountSync:
   enabled: true
@@ -475,3 +477,4 @@ runtimeConfiguration: |-
         channel: fast
         modules: []
 
+imagePullSecret: ""

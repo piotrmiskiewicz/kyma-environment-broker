@@ -42,4 +42,5 @@ For technical details of KEB, go to the `contributor` directory:
 * [Cleaning and Archiving](./contributor/08-10-cleaning-and-archiving.md)
 
 You can also read about:  
-* [Event Data Platform Tools](https://github.com/kyma-project/kyma-environment-broker/blob/main/utils/edp-registrator/README.md)
+* [Event Data Platform Tools](https://github.com/kyma-project/kyma-environment-broker/blob/main/utils/edp-registrator/README.md
+* [Installing KEB in CN region](../resources/cn/cn.md)
