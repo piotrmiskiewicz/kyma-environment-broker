@@ -12,7 +12,7 @@ global:
       version: "v20240307-f250dc83" # do not update along with the other images
     kyma_environment_broker:
       dir:
-      version: "1.5.22"
+      version: "1.5.23"
     database:
       cloudsqlproxy:
         enabled: false
@@ -43,7 +43,7 @@ cleaning:
 
 
 # **CN** AvS configuration needed
-#avs:
+avs:
 #    apiEndpoint: <path:kcp-prod/data/avs#api_endpoint>
 #    apiKey: <path:kcp-prod/data/avs#api_key>
 #    clientId: <path:kcp-prod/data/avs#client_id>
@@ -61,7 +61,7 @@ cleaning:
 #    trialInternalTesterAccessId: <path:kcp-prod/data/avs#trial_internal_tester_access_id>
 #    trialParentId: <path:kcp-prod/data/avs#trial_parent_id>
 #    maintenanceModeDuringUpgrade:
-#      disabled: true
+      disabled: true
 #      alwaysDisabledGlobalAccountIDs: []
 
 broker:
