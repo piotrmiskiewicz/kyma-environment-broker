@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	coreV1 "k8s.io/api/core/v1"
@@ -24,13 +25,13 @@ type ConfigMapReader struct {
 	configMapName string
 }
 
-func NewConfigMapReader(ctx context.Context, k8sClient client.Client, logger logrus.FieldLogger, cmName string) *ConfigMapReader {
-	return &ConfigMapReader{
+func NewConfigMapReader(ctx context.Context, k8sClient client.Client, logger logrus.FieldLogger, cmName string) ConfigReader {
+	return &argoReader{target: &ConfigMapReader{
 		ctx:           ctx,
 		k8sClient:     k8sClient,
 		logger:        logger,
 		configMapName: cmName,
-	}
+	}}
 }
 
 func (r *ConfigMapReader) Read(planName string) (string, error) {
@@ -67,4 +68,18 @@ func (r *ConfigMapReader) getConfigStringForPlanOrDefaults(cfgMap *coreV1.Config
 		}
 	}
 	return cfgString, nil
+}
+
+type argoReader struct {
+	target ConfigReader
+}
+
+func (r *argoReader) Read(planName string) (string, error) {
+	content, err := r.target.Read(planName)
+	if err != nil {
+		return "", err
+	}
+	// a workaround for the issue with the Argo CD, see https://github.com/argoproj/argo-cd/pull/4729/files
+	content = strings.Replace(content, "Kind:", "kind:", -1)
+	return content, nil
 }

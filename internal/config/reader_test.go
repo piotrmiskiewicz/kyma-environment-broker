@@ -23,6 +23,7 @@ import (
 
 const (
 	kebConfigYaml             = "keb-config.yaml"
+	expectedKebConfigYaml     = "keb-config-expected.yaml"
 	namespace                 = "kcp-system"
 	runtimeVersionLabelPrefix = "runtime-version-"
 	kebConfigLabel            = "keb-config"
@@ -105,7 +106,7 @@ func TestConfigReaderErrors(t *testing.T) {
 }
 
 func fixConfigMap() (*coreV1.ConfigMap, error) {
-	yamlFilePath := path.Join("testdata", kebConfigYaml)
+	yamlFilePath := path.Join("testdata", expectedKebConfigYaml)
 	contents, err := os.ReadFile(yamlFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("while reading configmap")
