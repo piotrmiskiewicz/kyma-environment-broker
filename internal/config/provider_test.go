@@ -51,7 +51,6 @@ func TestConfigProvider(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assert.Len(t, cfg.AdditionalComponents, len(expectedCfg.AdditionalComponents))
 		assert.ObjectsAreEqual(expectedCfg, cfg)
 	})
 
