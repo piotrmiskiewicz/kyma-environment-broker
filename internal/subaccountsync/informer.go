@@ -10,7 +10,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-func configureInformer(informer *cache.SharedIndexInformer, stateReconciler *stateReconcilerType, logger *slog.Logger, metrics *Metrics) {
+func configureInformer(informer *cache.SharedIndexInformer, stateReconciler *stateReconcilerType, logger *slog.Logger, metrics *Metrics, alwaysUseDB bool) {
 	_, err := (*informer).AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			metrics.informer.With(prometheus.Labels{"event": "add"}).Inc()
@@ -19,11 +19,11 @@ func configureInformer(informer *cache.SharedIndexInformer, stateReconciler *sta
 				logger.Error(fmt.Sprintf("added Kyma resource is not an Unstructured: %s", obj))
 				return
 			}
-			subaccountID, runtimeID, betaEnabled := getDataFromLabels(u)
-			if subaccountID == "" {
-				logger.Error(fmt.Sprintf("added Kyma resource has no subaccount label: %s", u.GetName()))
+			subaccountID, runtimeID, betaEnabled, err := getRequiredData(u, logger, stateReconciler, alwaysUseDB)
+			if err != nil {
 				return
 			}
+
 			stateReconciler.reconcileResourceUpdate(subaccountIDType(subaccountID), runtimeIDType(runtimeID), runtimeStateType{betaEnabled: betaEnabled})
 			data, err := stateReconciler.accountsClient.GetSubaccountData(subaccountID)
 			if err != nil {
@@ -39,9 +39,8 @@ func configureInformer(informer *cache.SharedIndexInformer, stateReconciler *sta
 				logger.Error(fmt.Sprintf("updated Kyma resource is not an Unstructured: %s", newObj))
 				return
 			}
-			subaccountID, runtimeID, betaEnabled := getDataFromLabels(u)
-			if subaccountID == "" {
-				logger.Error(fmt.Sprintf("updated Kyma resource has no subaccount label: %s", u.GetName()))
+			subaccountID, runtimeID, betaEnabled, err := getRequiredData(u, logger, stateReconciler, alwaysUseDB)
+			if err != nil {
 				return
 			}
 			if !reflect.DeepEqual(oldObj.(*unstructured.Unstructured).GetLabels(), u.GetLabels()) {
