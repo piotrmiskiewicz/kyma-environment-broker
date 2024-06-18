@@ -324,11 +324,11 @@ func NewNetworkingSchema() *NetworkingType {
 	return &NetworkingType{
 		Type: Type{Type: "object", Description: "Networking configuration. These values are immutable and cannot be updated later. All provided CIDR ranges must not overlap one another."},
 		Properties: NetworkingProperties{
-			Services: Type{Type: "string", Title: "CIDR range for services", Description: fmt.Sprintf("CIDR range for services, must not overlap with the following CIDRs: %s", seedCIDRs),
+			Services: Type{Type: "string", Title: "CIDR range for Services", Description: fmt.Sprintf("CIDR range for Services, must not overlap with the following CIDRs: %s", seedCIDRs),
 				Default: networking.DefaultServicesCIDR},
-			Pods: Type{Type: "string", Title: "CIDR range for pods", Description: fmt.Sprintf("CIDR range for pods, must not overlap with the following CIDRs: %s", seedCIDRs),
+			Pods: Type{Type: "string", Title: "CIDR range for Pods", Description: fmt.Sprintf("CIDR range for Pods, must not overlap with the following CIDRs: %s", seedCIDRs),
 				Default: networking.DefaultPodsCIDR},
-			Nodes: Type{Type: "string", Title: "CIDR range for nodes", Description: fmt.Sprintf("CIDR range for nodes, must not overlap with the following CIDRs: %s", seedCIDRs),
+			Nodes: Type{Type: "string", Title: "CIDR range for Nodes", Description: fmt.Sprintf("CIDR range for Nodes, must not overlap with the following CIDRs: %s", seedCIDRs),
 				Default: networking.DefaultNodesCIDR},
 		},
 		Required: []string{"nodes"},
