@@ -5,6 +5,7 @@ This guide will help you install KEB in the CN region.
 ## Prerequisites
 
 Push all necessary images to the proper Docker registry.
+Install Istio on the cluster.
 
 ## Installation
 
