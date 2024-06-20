@@ -120,6 +120,7 @@ broker:
     memory: false
   events:
     enabled: false
+  enableShootAndSeedSameRegion: "false"
 
 binding:
   enabled: false
