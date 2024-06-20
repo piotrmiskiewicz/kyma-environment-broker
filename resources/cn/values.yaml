@@ -10,7 +10,7 @@ global:
       version: "v20240307-f250dc83" # do not update along with the other images
     kyma_environment_broker:
       dir:
-      version: "1.6.0"
+      version: "1.8.2"
     database:
       cloudsqlproxy:
         enabled: false
@@ -55,7 +55,6 @@ kubeconfig:
     issuerURL: https://kyma.accounts.ondemand.com
 
 kymaVersion: 2.20.0
-kymaVersionOnDemand: false
 lifecycleManager:
     disabled: true
 
