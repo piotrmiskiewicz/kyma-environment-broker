@@ -477,5 +477,6 @@ runtimeConfiguration: |-
       spec:
         channel: fast
         modules: []
+    additional-components: []
 
 imagePullSecret: ""
