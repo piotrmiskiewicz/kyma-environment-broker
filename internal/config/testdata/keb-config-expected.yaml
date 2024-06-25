@@ -32,7 +32,7 @@ data:
   azure: |-
     kyma-template: |-
       apiVersion: operator.kyma-project.io/v1beta2
-      Kind: Kyma
+      kind: Kyma
       metadata:
         name: tbd
         namespace: kyma-system
@@ -54,7 +54,7 @@ data:
   gcp: |-
     kyma-template: |-
       apiVersion: operator.kyma-project.io/v1beta2
-      Kind: Kyma
+      kind: Kyma
       metadata:
         name: tbd
         namespace: kyma-system
@@ -78,7 +78,7 @@ data:
   trial: |-
     kyma-template: |-
       apiVersion: operator.kyma-project.io/v1beta2
-      Kind: Kyma
+      kind: Kyma
       metadata:
         name: tbd
         namespace: kyma-system
