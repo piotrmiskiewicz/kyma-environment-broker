@@ -27,8 +27,6 @@ kubectl create secret docker-registry k8s-ecr-login-renew-docker-secret --docker
 5. Apply the following YAML file to install KEB:
 
 ```shell
-kubectl apply -f global-overrides2.20.yaml
-kubectl apply -f keb-config.yaml
 kubectl apply -f sql.yaml
 ```
 
