@@ -18,19 +18,19 @@ KCFG=`cat <file with kubeconfig>`
 kubectl create secret generic gardener-credentials --from-literal=kubeconfig=$KCFG -n kcp-system
 ```
 
-4. Prepare a secret with credentials for Docker registry.
+3. Prepare a secret with credentials for Docker registry.
 
 ```shell
 kubectl create secret docker-registry k8s-ecr-login-renew-docker-secret --docker-server=<registry> --docker-username=<username> --docker-password=<password> --docker-email=<email> -n kcp-system
 ```
 
-5. Apply the following YAML file to install KEB:
+4. Apply the following YAML file to install KEB:
 
 ```shell
 kubectl apply -f sql.yaml
 ```
 
-6. Install the KEB chart:
+5. Install the KEB chart:
 
 ```shell
 helm install keb ../keb --namespace kcp-system -f values.yaml
