@@ -1,24 +1,24 @@
-# Installing KEB in CN region
+# Install KEB in the CN Region
 
 This guide will help you install KEB in the CN region.
 
 ## Prerequisites
 
-Push all necessary images to the proper Docker registry.
-Install Istio on the cluster.
+- All necessary images pushed to the proper Docker registry.
+- Istio installed on the cluster.
 
 ## Installation
 
 1. Set the proper values in the `sql.yaml`, especially the database password.
 
-2. Prepare a secret with kubeconfig to gardener project:
+2. Prepare a Secret with a kubeconfig to the Gardener project:
 
 ```shell
 KCFG=`cat <file with kubeconfig>`
 kubectl create secret generic gardener-credentials --from-literal=kubeconfig=$KCFG -n kcp-system
 ```
 
-3. Prepare a secret with credentials for Docker registry.
+3. Prepare a Secret with credentials for the Docker registry.
 
 ```shell
 kubectl create secret docker-registry k8s-ecr-login-renew-docker-secret --docker-server=<registry> --docker-username=<username> --docker-password=<password> --docker-email=<email> -n kcp-system
