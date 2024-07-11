@@ -5,12 +5,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider"
+	"github.com/stretchr/testify/require"
 
 	"github.com/google/uuid"
 	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
