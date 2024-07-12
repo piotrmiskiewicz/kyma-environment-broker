@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/euaccess"
 	"math/big"
 	"math/rand"
 	"net/netip"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/euaccess"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/networking"
 
