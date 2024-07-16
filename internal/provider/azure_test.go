@@ -1,9 +1,10 @@
 package provider
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
-	"testing"
 )
 
 func TestAzureDefaults(t *testing.T) {

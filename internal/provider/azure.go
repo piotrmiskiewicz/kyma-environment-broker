@@ -1,8 +1,9 @@
 package provider
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/internal"
 	"math/rand"
+
+	"github.com/kyma-project/kyma-environment-broker/internal"
 )
 
 type (

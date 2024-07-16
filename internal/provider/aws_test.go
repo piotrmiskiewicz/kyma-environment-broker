@@ -1,10 +1,11 @@
 package provider
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestAWSDefaults(t *testing.T) {
