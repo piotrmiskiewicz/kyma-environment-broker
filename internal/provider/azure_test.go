@@ -37,7 +37,7 @@ func TestAzureDefaults(t *testing.T) {
 func TestAzureSpecific(t *testing.T) {
 
 	// given
-	aws := AzureInputProvider{
+	azure := AzureInputProvider{
 		MultiZone: true,
 		ProvisioningParameters: internal.ProvisioningParameters{
 			Parameters: internal.ProvisioningParametersDTO{
@@ -50,7 +50,7 @@ func TestAzureSpecific(t *testing.T) {
 	}
 
 	// when
-	values := aws.Provide()
+	values := azure.Provide()
 
 	// then
 
@@ -59,9 +59,9 @@ func TestAzureSpecific(t *testing.T) {
 		DefaultAutoScalerMax: 20,
 		DefaultAutoScalerMin: 3,
 		ZonesCount:           3,
-		Zones:                []string{"1,2,3"},
+		Zones:                []string{"1", "2", "3"},
 		ProviderType:         "azure",
-		DefaultMachineType:   "Standard_D48_v3",
+		DefaultMachineType:   "Standard_D2s_v5",
 		Region:               "uksouth",
 		Purpose:              "production",
 	}, values)
