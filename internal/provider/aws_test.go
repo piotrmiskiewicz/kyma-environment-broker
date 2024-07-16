@@ -42,10 +42,6 @@ func TestAWSSpecific(t *testing.T) {
 		MultiZone: true,
 		ProvisioningParameters: internal.ProvisioningParameters{
 			Parameters: internal.ProvisioningParametersDTO{
-				AutoScalerParameters: internal.AutoScalerParameters{
-					AutoScalerMin: ptr.Integer(5),
-					AutoScalerMax: ptr.Integer(6),
-				},
 				MachineType: ptr.String("m6i.xlarge"),
 				Region:      ptr.String("ap-southeast-1"),
 			},
