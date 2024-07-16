@@ -2,11 +2,12 @@ package provisioning
 
 import (
 	"fmt"
+	"time"
+
 	gardener "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/kyma-project/kyma-environment-broker/internal/process/input"
 	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"time"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
 
