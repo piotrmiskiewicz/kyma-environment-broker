@@ -3,11 +3,12 @@ package provisioning
 import (
 	"context"
 	"fmt"
-	"github.com/pivotal-cf/brokerapi/v8/domain"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/pivotal-cf/brokerapi/v8/domain"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/networking"
 
