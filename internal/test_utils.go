@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"os"
 	"os/exec"
 	"path"
@@ -35,6 +36,8 @@ func NewSchemeForTests(t *testing.T) *k8sruntime.Scheme {
 	err := corev1.AddToScheme(sch)
 	assert.NoError(t, err)
 	err = apiextensionsv1.AddToScheme(sch)
+	assert.NoError(t, err)
+	err = imv1.AddToScheme(sch)
 	assert.NoError(t, err)
 	return sch
 }

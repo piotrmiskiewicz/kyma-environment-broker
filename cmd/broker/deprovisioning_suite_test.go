@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"testing"
 	"time"
 
@@ -111,6 +112,8 @@ func NewDeprovisioningSuite(t *testing.T) *DeprovisioningSuite {
 	assert.NoError(t, err)
 	err = corev1.AddToScheme(scheme)
 	assert.NoError(t, err)
+	err = imv1.AddToScheme(scheme)
+	require.NoError(t, err)
 	fakeK8sSKRClient := fake.NewClientBuilder().WithScheme(scheme).Build()
 
 	sch := internal.NewSchemeForTests(t)
