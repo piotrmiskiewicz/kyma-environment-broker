@@ -1,6 +1,8 @@
 package deprovisioning
 
 import (
+	"testing"
+
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
 	"github.com/kyma-project/kyma-environment-broker/internal/logger"
@@ -8,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"testing"
 )
 
 func TestCheckRuntimeResourceDeletionStep_ResourceNotExists(t *testing.T) {
