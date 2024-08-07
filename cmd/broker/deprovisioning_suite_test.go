@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"testing"
 	"time"
+
+	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 
