@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"os"
 	"os/exec"
 	"path"
@@ -12,6 +11,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
