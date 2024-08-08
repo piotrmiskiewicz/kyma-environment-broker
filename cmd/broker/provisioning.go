@@ -2,8 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/kyma-project/kyma-environment-broker/internal/runtime"
-
+	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
@@ -22,7 +21,7 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 	db storage.BrokerStorage, provisionerClient provisioner.Client, inputFactory input.CreatorForPlan, avsDel *avs.Delegator,
 	internalEvalAssistant *avs.InternalEvalAssistant, externalEvalCreator *provisioning.ExternalEvalCreator,
 	edpClient provisioning.EDPClient, accountProvider hyperscaler.AccountProvider,
-	k8sClientProvider provisioning.K8sClientProvider, cli client.Client, logs logrus.FieldLogger) *process.Queue {
+	k8sClientProvider provisioning.K8sClientProvider, cli client.Client, defaultOIDC internal.OIDCConfigDTO, logs logrus.FieldLogger) *process.Queue {
 
 	trialRegionsMapping, err := provider.ReadPlatformRegionMappingFromFile(cfg.TrialRegionMappingFilePath)
 	if err != nil {
@@ -44,7 +43,6 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 			Once the stage is done it will never be retried.
 	*/
 
-	oidcDefaults, err := runtime.ReadOIDCDefaultValuesFromYAML(cfg.SkrOidcDefaultValuesYAMLFilePath)
 	fatalOnError(err, logs)
 
 	provisioningSteps := []struct {
@@ -102,7 +100,7 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 		// postcondition: operation.KymaResourceName, operation.RuntimeResourceName is set
 		{
 			stage: createRuntimeStageName,
-			step:  provisioning.NewCreateRuntimeResourceStep(db.Operations(), db.Instances(), cli, cfg.Broker.KimConfig, cfg.Provisioner, trialRegionsMapping, cfg.Broker.UseSmallerMachineTypes, oidcDefaults),
+			step:  provisioning.NewCreateRuntimeResourceStep(db.Operations(), db.Instances(), cli, cfg.Broker.KimConfig, cfg.Provisioner, trialRegionsMapping, cfg.Broker.UseSmallerMachineTypes, defaultOIDC),
 		},
 		{
 			stage:     createRuntimeStageName,
