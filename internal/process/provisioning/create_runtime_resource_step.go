@@ -3,6 +3,7 @@ package provisioning
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 	"time"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
@@ -39,10 +40,11 @@ type CreateRuntimeResourceStep struct {
 	config                     input.Config
 	trialPlatformRegionMapping map[string]string
 	useSmallerMachineTypes     bool
+	oidcDefaultValues          internal.OIDCConfigDTO
 }
 
 func NewCreateRuntimeResourceStep(os storage.Operations, is storage.Instances, k8sClient client.Client, kimConfig kim.Config, cfg input.Config,
-	trialPlatformRegionMapping map[string]string, useSmallerMachines bool) *CreateRuntimeResourceStep {
+	trialPlatformRegionMapping map[string]string, useSmallerMachines bool, oidcDefaultValues internal.OIDCConfigDTO) *CreateRuntimeResourceStep {
 	return &CreateRuntimeResourceStep{
 		operationManager:           process.NewOperationManager(os),
 		instanceStorage:            is,
@@ -51,6 +53,7 @@ func NewCreateRuntimeResourceStep(os storage.Operations, is storage.Instances, k
 		config:                     cfg,
 		trialPlatformRegionMapping: trialPlatformRegionMapping,
 		useSmallerMachineTypes:     useSmallerMachines,
+		oidcDefaultValues:          oidcDefaultValues,
 	}
 }
 
@@ -141,6 +144,7 @@ func (s *CreateRuntimeResourceStep) updateRuntimeResourceObject(runtime *imv1.Ru
 	runtime.Spec.Shoot.EnforceSeedLocation = operation.ProvisioningParameters.Parameters.ShootAndSeedSameRegion
 	runtime.Spec.Security = s.createSecurityConfiguration(operation)
 	runtime.Spec.Shoot.Networking = s.createNetworkingConfiguration(operation)
+	runtime.Spec.Shoot.Kubernetes = s.createKubernetesConfiguration(operation)
 	return nil
 }
 
@@ -339,6 +343,45 @@ func (s *CreateRuntimeResourceStep) getEmptyOrExistingRuntimeResource(name, name
 		return nil, err
 	}
 	return &runtime, nil
+}
+
+func (s *CreateRuntimeResourceStep) createKubernetesConfiguration(operation internal.Operation) imv1.Kubernetes {
+	oidc := gardener.OIDCConfig{
+		ClientID:       &s.oidcDefaultValues.ClientID,
+		GroupsClaim:    &s.oidcDefaultValues.GroupsClaim,
+		IssuerURL:      &s.oidcDefaultValues.IssuerURL,
+		SigningAlgs:    s.oidcDefaultValues.SigningAlgs,
+		UsernameClaim:  &s.oidcDefaultValues.UsernameClaim,
+		UsernamePrefix: &s.oidcDefaultValues.UsernamePrefix,
+	}
+	if operation.ProvisioningParameters.Parameters.OIDC != nil {
+		if operation.ProvisioningParameters.Parameters.OIDC.ClientID != "" {
+			oidc.ClientID = &operation.ProvisioningParameters.Parameters.OIDC.ClientID
+		}
+		if operation.ProvisioningParameters.Parameters.OIDC.GroupsClaim != "" {
+			oidc.GroupsClaim = &operation.ProvisioningParameters.Parameters.OIDC.GroupsClaim
+		}
+		if operation.ProvisioningParameters.Parameters.OIDC.IssuerURL != "" {
+			oidc.IssuerURL = &operation.ProvisioningParameters.Parameters.OIDC.IssuerURL
+		}
+		if len(operation.ProvisioningParameters.Parameters.OIDC.SigningAlgs) > 0 {
+			oidc.SigningAlgs = operation.ProvisioningParameters.Parameters.OIDC.SigningAlgs
+		}
+		if operation.ProvisioningParameters.Parameters.OIDC.UsernameClaim != "" {
+			oidc.UsernameClaim = &operation.ProvisioningParameters.Parameters.OIDC.UsernameClaim
+		}
+		if operation.ProvisioningParameters.Parameters.OIDC.UsernamePrefix != "" {
+			oidc.UsernamePrefix = &operation.ProvisioningParameters.Parameters.OIDC.UsernamePrefix
+		}
+	}
+
+	return imv1.Kubernetes{
+		Version: ptr.String(s.config.KubernetesVersion),
+		KubeAPIServer: imv1.APIServer{
+			OidcConfig:           oidc,
+			AdditionalOidcConfig: nil,
+		},
+	}
 }
 
 func DefaultIfParamNotSet[T interface{}](d T, param *T) T {

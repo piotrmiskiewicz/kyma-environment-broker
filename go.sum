@@ -204,6 +204,8 @@ github.com/kyma-project/control-plane/components/schema-migrator v0.0.0-20240612
 github.com/kyma-project/control-plane/components/schema-migrator v0.0.0-20240612080429-83a7c0eb13b8/go.mod h1:vABrhytVuZpchbdlIVdUDlhB/Q/3GIZld2JmdS2rZ6I=
 github.com/kyma-project/infrastructure-manager v0.0.0-20240705113756-2ea9b23b6154 h1:1nE1nmUlhaQAaPA2/p6tcrx6pFJsCKqQzw46OoqI51o=
 github.com/kyma-project/infrastructure-manager v0.0.0-20240705113756-2ea9b23b6154/go.mod h1:VIXFOtvzBYNj9RKB5K4do6loUxp9i9XNEvhqAQIZ5G8=
+github.com/kyma-project/infrastructure-manager v0.0.0-20240806115205-c1fb9fb5968a h1:9AMvbR/9hSumE5WXQ/HAlyRjlScqQU1sVcRolsknHSw=
+github.com/kyma-project/infrastructure-manager v0.0.0-20240806115205-c1fb9fb5968a/go.mod h1:0uJ/bMp2Qq9fTq2CV4PmWXDgPSwGzKKYswhVv/CW0AE=
 github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.1.1/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=

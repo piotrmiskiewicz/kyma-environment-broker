@@ -47,6 +47,58 @@ var defaultNetworking = imv1.Networking{
 	Pods:     networking.DefaultPodsCIDR,
 	Services: networking.DefaultServicesCIDR,
 }
+var defaultOIDSConfig = internal.OIDCConfigDTO{
+	ClientID:       "client-id-default",
+	GroupsClaim:    "gc-default",
+	IssuerURL:      "issuer-url-default",
+	SigningAlgs:    []string{"sa-default"},
+	UsernameClaim:  "uc-default",
+	UsernamePrefix: "up-default",
+}
+
+func TestCreateRuntimeResourceStep_OIDC(t *testing.T) {
+	// given
+	err := imv1.AddToScheme(scheme.Scheme)
+	assert.NoError(t, err)
+	log := logrus.New()
+	memoryStorage := storage.NewMemoryStorage()
+	instance, operation := fixInstanceAndOperation(broker.AzurePlanID, "westeurope", "platform-region")
+	operation.ProvisioningParameters.Parameters.OIDC = &internal.OIDCConfigDTO{
+		ClientID:       "client-id-custom",
+		GroupsClaim:    "gc-custom",
+		IssuerURL:      "issuer-url-custom",
+		SigningAlgs:    []string{"sa-custom"},
+		UsernameClaim:  "uc-custom",
+		UsernamePrefix: "up-custom",
+	}
+	assertInsertions(t, memoryStorage, instance, operation)
+	kimConfig := fixKimConfig("azure", false)
+	inputConfig := input.Config{MultiZoneCluster: true}
+	cli := getClientForTests(t)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
+
+	// when
+	entry := log.WithFields(logrus.Fields{"step": "TEST"})
+	_, repeat, err := step.Run(operation, entry)
+
+	// then
+	assert.NoError(t, err)
+	assert.Zero(t, repeat)
+	runtime := imv1.Runtime{}
+	err = cli.Get(context.Background(), client.ObjectKey{
+		Namespace: "kyma-system",
+		Name:      operation.RuntimeID,
+	}, &runtime)
+	assert.NoError(t, err)
+	assert.Equal(t, gardener.OIDCConfig{
+		ClientID:       ptr.String("client-id-custom"),
+		GroupsClaim:    ptr.String("gc-custom"),
+		IssuerURL:      ptr.String("issuer-url-custom"),
+		SigningAlgs:    []string{"sa-custom"},
+		UsernameClaim:  ptr.String("uc-custom"),
+		UsernamePrefix: ptr.String("up-custom"),
+	}, runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig)
+}
 
 func TestCreateRuntimeResourceStep_Defaults_Azure_MultiZone_YamlOnly(t *testing.T) {
 	// given
@@ -59,7 +111,7 @@ func TestCreateRuntimeResourceStep_Defaults_Azure_MultiZone_YamlOnly(t *testing.
 	kimConfig := fixKimConfig("azure", true)
 	inputConfig := input.Config{MultiZoneCluster: true}
 
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), nil, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), nil, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -99,7 +151,7 @@ func TestCreateRuntimeResourceStep_AllYamls(t *testing.T) {
 			kimConfig := fixKimConfigWithAllPlans(true)
 			inputConfig := input.Config{MultiZoneCluster: testCase.multiZone}
 
-			step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), nil, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), nil, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 			// when
 			entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -129,7 +181,7 @@ func TestCreateRuntimeResourceStep_Defaults_AWS_SingleZone_EnforceSeed_ActualCre
 	inputConfig := input.Config{MultiZoneCluster: false, ControlPlaneFailureTolerance: "zone"}
 
 	cli := getClientForTests(t)
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -179,7 +231,7 @@ func TestCreateRuntimeResourceStep_Defaults_AWS_SingleZone_DefaultAdmin_ActualCr
 	inputConfig := input.Config{MultiZoneCluster: false, ControlPlaneFailureTolerance: "zone"}
 
 	cli := getClientForTests(t)
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -188,47 +240,21 @@ func TestCreateRuntimeResourceStep_Defaults_AWS_SingleZone_DefaultAdmin_ActualCr
 	// then
 	assert.NoError(t, err)
 	assert.Zero(t, repeat)
-
-	runtime := imv1.Runtime{}
-	err = cli.Get(context.Background(), client.ObjectKey{
-		Namespace: "kyma-system",
-		Name:      operation.RuntimeID,
-	}, &runtime)
-	assert.NoError(t, err)
-	assert.Equal(t, runtime.Name, operation.RuntimeID)
-	assert.Equal(t, "runtime-58f8c703-1756-48ab-9299-a847974d1fee", runtime.Labels["operator.kyma-project.io/kyma-name"])
-
-	assertLabelsKIMDriven(t, operation, runtime)
-	assertSecurityWithDefaultAdministrator(t, runtime)
-
-	assert.Equal(t, "aws", runtime.Spec.Shoot.Provider.Type)
-	assert.Equal(t, "eu-west-2", runtime.Spec.Shoot.Region)
-	assert.Equal(t, "production", string(runtime.Spec.Shoot.Purpose))
-	assert.Equal(t, SecretBindingName, runtime.Spec.Shoot.SecretBindingName)
-	assertWorkers(t, runtime.Spec.Shoot.Provider.Workers, "m6i.large", 20, 3, 1, 0, 1, []string{"eu-west-2a", "eu-west-2b", "eu-west-2c"})
-	assert.Equal(t, "zone", string(runtime.Spec.Shoot.ControlPlane.HighAvailability.FailureTolerance.Type))
-	assertDefaultNetworking(t, runtime.Spec.Shoot.Networking)
-
-	_, err = memoryStorage.Instances().GetByID(operation.InstanceID)
-	assert.NoError(t, err)
 }
 
-func TestCreateRuntimeResourceStep_Defaults_AWS_SingleZone_DryRun_ActualCreation(t *testing.T) {
+func TestCreateRuntimeResourceStep_Defaults_AWS_SingleZone_YamlOnly(t *testing.T) {
 	// given
 	log := logrus.New()
 	memoryStorage := storage.NewMemoryStorage()
 
-	err := imv1.AddToScheme(scheme.Scheme)
-
 	instance, operation := fixInstanceAndOperation(broker.AWSPlanID, "eu-west-2", "platform-region")
 	assertInsertions(t, memoryStorage, instance, operation)
 
-	kimConfig := fixKimConfig("aws", false)
-	kimConfig.ViewOnly = true
-	inputConfig := input.Config{MultiZoneCluster: false, ControlPlaneFailureTolerance: "zone"}
+	kimConfig := fixKimConfig("aws", true)
+	inputConfig := input.Config{MultiZoneCluster: false}
 
 	cli := getClientForTests(t)
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -332,7 +358,7 @@ func TestCreateRuntimeResourceStep_Defaults_AWS_MultiZone_ActualCreation(t *test
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: true}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -377,7 +403,7 @@ func TestCreateRuntimeResourceStep_Defaults_Preview_SingleZone_ActualCreation(t 
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: false}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -423,7 +449,7 @@ func TestCreateRuntimeResourceStep_Defaults_Preview_SingleZone_ActualCreation_Wi
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: false}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -489,7 +515,7 @@ func TestCreateRuntimeResourceStep_Defaults_Preview_MultiZone_ActualCreation(t *
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: true}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -534,7 +560,7 @@ func TestCreateRuntimeResourceStep_Defaults_Azure_SingleZone_ActualCreation(t *t
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: false}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -581,7 +607,7 @@ func TestCreateRuntimeResourceStep_Defaults_AzureLite_ActualCreation(t *testing.
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: false}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -628,7 +654,7 @@ func TestCreateRuntimeResourceStep_Defaults_Azure_MultiZone_ActualCreation(t *te
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: true}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -675,7 +701,7 @@ func TestCreateRuntimeResourceStep_Defaults_GCP_SingleZone_ActualCreation(t *tes
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: false}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -722,7 +748,7 @@ func TestCreateRuntimeResourceStep_Defaults_GCP_MultiZone_ActualCreation(t *test
 
 	cli := getClientForTests(t)
 	inputConfig := input.Config{MultiZoneCluster: true}
-	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 	// when
 	entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -779,7 +805,7 @@ func TestCreateRuntimeResourceStep_SapConvergedCloud(t *testing.T) {
 
 			cli := getClientForTests(t)
 			inputConfig := input.Config{MultiZoneCluster: testCase.expectedZonesCount > 1}
-			step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+			step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 			// when
 			entry := log.WithFields(logrus.Fields{"step": "TEST"})
@@ -830,7 +856,7 @@ func TestCreateRuntimeResourceStep_Defaults_Freemium(t *testing.T) {
 
 			cli := getClientForTests(t)
 			inputConfig := input.Config{MultiZoneCluster: true}
-			step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false)
+			step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
 
 			// when
 			entry := log.WithFields(logrus.Fields{"step": "TEST"})

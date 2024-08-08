@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/kyma-project/kyma-environment-broker/internal/runtime"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 
@@ -42,6 +43,9 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 
 			Once the stage is done it will never be retried.
 	*/
+
+	oidcDefaults, err := runtime.ReadOIDCDefaultValuesFromYAML(cfg.SkrOidcDefaultValuesYAMLFilePath)
+	fatalOnError(err, logs)
 
 	provisioningSteps := []struct {
 		disabled  bool
@@ -98,7 +102,7 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 		// postcondition: operation.KymaResourceName, operation.RuntimeResourceName is set
 		{
 			stage: createRuntimeStageName,
-			step:  provisioning.NewCreateRuntimeResourceStep(db.Operations(), db.Instances(), cli, cfg.Broker.KimConfig, cfg.Provisioner, trialRegionsMapping, cfg.Broker.UseSmallerMachineTypes),
+			step:  provisioning.NewCreateRuntimeResourceStep(db.Operations(), db.Instances(), cli, cfg.Broker.KimConfig, cfg.Provisioner, trialRegionsMapping, cfg.Broker.UseSmallerMachineTypes, oidcDefaults),
 		},
 		{
 			stage:     createRuntimeStageName,
