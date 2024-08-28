@@ -4,8 +4,6 @@ Some Kyma Environment Broker (KEB) processes can be configured to deliver differ
 The default configuration must be defined. KEB must recognize this configuration as applicable to all supported plans. You can also set a separate configuration for each plan.
   
 While processing requests, KEB reads the configuration from the ConfigMap that holds data for a given plan.
-> [!NOTE] 
-> Create all configurations in the `kcp-system` namespace.
 
 > [!NOTE] 
 > Currently, only the Kyma custom resource template can be configured.
