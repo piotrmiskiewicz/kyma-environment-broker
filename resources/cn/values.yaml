@@ -59,7 +59,8 @@ lifecycleManager:
     disabled: true
 
 infrastructureManager:
-    disabled: true
+    # when infrastructure is disabled, the GerdenerCluster syncer is disabled as well
+    disabled: false
 
 
 oidc:
