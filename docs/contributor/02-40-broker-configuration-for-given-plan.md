@@ -1,7 +1,4 @@
-# Kyma Environment Broker Configuration for a Given Kyma Version and Plan
-
-> [!NOTE] 
-> This document has been deprecated. Kyma version configuration is not possible.
+# Kyma Environment Broker Configuration for a Given Kyma Plan
 
 Some Kyma Environment Broker (KEB) processes can be configured to deliver different results. KEB needs a ConfigMap with the configuration for a given Kyma plan to process the requests. 
 The default configuration must be defined. KEB must recognize this configuration as applicable to all supported plans. You can also set a separate configuration for each plan.
@@ -11,7 +8,7 @@ While processing requests, KEB reads the configuration from the ConfigMap that h
 > Create all configurations in the `kcp-system` namespace.
 
 > [!NOTE] 
-> Currently, only the Kyma custom resource template and the additional components list can be configured.
+> Currently, only the Kyma custom resource template can be configured.
 
 ## ConfigMap  
 
@@ -50,8 +47,8 @@ data:
 
 You must define a default configuration that is selected when the supported plan key is missing. This means that, for example, if there are no other plan keys under the `data` object, the default configuration applies to all the plans. You do not have to change `tbd` value of `kyma-template.metadata.name` field as KEB generates the name for Kyma CR during provisioning operation.
 
-> [!NOTE] 
-> The `kyma-template` and `additional-components` configurations are required.
+> [!NOTE]
+> The `kyma-template` configuration is required.
 
 See the example of a ConfigMap with the default configuration for Kyma and specific configurations for `plan1`, `plan2`, and `trial` plans:
 
@@ -113,13 +110,6 @@ data:
         - name: btp-operator
         - name: keda
         - name: serverless
-    additional-components:
-      - name: "additional-component2"
-        namespace: "kyma-system"
-      - name: "additional-component3"
-        namespace: "kyma-system"
-        source:
-          url: "https://example.source.url.local/artifacts/additional-component3-0.0.1.tgz"
   trial: |-
     kyma-template: |-
       apiVersion: operator.kyma-project.io/v1beta2
