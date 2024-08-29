@@ -68,9 +68,9 @@ async function getShoot(kcp, shootName) {
     };
   } else {
     expect(objRuntimeGardenerConfig).to.have.nested.
-        property('data[0].status.runtimeConfig.spec.shoot.kubernetes.kubeAPIServer.oidcConfig').not.empty;
+        property('data[0].status.runtimeResource.spec.shoot.kubernetes.kubeAPIServer.oidcConfig').not.empty;
     expect(objRuntimeGardenerConfig).to.have.nested.
-        property('data[0].status.runtimeConfig.spec.shoot.provider.workers[0].machine.type').not.empty;
+        property('data[0].status.runtimeResource.spec.shoot.provider.workers[0].machine.type').not.empty;
     return {
       name: shootName,
       kubeconfig: kubeconfigPath,
