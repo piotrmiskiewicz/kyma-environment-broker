@@ -1,6 +1,7 @@
 package update
 
 import (
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"testing"
 
 	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
@@ -23,7 +24,8 @@ func TestUpgradeShootStep_Run(t *testing.T) {
 	os := memoryStorage.Operations()
 	rs := memoryStorage.RuntimeStates()
 	cli := provisioner.NewFakeClient()
-	step := NewUpgradeShootStep(os, rs, cli)
+	kcpClient := fake.NewClientBuilder().Build()
+	step := NewUpgradeShootStep(os, rs, cli, kcpClient)
 	operation := fixture.FixUpdatingOperation("op-id", "inst-id")
 	operation.RuntimeID = "runtime-id"
 	operation.ProvisionerOperationID = ""
