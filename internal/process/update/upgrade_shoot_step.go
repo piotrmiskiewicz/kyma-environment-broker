@@ -3,9 +3,10 @@ package update
 import (
 	"context"
 	"fmt"
+	"time"
+
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"time"
 
 	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 	"github.com/kyma-project/kyma-environment-broker/internal"

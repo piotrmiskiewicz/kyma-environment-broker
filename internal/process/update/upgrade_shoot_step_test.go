@@ -1,8 +1,9 @@
 package update
 
 import (
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"testing"
+
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 	"github.com/kyma-project/kyma-environment-broker/internal"

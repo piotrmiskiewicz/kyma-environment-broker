@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
 	"strconv"
 	"testing"
 
@@ -61,7 +62,8 @@ func TestUpdateRuntimeStep_RunUpdateMachineType(t *testing.T) {
 	assert.Zero(t, backoff)
 
 	var gotRuntime imv1.Runtime
-	kcpClient.Get(context.Background(), client.ObjectKey{Name: operation.RuntimeResourceName, Namespace: "kcp-system"}, &gotRuntime)
+	err = kcpClient.Get(context.Background(), client.ObjectKey{Name: operation.RuntimeResourceName, Namespace: "kcp-system"}, &gotRuntime)
+	require.NoError(t, err)
 	assert.Equal(t, "new-machine-type", gotRuntime.Spec.Shoot.Provider.Workers[0].Machine.Type)
 
 }
