@@ -2,6 +2,9 @@ package update
 
 import (
 	"context"
+	"strconv"
+	"testing"
+
 	gardener "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"github.com/kyma-project/kyma-environment-broker/internal"
@@ -13,8 +16,6 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"strconv"
-	"testing"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
