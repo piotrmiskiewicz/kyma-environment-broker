@@ -51,7 +51,8 @@ func (s *UpdateRuntimeStep) Run(operation internal.Operation, log logrus.FieldLo
 		runtime.Spec.Shoot.Provider.Workers[0].Maximum = int32(*operation.UpdatingParameters.AutoScalerMax)
 	}
 	if operation.UpdatingParameters.MaxSurge != nil {
-		runtime.Spec.Shoot.Provider.Workers[0].Maximum = int32(*operation.UpdatingParameters.MaxSurge)
+		v := intstr.FromInt32(int32(*operation.UpdatingParameters.MaxSurge))
+		runtime.Spec.Shoot.Provider.Workers[0].MaxSurge = &v
 	}
 	if operation.UpdatingParameters.MaxUnavailable != nil {
 		v := intstr.FromInt32(int32(*operation.UpdatingParameters.MaxUnavailable))
