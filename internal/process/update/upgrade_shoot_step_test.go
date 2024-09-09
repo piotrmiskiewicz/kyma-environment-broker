@@ -1,6 +1,8 @@
 package update
 
 import (
+	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
+	"k8s.io/client-go/kubernetes/scheme"
 	"testing"
 
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -21,6 +23,8 @@ import (
 
 func TestUpgradeShootStep_Run(t *testing.T) {
 	// given
+	err := imv1.AddToScheme(scheme.Scheme)
+	assert.NoError(t, err)
 	memoryStorage := storage.NewMemoryStorage()
 	os := memoryStorage.Operations()
 	rs := memoryStorage.RuntimeStates()
@@ -40,7 +44,7 @@ func TestUpgradeShootStep_Run(t *testing.T) {
 		UsernamePrefix: "-",
 	}
 	operation.InputCreator = fixInputCreator(t)
-	err := os.InsertOperation(operation.Operation)
+	err = os.InsertOperation(operation.Operation)
 	require.NoError(t, err)
 	runtimeState := fixture.FixRuntimeState("runtime-id", "runtime-id", "provisioning-op-1")
 	runtimeState.ClusterConfig.OidcConfig = &gqlschema.OIDCConfigInput{
@@ -82,6 +86,8 @@ func TestUpgradeShootStep_Run(t *testing.T) {
 
 func TestUpgradeShootStep_RunRuntimeControlledByKIM(t *testing.T) {
 	// given
+	err := imv1.AddToScheme(scheme.Scheme)
+	assert.NoError(t, err)
 	memoryStorage := storage.NewMemoryStorage()
 	os := memoryStorage.Operations()
 	rs := memoryStorage.RuntimeStates()
@@ -90,6 +96,7 @@ func TestUpgradeShootStep_RunRuntimeControlledByKIM(t *testing.T) {
 	step := NewUpgradeShootStep(os, rs, cli, kcpClient)
 	operation := fixture.FixUpdatingOperation("op-id", "inst-id")
 	operation.RuntimeID = "runtime-id"
+	operation.KymaResourceNamespace = "kcp-system"
 	operation.ProvisionerOperationID = ""
 	operation.ProvisioningParameters.ErsContext.UserID = "test-user-id"
 	operation.ProvisioningParameters.Parameters.OIDC = &internal.OIDCConfigDTO{
@@ -101,7 +108,7 @@ func TestUpgradeShootStep_RunRuntimeControlledByKIM(t *testing.T) {
 		UsernamePrefix: "-",
 	}
 	operation.InputCreator = fixInputCreator(t)
-	err := os.InsertOperation(operation.Operation)
+	err = os.InsertOperation(operation.Operation)
 	require.NoError(t, err)
 	runtimeState := fixture.FixRuntimeState("runtime-id", "runtime-id", "provisioning-op-1")
 	runtimeState.ClusterConfig.OidcConfig = &gqlschema.OIDCConfigInput{
@@ -121,23 +128,6 @@ func TestUpgradeShootStep_RunRuntimeControlledByKIM(t *testing.T) {
 	// then
 	require.NoError(t, err)
 	assert.Zero(t, d)
-	assert.True(t, cli.IsShootUpgraded("runtime-id"))
-	req, _ := cli.LastShootUpgrade("runtime-id")
-	disabled := false
-	assert.Equal(t, gqlschema.UpgradeShootInput{
-		GardenerConfig: &gqlschema.GardenerUpgradeInput{
-			OidcConfig: &gqlschema.OIDCConfigInput{
-				ClientID:       "client-id",
-				GroupsClaim:    "groups",
-				IssuerURL:      "https://issuer.url",
-				SigningAlgs:    []string{"RSA256"},
-				UsernameClaim:  "sub",
-				UsernamePrefix: "-",
-			},
-			ShootNetworkingFilterDisabled: &disabled,
-		},
-		Administrators: []string{"test-user-id"},
-	}, req)
 	assert.Empty(t, newOperation.ProvisionerOperationID)
 }
 
