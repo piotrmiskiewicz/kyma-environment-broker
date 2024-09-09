@@ -47,7 +47,7 @@ func (s *CheckStep) Run(operation internal.Operation, log logrus.FieldLogger) (i
 func (s *CheckStep) checkRuntimeStatus(operation internal.Operation, log logrus.FieldLogger) (internal.Operation, time.Duration, error) {
 	if operation.ProvisionerOperationID == "" {
 		// it can happen, when only KIM is involved in the process
-		log.Infof("Provisioner operation ID is empty, skippikng")
+		log.Infof("Provisioner operation ID is empty, skipping")
 		return operation, 0, nil
 	}
 
