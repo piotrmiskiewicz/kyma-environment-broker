@@ -1,9 +1,10 @@
 package update
 
 import (
+	"testing"
+
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"k8s.io/client-go/kubernetes/scheme"
-	"testing"
 
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 

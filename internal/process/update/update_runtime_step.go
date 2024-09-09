@@ -2,8 +2,9 @@ package update
 
 import (
 	"context"
-	"github.com/kyma-project/kyma-environment-broker/internal/process/provisioning"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/process/provisioning"
 
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"github.com/kyma-project/kyma-environment-broker/internal"
