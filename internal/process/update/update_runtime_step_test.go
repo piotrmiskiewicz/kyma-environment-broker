@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"strconv"
 	"testing"
 
@@ -70,6 +71,8 @@ func TestUpdateRuntimeStep_RunUpdateMachineType(t *testing.T) {
 }
 
 func fixRuntimeResource(name string, controlledByProvisioner bool) runtime.Object {
+	maxSurge := intstr.FromInt32(1)
+	maxUnavailable := intstr.FromInt32(0)
 	return &imv1.Runtime{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
@@ -86,6 +89,8 @@ func fixRuntimeResource(name string, controlledByProvisioner bool) runtime.Objec
 							Machine: gardener.Machine{
 								Type: "original-type",
 							},
+							MaxSurge:       &maxSurge,
+							MaxUnavailable: &maxUnavailable,
 						},
 					},
 				},
