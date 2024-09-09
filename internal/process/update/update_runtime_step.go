@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"github.com/kyma-project/kyma-environment-broker/internal/process/provisioning"
 	"time"
 
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
@@ -42,23 +43,15 @@ func (s *UpdateRuntimeStep) Run(operation internal.Operation, log logrus.FieldLo
 	}
 
 	// Update the runtime
-	if operation.UpdatingParameters.MachineType != nil {
-		runtime.Spec.Shoot.Provider.Workers[0].Machine.Type = *operation.UpdatingParameters.MachineType
-	}
-	if operation.UpdatingParameters.AutoScalerMin != nil {
-		runtime.Spec.Shoot.Provider.Workers[0].Minimum = int32(*operation.UpdatingParameters.AutoScalerMin)
-	}
-	if operation.UpdatingParameters.AutoScalerMax != nil {
-		runtime.Spec.Shoot.Provider.Workers[0].Maximum = int32(*operation.UpdatingParameters.AutoScalerMax)
-	}
-	if operation.UpdatingParameters.MaxSurge != nil {
-		v := intstr.FromInt32(int32(*operation.UpdatingParameters.MaxSurge))
-		runtime.Spec.Shoot.Provider.Workers[0].MaxSurge = &v
-	}
-	if operation.UpdatingParameters.MaxUnavailable != nil {
-		v := intstr.FromInt32(int32(*operation.UpdatingParameters.MaxUnavailable))
-		runtime.Spec.Shoot.Provider.Workers[0].MaxUnavailable = &v
-	}
+
+	runtime.Spec.Shoot.Provider.Workers[0].Machine.Type = provisioning.DefaultIfParamNotSet(runtime.Spec.Shoot.Provider.Workers[0].Machine.Type, operation.UpdatingParameters.MachineType)
+	runtime.Spec.Shoot.Provider.Workers[0].Minimum = int32(provisioning.DefaultIfParamNotSet(int(runtime.Spec.Shoot.Provider.Workers[0].Minimum), operation.UpdatingParameters.AutoScalerMin))
+	runtime.Spec.Shoot.Provider.Workers[0].Maximum = int32(provisioning.DefaultIfParamNotSet(int(runtime.Spec.Shoot.Provider.Workers[0].Maximum), operation.UpdatingParameters.AutoScalerMax))
+	maxSurge := intstr.FromInt32(int32(provisioning.DefaultIfParamNotSet(runtime.Spec.Shoot.Provider.Workers[0].MaxSurge.IntValue(), operation.UpdatingParameters.MaxSurge)))
+	runtime.Spec.Shoot.Provider.Workers[0].MaxSurge = &maxSurge
+	maxUnavailable := intstr.FromInt32(int32(provisioning.DefaultIfParamNotSet(runtime.Spec.Shoot.Provider.Workers[0].MaxUnavailable.IntValue(), operation.UpdatingParameters.MaxUnavailable)))
+	runtime.Spec.Shoot.Provider.Workers[0].MaxUnavailable = &maxUnavailable
+
 	if operation.UpdatingParameters.OIDC != nil {
 		input := operation.UpdatingParameters.OIDC
 		if len(input.SigningAlgs) > 0 {
