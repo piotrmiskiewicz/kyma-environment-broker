@@ -74,7 +74,18 @@ func (s *UpdateRuntimeStep) Run(operation internal.Operation, log logrus.FieldLo
 		if input.UsernameClaim != "" {
 			runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig.UsernameClaim = &input.UsernameClaim
 		}
+	}
 
+	if len(operation.UpdatingParameters.RuntimeAdministrators) > 0 {
+		runtime.Spec.Security.Administrators = operation.UpdatingParameters.RuntimeAdministrators
+	} else {
+		if operation.ProvisioningParameters.ErsContext.UserID != "" {
+			// get default admin (user_id from provisioning operation)
+			runtime.Spec.Security.Administrators = []string{operation.ProvisioningParameters.ErsContext.UserID}
+		} else {
+			// some old clusters does not have an user_id
+			runtime.Spec.Security.Administrators = []string{}
+		}
 	}
 
 	err = s.k8sClient.Update(context.Background(), &runtime)
