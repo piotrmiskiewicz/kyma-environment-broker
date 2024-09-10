@@ -11,6 +11,7 @@ import (
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"gopkg.in/yaml.v2"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 type Config struct {
@@ -48,7 +49,7 @@ func (b *Builder) BuildFromAdminKubeconfig(instance *internal.Instance, adminKub
 		return "", fmt.Errorf("RuntimeID must not be empty")
 	}
 	issuerURL, clientID, err := b.getOidcDataFromRuntimeResource(instance.RuntimeID)
-	if IsNotFound(err) {
+	if errors.IsNotFound(err) {
 		issuerURL, clientID, err = b.getOidcDataFromProvisioner(instance)
 	}
 	if err != nil {
