@@ -90,7 +90,7 @@ func TestBuilder_BuildFromRuntimeResource(t *testing.T) {
 	assert.NoError(t, err)
 	kcpClient := fake.NewClientBuilder().Build()
 
-	t.Run("new kubeconfig was build properly", func(t *testing.T) {
+	t.Run("new kubeconfig was built properly", func(t *testing.T) {
 		// given
 		provisionerClient := &automock.Client{}
 		provisionerClient.On("RuntimeStatus", globalAccountID, runtimeID).Return(schema.RuntimeStatus{
