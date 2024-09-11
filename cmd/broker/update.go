@@ -46,7 +46,7 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 			condition: update.SkipForOwnClusterPlan,
 		},
 		{
-			stage:     createRuntimeStageName,
+			stage:     "check_runtime_resource",
 			step:      steps.NewCheckRuntimeResourceStep(db.Operations(), cli, cfg.Broker.KimConfig, cfg.Provisioner.RuntimeResourceStepTimeout),
 			condition: update.SkipForOwnClusterPlan,
 		},
