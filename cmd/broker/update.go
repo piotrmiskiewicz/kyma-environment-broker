@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
 	"time"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/event"
@@ -42,6 +43,11 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 		{
 			stage:     "runtime_resource",
 			step:      update.NewUpdateRuntimeStep(db.Operations(), cli),
+			condition: update.SkipForOwnClusterPlan,
+		},
+		{
+			stage:     createRuntimeStageName,
+			step:      steps.NewCheckRuntimeResourceStep(db.Operations(), cli, cfg.Broker.KimConfig, cfg.Provisioner.RuntimeResourceStepTimeout),
 			condition: update.SkipForOwnClusterPlan,
 		},
 	}
