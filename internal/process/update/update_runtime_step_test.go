@@ -2,9 +2,10 @@ package update
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"strconv"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/stretchr/testify/require"
 
