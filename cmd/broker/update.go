@@ -19,7 +19,7 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 	provisionerClient provisioner.Client, publisher event.Publisher,
 	cfg Config, k8sClientProvider K8sClientProvider, cli client.Client, logs logrus.FieldLogger) *process.Queue {
 
-	manager.DefineStages([]string{"cluster", "btp-operator", "btp-operator-check", "check", "runtime_resource"})
+	manager.DefineStages([]string{"cluster", "btp-operator", "btp-operator-check", "check", "runtime_resource", "check_runtime_resource"})
 	updateSteps := []struct {
 		disabled  bool
 		stage     string
