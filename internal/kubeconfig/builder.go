@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"text/template"
+
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"github.com/kyma-project/kyma-environment-broker/internal/provisioner"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"text/template"
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"gopkg.in/yaml.v2"

@@ -2,11 +2,12 @@ package kubeconfig
 
 import (
 	"fmt"
+	"testing"
+
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"testing"
 
 	schema "github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 	"github.com/kyma-project/kyma-environment-broker/internal"
