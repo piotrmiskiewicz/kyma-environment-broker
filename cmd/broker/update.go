@@ -42,7 +42,7 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 		},
 		{
 			stage:     "runtime_resource",
-			step:      update.NewUpdateRuntimeStep(db.Operations(), cli),
+			step:      update.NewUpdateRuntimeStep(db.Operations(), cli, cfg.UpdateRuntimeResourceDelay),
 			condition: update.SkipForOwnClusterPlan,
 		},
 		{
