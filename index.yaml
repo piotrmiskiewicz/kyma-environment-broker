@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   keb:
   - apiVersion: v2
+    appVersion: 1.8.44
+    created: "2024-09-11T14:09:25.44573307Z"
+    description: Kyma Environment Broker Helm chart for Kubernetes
+    digest: fc53feb6a1cc29876e0d4e6c35cb23a9dfc50400f72695e402ff089fed2102ae
+    name: keb
+    type: application
+    urls:
+    - https://github.com/kyma-project/kyma-environment-broker/releases/download/1.8.44/keb-1.8.44.tgz
+    version: 1.8.44
+  - apiVersion: v2
     appVersion: 1.8.43
     created: "2024-09-11T10:29:45.589410985Z"
     description: Kyma Environment Broker Helm chart for Kubernetes
@@ -991,4 +1001,4 @@ entries:
     urls:
     - https://github.com/kyma-project/kyma-environment-broker/releases/download/1.2.6/keb-1.2.6.tgz
     version: 1.2.6
-generated: "2024-09-11T10:29:45.586146145Z"
+generated: "2024-09-11T14:09:25.443360067Z"
