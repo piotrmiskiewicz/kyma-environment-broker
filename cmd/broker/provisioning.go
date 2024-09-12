@@ -125,6 +125,7 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 		{
 			stage: postActionsStageName,
 			step:  provisioning.NewExternalEvalStep(externalEvalCreator),
+			disabled: cfg.Avs.Disabled,
 		},
 		{
 			stage:    postActionsStageName,
