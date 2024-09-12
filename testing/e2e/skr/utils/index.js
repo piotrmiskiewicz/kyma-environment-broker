@@ -312,6 +312,7 @@ async function getKymaAdminBindings() {
 
 async function findKymaAdminBindingForUser(targetUser) {
   const kymaAdminBindings = await getKymaAdminBindings();
+  console.log(kymaAdminBindings);
   return kymaAdminBindings.find(
       (binding) => binding.users.indexOf(targetUser) >= 0,
   );
