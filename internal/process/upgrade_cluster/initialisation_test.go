@@ -9,7 +9,6 @@ import (
 	"github.com/kyma-project/kyma-environment-broker/internal/process/upgrade_cluster/automock"
 
 	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
-	"github.com/kyma-project/kyma-environment-broker/internal/avs"
 	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
 	"github.com/kyma-project/kyma-environment-broker/internal/notification"
 	notificationAutomock "github.com/kyma-project/kyma-environment-broker/internal/notification/mocks"
@@ -43,99 +42,6 @@ const (
 
 type fixHyperscalerInputProvider interface {
 	Defaults() *gqlschema.ClusterConfigInput
-}
-
-func createMonitors(t *testing.T, client *avs.Client, internalStatus string, externalStatus string) internal.AvsLifecycleData {
-	// monitors
-	var (
-		operationInternalId int64
-		operationExternalId int64
-	)
-
-	// internal
-	inMonitor, err := client.CreateEvaluation(&avs.BasicEvaluationCreateRequest{
-		Name: "internal monitor",
-	})
-	require.NoError(t, err)
-	operationInternalId = inMonitor.Id
-
-	if avs.ValidStatus(internalStatus) {
-		_, err = client.SetStatus(inMonitor.Id, internalStatus)
-		require.NoError(t, err)
-	}
-
-	// external
-	exMonitor, err := client.CreateEvaluation(&avs.BasicEvaluationCreateRequest{
-		Name: "external monitor",
-	})
-	require.NoError(t, err)
-	operationExternalId = exMonitor.Id
-
-	if avs.ValidStatus(externalStatus) {
-		_, err = client.SetStatus(exMonitor.Id, externalStatus)
-		require.NoError(t, err)
-	}
-
-	// return AvsLifecycleData
-	avsData := internal.AvsLifecycleData{
-		AvsEvaluationInternalId: operationInternalId,
-		AVSEvaluationExternalId: operationExternalId,
-		AvsInternalEvaluationStatus: internal.AvsEvaluationStatus{
-			Current:  internalStatus,
-			Original: "",
-		},
-		AvsExternalEvaluationStatus: internal.AvsEvaluationStatus{
-			Current:  externalStatus,
-			Original: "",
-		},
-		AVSInternalEvaluationDeleted: false,
-		AVSExternalEvaluationDeleted: false,
-	}
-
-	return avsData
-}
-
-func createEvalManagerWithValidity(t *testing.T, storage storage.BrokerStorage, log *logrus.Logger, valid bool) (*avs.EvaluationManager, *avs.Client) {
-	server := avs.NewMockAvsServer(t)
-	mockServer := avs.FixMockAvsServer(server)
-	client, err := avs.NewClient(context.TODO(), avs.Config{
-		OauthTokenEndpoint: fmt.Sprintf("%s/oauth/token", mockServer.URL),
-		ApiEndpoint:        fmt.Sprintf("%s/api/v2/evaluationmetadata", mockServer.URL),
-	}, logrus.New())
-	require.NoError(t, err)
-
-	if !valid {
-		client, err = avs.NewClient(context.TODO(), avs.Config{}, logrus.New())
-	}
-	require.NoError(t, err)
-
-	avsDel := avs.NewDelegator(client, avs.Config{}, storage.Operations())
-	upgradeEvalManager := avs.NewEvaluationManager(avsDel, avs.Config{})
-
-	return upgradeEvalManager, client
-}
-
-func createEvalManager(t *testing.T, storage storage.BrokerStorage, log *logrus.Logger) (*avs.EvaluationManager, *avs.Client) {
-	return createEvalManagerWithValidity(t, storage, log, true)
-}
-
-func createEvalManagerWithMaintenanceModeConfig(t *testing.T, storage storage.BrokerStorage, maintenanceModeDisabled bool,
-	maintenanceModeAlwaysDisabledGAIDs []string) (*avs.EvaluationManager, *avs.Client) {
-	server := avs.NewMockAvsServer(t)
-	mockServer := avs.FixMockAvsServer(server)
-	client, err := avs.NewClient(context.TODO(), avs.Config{
-		OauthTokenEndpoint: fmt.Sprintf("%s/oauth/token", mockServer.URL),
-		ApiEndpoint:        fmt.Sprintf("%s/api/v2/evaluationmetadata", mockServer.URL),
-	}, logrus.New())
-	require.NoError(t, err)
-
-	avsDel := avs.NewDelegator(client, avs.Config{}, storage.Operations())
-	upgradeEvalManager := avs.NewEvaluationManager(avsDel, avs.Config{
-		MaintenanceModeDuringUpgradeDisabled:            maintenanceModeDisabled,
-		MaintenanceModeDuringUpgradeAlwaysDisabledGAIDs: maintenanceModeAlwaysDisabledGAIDs,
-	})
-
-	return upgradeEvalManager, client
 }
 
 func TestInitialisationStep_Run(t *testing.T) {

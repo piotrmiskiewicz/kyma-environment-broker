@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
-	"github.com/kyma-project/kyma-environment-broker/internal/avs"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
 	automock2 "github.com/kyma-project/kyma-environment-broker/internal/process/input/automock"
