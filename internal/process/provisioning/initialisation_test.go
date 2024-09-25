@@ -1,9 +1,6 @@
 package provisioning
 
 import (
-	"testing"
-	"time"
-
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
@@ -12,6 +9,7 @@ import (
 	"github.com/pivotal-cf/brokerapi/v8/domain"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 const (
@@ -86,42 +84,4 @@ func fixInstanceRuntimeStatus() internal.Instance {
 	instance.GlobalAccountID = statusGlobalAccountID
 
 	return instance
-}
-
-func fixAvsEvaluation() *avs.BasicEvaluationCreateResponse {
-	return &avs.BasicEvaluationCreateResponse{
-		DefinitionType:   "av",
-		Name:             "fake-internal-eval",
-		Description:      "",
-		Service:          "",
-		URL:              "",
-		CheckType:        "",
-		Interval:         180,
-		TesterAccessId:   int64(999),
-		Timeout:          30000,
-		ReadOnly:         false,
-		ContentCheck:     "",
-		ContentCheckType: "",
-		Threshold:        30000,
-		GroupId:          int64(4321),
-		Visibility:       "PUBLIC",
-		DateCreated:      time.Now().Unix(),
-		DateChanged:      time.Now().Unix(),
-		Owner:            "johndoe@xyz.corp",
-		Status:           "ACTIVE",
-		Alerts:           nil,
-		Tags: []*avs.Tag{
-			{
-				Content:      "already-exist-tag",
-				TagClassId:   123456,
-				TagClassName: "already-exist-tag-classname",
-			},
-		},
-		Id:                         fixAvsEvaluationInternalId,
-		LegacyCheckId:              fixAvsEvaluationInternalId,
-		InternalInterval:           60,
-		AuthType:                   "AUTH_NONE",
-		IndividualOutageEventsOnly: false,
-		IdOnTester:                 "",
-	}
 }
