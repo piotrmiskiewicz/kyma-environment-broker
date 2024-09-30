@@ -3,6 +3,7 @@ package broker
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -12,12 +13,16 @@ import (
 
 	"github.com/kyma-incubator/compass/components/director/pkg/jsonschema"
 	"github.com/kyma-project/kyma-environment-broker/internal/euaccess"
+	"github.com/kyma-project/kyma-environment-broker/internal/k8s"
 	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/google/uuid"
 	"github.com/pivotal-cf/brokerapi/v8/domain"
 	"github.com/pivotal-cf/brokerapi/v8/domain/apiresponses"
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
@@ -35,12 +40,13 @@ type UpdateEndpoint struct {
 	config Config
 	log    logrus.FieldLogger
 
-	instanceStorage           storage.Instances
-	runtimeStates             storage.RuntimeStates
-	contextUpdateHandler      ContextUpdateHandler
-	brokerURL                 string
-	processingEnabled         bool
-	subAccountMovementEnabled bool
+	instanceStorage                          storage.Instances
+	runtimeStates                            storage.RuntimeStates
+	contextUpdateHandler                     ContextUpdateHandler
+	brokerURL                                string
+	processingEnabled                        bool
+	subaccountMovementEnabled                bool
+	updateCustomResourcesLabelsOnAccountMove bool
 
 	operationStorage storage.Operations
 
@@ -53,6 +59,8 @@ type UpdateEndpoint struct {
 	kcBuilder       kubeconfig.KcBuilder
 
 	convergedCloudRegionsProvider ConvergedCloudRegionProvider
+
+	kcpClient client.Client
 }
 
 func NewUpdate(cfg Config,
@@ -61,7 +69,8 @@ func NewUpdate(cfg Config,
 	operationStorage storage.Operations,
 	ctxUpdateHandler ContextUpdateHandler,
 	processingEnabled bool,
-	subAccountMovementEnabled bool,
+	subaccountMovementEnabled bool,
+	updateCustomResourcesLabelsOnAccountMove bool,
 	queue Queue,
 	plansConfig PlansConfig,
 	planDefaults PlanDefaults,
@@ -69,22 +78,25 @@ func NewUpdate(cfg Config,
 	dashboardConfig dashboard.Config,
 	kcBuilder kubeconfig.KcBuilder,
 	convergedCloudRegionsProvider ConvergedCloudRegionProvider,
+	kcpClient client.Client,
 ) *UpdateEndpoint {
 	return &UpdateEndpoint{
-		config:                        cfg,
-		log:                           log.WithField("service", "UpdateEndpoint"),
-		instanceStorage:               instanceStorage,
-		runtimeStates:                 runtimeStates,
-		operationStorage:              operationStorage,
-		contextUpdateHandler:          ctxUpdateHandler,
-		processingEnabled:             processingEnabled,
-		subAccountMovementEnabled:     subAccountMovementEnabled,
-		updatingQueue:                 queue,
-		plansConfig:                   plansConfig,
-		planDefaults:                  planDefaults,
-		dashboardConfig:               dashboardConfig,
-		kcBuilder:                     kcBuilder,
-		convergedCloudRegionsProvider: convergedCloudRegionsProvider,
+		config:                                   cfg,
+		log:                                      log.WithField("service", "UpdateEndpoint"),
+		instanceStorage:                          instanceStorage,
+		runtimeStates:                            runtimeStates,
+		operationStorage:                         operationStorage,
+		contextUpdateHandler:                     ctxUpdateHandler,
+		processingEnabled:                        processingEnabled,
+		subaccountMovementEnabled:                subaccountMovementEnabled,
+		updateCustomResourcesLabelsOnAccountMove: updateCustomResourcesLabelsOnAccountMove,
+		updatingQueue:                            queue,
+		plansConfig:                              plansConfig,
+		planDefaults:                             planDefaults,
+		dashboardConfig:                          dashboardConfig,
+		kcBuilder:                                kcBuilder,
+		convergedCloudRegionsProvider:            convergedCloudRegionsProvider,
+		kcpClient:                                kcpClient,
 	}
 }
 
@@ -113,23 +125,14 @@ func (b *UpdateEndpoint) Update(_ context.Context, instanceID string, details do
 	}
 	logger.Infof("Global account ID: %s active: %s", instance.GlobalAccountID, ptr.BoolAsString(ersContext.Active))
 	logger.Infof("Received context: %s", marshallRawContext(hideSensitiveDataFromRawContext(details.RawContext)))
-
 	// validation of incoming input
 	if err := b.validateWithJsonSchemaValidator(details, instance); err != nil {
 		return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, "validation failed")
 	}
 
 	if instance.IsExpired() {
-		if b.config.AllowUpdateExpiredInstanceWithContext {
-			// if only ersContext is pass, we respond with success for already expired instance, serviceID is exception as it is required by OSB API
-			onlyContextSet := (details.RawContext != nil && len(details.RawContext) > 0) &&
-				((details.RawParameters == nil || len(details.RawParameters) == 0) &&
-					details.PlanID == "" &&
-					details.MaintenanceInfo == nil &&
-					details.PreviousValues == domain.PreviousValues{})
-			if onlyContextSet {
-				return domain.UpdateServiceSpec{}, nil
-			}
+		if b.config.AllowUpdateExpiredInstanceWithContext && ersContext.GlobalAccountID != "" {
+			return domain.UpdateServiceSpec{}, nil
 		}
 		return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(fmt.Errorf("cannot update an expired instance"), http.StatusBadRequest, "")
 	}
@@ -353,22 +356,30 @@ func (b *UpdateEndpoint) processContext(instance *internal.Instance, details dom
 		instance.Parameters.ErsContext.Active = ersContext.Active
 	}
 
-	if b.subAccountMovementEnabled {
-		if instance.GlobalAccountID != ersContext.GlobalAccountID && ersContext.GlobalAccountID != "" {
-			if instance.SubscriptionGlobalAccountID == "" {
-				instance.SubscriptionGlobalAccountID = instance.GlobalAccountID
-			}
-			instance.GlobalAccountID = ersContext.GlobalAccountID
+	needUpdateCustomResources := false
+	if b.subaccountMovementEnabled && (instance.GlobalAccountID != ersContext.GlobalAccountID && ersContext.GlobalAccountID != "") {
+		if instance.SubscriptionGlobalAccountID == "" {
+			instance.SubscriptionGlobalAccountID = instance.GlobalAccountID
 		}
-
+		instance.GlobalAccountID = ersContext.GlobalAccountID
+		needUpdateCustomResources = true
+		logger.Infof("Global account ID changed to: %s. need update labels", instance.GlobalAccountID)
 	}
 
 	newInstance, err := b.instanceStorage.Update(*instance)
 	if err != nil {
 		logger.Errorf("processing context updated failed: %s", err.Error())
 		return nil, changed, fmt.Errorf("unable to process the update")
-	} else {
-		logger.Infof("subAccount movement done for instance: %s", instance.InstanceID)
+	} else if b.updateCustomResourcesLabelsOnAccountMove && needUpdateCustomResources {
+		logger.Info("updating labels on related CRs")
+		// update labels on related CRs, but only if account movement was successfully persisted and kept in database
+		err = b.updateLabels(newInstance.RuntimeID, newInstance.GlobalAccountID)
+		if err != nil {
+			logger.Errorf("unable to update global account label on CRs while doing account move: %s", err.Error())
+			response := apiresponses.NewFailureResponse(fmt.Errorf("Update CRs label failed"), http.StatusInternalServerError, err.Error())
+			return newInstance, changed, response
+		}
+		logger.Info("labels updated")
 	}
 
 	return newInstance, changed, nil
@@ -396,4 +407,39 @@ func (b *UpdateEndpoint) getJsonSchemaValidator(provider internal.CloudProvider,
 	schema := string(Marshal(plan.Schemas.Instance.Update.Parameters))
 
 	return jsonschema.NewValidatorFromStringSchema(schema)
+}
+
+func (b *UpdateEndpoint) updateLabels(id, newGlobalAccountId string) error {
+	kymaErr := b.updateCrLabel(id, k8s.KymaCr, newGlobalAccountId)
+	gardenerClusterErr := b.updateCrLabel(id, k8s.GardenerClusterCr, newGlobalAccountId)
+	runtimeErr := b.updateCrLabel(id, k8s.RuntimeCr, newGlobalAccountId)
+	err := errors.Join(kymaErr, gardenerClusterErr, runtimeErr)
+	return err
+}
+
+func (b *UpdateEndpoint) updateCrLabel(id, crName, newGlobalAccountId string) error {
+	b.log.Infof("update labels starting for runtime %s for %s cr with new value %s", id, crName, newGlobalAccountId)
+	gvk, err := k8s.GvkByName(crName)
+	if err != nil {
+		return fmt.Errorf("while getting gvk for name: %s: %s", crName, err.Error())
+	}
+
+	var k8sObject unstructured.Unstructured
+	k8sObject.SetGroupVersionKind(gvk)
+	err = b.kcpClient.Get(context.Background(), types.NamespacedName{Namespace: KcpNamespace, Name: id}, &k8sObject)
+	if err != nil {
+		return fmt.Errorf("while getting k8s object of type %s from kcp cluster for instance %s, due to: %s", crName, id, err.Error())
+	}
+
+	err = k8s.AddOrOverrideMetadata(&k8sObject, k8s.GlobalAccountIdLabel, newGlobalAccountId)
+	if err != nil {
+		return fmt.Errorf("while adding or overriding label (new=%s) for k8s object %s %s, because: %s", newGlobalAccountId, id, crName, err.Error())
+	}
+
+	err = b.kcpClient.Update(context.Background(), &k8sObject)
+	if err != nil {
+		return fmt.Errorf("while updating k8s object %s %s, because: %s", id, crName, err.Error())
+	}
+
+	return nil
 }

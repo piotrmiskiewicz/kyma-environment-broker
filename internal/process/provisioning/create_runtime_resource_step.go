@@ -3,7 +3,6 @@ package provisioning
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -149,6 +148,9 @@ func (s *CreateRuntimeResourceStep) updateRuntimeResourceObject(runtime *imv1.Ru
 	runtime.Spec.Shoot.Purpose = gardener.ShootPurpose(values.Purpose)
 	runtime.Spec.Shoot.PlatformRegion = operation.ProvisioningParameters.PlatformRegion
 	runtime.Spec.Shoot.SecretBindingName = *operation.ProvisioningParameters.Parameters.TargetSecret
+	if runtime.Spec.Shoot.ControlPlane == nil {
+		runtime.Spec.Shoot.ControlPlane = &gardener.ControlPlane{}
+	}
 	runtime.Spec.Shoot.ControlPlane.HighAvailability = s.createHighAvailabilityConfiguration()
 	runtime.Spec.Shoot.EnforceSeedLocation = operation.ProvisioningParameters.Parameters.ShootAndSeedSameRegion
 	runtime.Spec.Shoot.Networking = s.createNetworkingConfiguration(operation)
@@ -171,11 +173,8 @@ func (s *CreateRuntimeResourceStep) createLabelsForRuntime(operation internal.Op
 		"kyma-project.io/region":             region,
 		"operator.kyma-project.io/kyma-name": kymaName,
 	}
-	if s.kimConfig.ViewOnly && !s.kimConfig.IsDrivenByKimOnly(broker.PlanNamesMapping[operation.ProvisioningParameters.PlanID]) {
-		labels[imv1.LabelControlledByProvisioner] = "true"
-	} else {
-		labels[imv1.LabelControlledByProvisioner] = "false"
-	}
+	controlledByProvisioner := s.kimConfig.ViewOnly && !s.kimConfig.IsDrivenByKimOnly(broker.PlanNamesMapping[operation.ProvisioningParameters.PlanID])
+	labels[imv1.LabelControlledByProvisioner] = strconv.FormatBool(controlledByProvisioner)
 	return labels
 }
 
@@ -202,12 +201,10 @@ func (s *CreateRuntimeResourceStep) createShootProvider(operation *internal.Oper
 	maxSurge := intstr.FromInt32(int32(DefaultIfParamNotSet(values.ZonesCount, operation.ProvisioningParameters.Parameters.MaxSurge)))
 	maxUnavailable := intstr.FromInt32(int32(DefaultIfParamNotSet(0, operation.ProvisioningParameters.Parameters.MaxUnavailable)))
 
-	max := int32(DefaultIfParamNotSet(values.DefaultAutoScalerMax, operation.ProvisioningParameters.Parameters.AutoScalerMax))
-	min := int32(DefaultIfParamNotSet(values.DefaultAutoScalerMin, operation.ProvisioningParameters.Parameters.AutoScalerMin))
+	scalerMax := int32(DefaultIfParamNotSet(values.DefaultAutoScalerMax, operation.ProvisioningParameters.Parameters.AutoScalerMax))
+	scalerMin := int32(DefaultIfParamNotSet(values.DefaultAutoScalerMin, operation.ProvisioningParameters.Parameters.AutoScalerMin))
 
-	volumeSize := strconv.Itoa(DefaultIfParamNotSet(values.VolumeSizeGb, operation.ProvisioningParameters.Parameters.VolumeSizeGb))
-
-	providerObj := imv1.Provider{
+	provider := imv1.Provider{
 		Type: values.ProviderType,
 		Workers: []gardener.Worker{
 			{
@@ -219,19 +216,23 @@ func (s *CreateRuntimeResourceStep) createShootProvider(operation *internal.Oper
 						Version: &s.config.MachineImageVersion,
 					},
 				},
-				Maximum:        max,
-				Minimum:        min,
+				Maximum:        scalerMax,
+				Minimum:        scalerMin,
 				MaxSurge:       &maxSurge,
 				MaxUnavailable: &maxUnavailable,
 				Zones:          values.Zones,
-				Volume: &gardener.Volume{
-					Type:       ptr.String(values.DiskType),
-					VolumeSize: fmt.Sprintf("%sGi", volumeSize),
-				},
 			},
 		},
 	}
-	return providerObj, nil
+
+	if values.ProviderType != "openstack" {
+		volumeSize := strconv.Itoa(DefaultIfParamNotSet(values.VolumeSizeGb, operation.ProvisioningParameters.Parameters.VolumeSizeGb))
+		provider.Workers[0].Volume = &gardener.Volume{
+			Type:       ptr.String(values.DiskType),
+			VolumeSize: fmt.Sprintf("%sGi", volumeSize),
+		}
+	}
+	return provider, nil
 }
 
 func (s *CreateRuntimeResourceStep) createHighAvailabilityConfiguration() *gardener.HighAvailability {
@@ -255,10 +256,15 @@ func (s *CreateRuntimeResourceStep) createNetworkingConfiguration(operation inte
 		networkingParams = &internal.NetworkingDTO{}
 	}
 
+	nodes := networking.DefaultNodesCIDR
+	if networkingParams.NodesCidr != "" {
+		nodes = networkingParams.NodesCidr
+	}
+
 	return imv1.Networking{
 		Pods:     DefaultIfParamNotSet(networking.DefaultPodsCIDR, networkingParams.PodsCidr),
 		Services: DefaultIfParamNotSet(networking.DefaultServicesCIDR, networkingParams.ServicesCidr),
-		Nodes:    DefaultIfParamZero(networking.DefaultNodesCIDR, networkingParams.NodesCidr),
+		Nodes:    nodes,
 		//TODO remove when KIM is ready with setting this value
 		Type: ptr.String("calico"),
 	}
@@ -277,7 +283,6 @@ func (s *CreateRuntimeResourceStep) getEmptyOrExistingRuntimeResource(name, name
 	return &runtime, nil
 }
 
-// TODO unit test
 func (s *CreateRuntimeResourceStep) createKubernetesConfiguration(operation internal.Operation) imv1.Kubernetes {
 	oidc := gardener.OIDCConfig{
 		ClientID:       &s.oidcDefaultValues.ClientID,
@@ -288,12 +293,24 @@ func (s *CreateRuntimeResourceStep) createKubernetesConfiguration(operation inte
 		UsernamePrefix: &s.oidcDefaultValues.UsernamePrefix,
 	}
 	if operation.ProvisioningParameters.Parameters.OIDC != nil {
-		oidc.SigningAlgs = DefaultIfParamZero(oidc.SigningAlgs, operation.ProvisioningParameters.Parameters.OIDC.SigningAlgs)
-		oidc.ClientID = DefaultIfParamZero(oidc.ClientID, &operation.ProvisioningParameters.Parameters.OIDC.ClientID)
-		oidc.GroupsClaim = DefaultIfParamZero(oidc.GroupsClaim, &operation.ProvisioningParameters.Parameters.OIDC.GroupsClaim)
-		oidc.IssuerURL = DefaultIfParamZero(oidc.IssuerURL, &operation.ProvisioningParameters.Parameters.OIDC.IssuerURL)
-		oidc.UsernameClaim = DefaultIfParamZero(oidc.UsernameClaim, &operation.ProvisioningParameters.Parameters.OIDC.UsernameClaim)
-		oidc.UsernamePrefix = DefaultIfParamZero(oidc.UsernamePrefix, &operation.ProvisioningParameters.Parameters.OIDC.UsernamePrefix)
+		if operation.ProvisioningParameters.Parameters.OIDC.ClientID != "" {
+			oidc.ClientID = &operation.ProvisioningParameters.Parameters.OIDC.ClientID
+		}
+		if operation.ProvisioningParameters.Parameters.OIDC.GroupsClaim != "" {
+			oidc.GroupsClaim = &operation.ProvisioningParameters.Parameters.OIDC.GroupsClaim
+		}
+		if operation.ProvisioningParameters.Parameters.OIDC.IssuerURL != "" {
+			oidc.IssuerURL = &operation.ProvisioningParameters.Parameters.OIDC.IssuerURL
+		}
+		if len(operation.ProvisioningParameters.Parameters.OIDC.SigningAlgs) > 0 {
+			oidc.SigningAlgs = operation.ProvisioningParameters.Parameters.OIDC.SigningAlgs
+		}
+		if operation.ProvisioningParameters.Parameters.OIDC.UsernameClaim != "" {
+			oidc.UsernameClaim = &operation.ProvisioningParameters.Parameters.OIDC.UsernameClaim
+		}
+		if operation.ProvisioningParameters.Parameters.OIDC.UsernamePrefix != "" {
+			oidc.UsernamePrefix = &operation.ProvisioningParameters.Parameters.OIDC.UsernamePrefix
+		}
 	}
 
 	return imv1.Kubernetes{
@@ -310,14 +327,6 @@ func DefaultIfParamNotSet[T interface{}](d T, param *T) T {
 		return d
 	}
 	return *param
-}
-
-func DefaultIfParamZero[T interface{}](d T, param T) T {
-	field := reflect.ValueOf(param)
-	if field.IsZero() {
-		return d
-	}
-	return param
 }
 
 func RuntimeToYaml(runtime *imv1.Runtime) (string, error) {
