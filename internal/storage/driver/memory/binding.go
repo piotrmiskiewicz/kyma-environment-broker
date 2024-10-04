@@ -23,7 +23,7 @@ func (s *Binding) GetByBindingID(bindingID string) (*internal.Binding, error) {
 	defer s.mu.Unlock()
 	binding, found := s.data[bindingID]
 	if !found {
-		return nil, dberr.NotFound("instance with id %s not exist", bindingID)
+		return nil, dberr.NotFound("binding with id %s not exist", bindingID)
 	}
 	return &binding, nil
 }
@@ -33,7 +33,7 @@ func (s *Binding) Insert(binding *internal.Binding) error {
 	defer s.mu.Unlock()
 
 	if _, found := s.data[binding.ID]; found {
-		return dberr.AlreadyExists("instance with id %s already exist", binding.ID)
+		return dberr.AlreadyExists("binding with id %s already exist", binding.ID)
 	}
 	s.data[binding.ID] = *binding
 
