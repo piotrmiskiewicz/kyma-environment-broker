@@ -18,12 +18,12 @@ func NewBinding() *Binding {
 	}
 }
 
-func (s *Binding) GetByBindingID(bindingId string) (*internal.Binding, error) {
+func (s *Binding) GetByBindingID(bindingID string) (*internal.Binding, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	binding, found := s.data[bindingId]
+	binding, found := s.data[bindingID]
 	if !found {
-		return nil, dberr.NotFound("instance with id %s not exist", bindingId)
+		return nil, dberr.NotFound("instance with id %s not exist", bindingID)
 	}
 	return &binding, nil
 }
@@ -40,11 +40,11 @@ func (s *Binding) Insert(binding *internal.Binding) error {
 	return nil
 }
 
-func (s *Binding) DeleteByBindingID(ID string) error {
+func (s *Binding) DeleteByBindingID(bindingID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	delete(s.data, ID)
+	delete(s.data, bindingID)
 	return nil
 }
 
