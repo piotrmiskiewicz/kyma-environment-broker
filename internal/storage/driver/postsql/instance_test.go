@@ -376,6 +376,9 @@ func TestInstance(t *testing.T) {
 			fixture.FixProvisioningOperation("op3", "inst3"),
 			fixture.FixProvisioningOperation("op4", "expiredinstance"),
 		}
+		fixBinding := fixture.FixBinding("binding1")
+		fixBinding.InstanceID = fixInstances[0].InstanceID
+		brokerStorage.Bindings().Insert(&fixBinding)
 		for i, v := range fixInstances {
 			v.InstanceDetails = fixture.FixInstanceDetails(v.InstanceID)
 			fixInstances[i] = v
@@ -469,6 +472,11 @@ func TestInstance(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 3, count)
 		require.Equal(t, 3, totalCount)
+
+		out, count, totalCount, err = brokerStorage.Instances().List(dbmodel.InstanceFilter{BindingExists: ptr.Bool(true)})
+		require.NoError(t, err)
+		require.Equal(t, 1, count)
+		require.Equal(t, 1, totalCount)
 
 	})
 

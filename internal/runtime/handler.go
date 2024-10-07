@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -37,6 +38,7 @@ type Handler struct {
 	instancesDb         storage.Instances
 	operationsDb        storage.Operations
 	runtimeStatesDb     storage.RuntimeStates
+	bindingsDb          storage.Bindings
 	instancesArchivedDb storage.InstancesArchived
 	converter           Converter
 	defaultMaxPage      int
@@ -47,7 +49,7 @@ type Handler struct {
 }
 
 func NewHandler(instanceDb storage.Instances, operationDb storage.Operations, runtimeStatesDb storage.RuntimeStates,
-	instancesArchived storage.InstancesArchived, defaultMaxPage int, defaultRequestRegion string,
+	instancesArchived storage.InstancesArchived, bindingsDb storage.Bindings, defaultMaxPage int, defaultRequestRegion string,
 	provisionerClient provisioner.Client,
 	k8sClient client.Client, kimConfig broker.KimConfig,
 	logger logrus.FieldLogger) *Handler {
@@ -193,6 +195,7 @@ func (h *Handler) getRuntimes(w http.ResponseWriter, req *http.Request) {
 	clusterConfig := getBoolParam(pkg.ClusterConfigParam, req)
 	gardenerConfig := getBoolParam(pkg.GardenerConfigParam, req)
 	runtimeResourceConfig := getBoolParam(pkg.RuntimeConfigParam, req)
+	bindings := getBoolParam(pkg.BindingsParam, req)
 
 	instances, count, totalCount, err := h.listInstances(filter)
 	if err != nil {
@@ -259,6 +262,10 @@ func (h *Handler) getRuntimes(w http.ResponseWriter, req *http.Request) {
 					dto.RuntimeConfig = &runtimeResourceObject.Object
 				}
 			}
+
+		}
+		if bindings {
+			h.applyBindings(&dto)
 		}
 
 		toReturn = append(toReturn, dto)
@@ -504,6 +511,25 @@ func (h *Handler) getFilters(req *http.Request) dbmodel.InstanceFilter {
 	}
 
 	return filter
+}
+
+func (h *Handler) applyBindings(p *pkg.RuntimeDTO) error {
+	bindings, err := h.bindingsDb.ListByInstanceID(p.InstanceID)
+	if err != nil {
+		return err
+	}
+	p.Bindings = make([]pkg.BindingDTO, 0, len(bindings))
+	for _, b := range bindings {
+		p.Bindings = append(p.Bindings, pkg.BindingDTO{
+			ID:                b.ID,
+			ExpirationSeconds: b.ExpirationSeconds,
+			CreatedAt:         b.CreatedAt,
+			ExpiresAt:         b.CreatedAt.Add(time.Duration(b.ExpirationSeconds) * time.Second),
+			Type:              b.BindingType,
+		})
+	}
+
+	return nil
 }
 
 func getOpDetail(req *http.Request) pkg.OperationDetail {

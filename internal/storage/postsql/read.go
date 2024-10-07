@@ -882,6 +882,10 @@ func addInstanceFilters(stmt *dbr.SelectStmt, filter dbmodel.InstanceFilter) {
 			stmt.Where("instances.deleted_at = '0001-01-01T00:00:00.000Z'")
 		}
 	}
+
+	if filter.BindingExists != nil && *filter.BindingExists {
+		stmt.Where("instances.instance_id IN (SELECT instance_id FROM bindings)")
+	}
 }
 
 func addOrchestrationFilters(stmt *dbr.SelectStmt, filter dbmodel.OrchestrationFilter) {
