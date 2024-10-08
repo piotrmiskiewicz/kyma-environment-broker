@@ -884,7 +884,7 @@ func addInstanceFilters(stmt *dbr.SelectStmt, filter dbmodel.InstanceFilter) {
 	}
 
 	if filter.BindingExists != nil && *filter.BindingExists {
-		stmt.Where("instances.instance_id IN (SELECT instance_id FROM bindings)")
+		stmt.Where("exists (select instance_id from bindings where bindings.instance_id=instances.instance_id)")
 	}
 }
 
