@@ -265,7 +265,12 @@ func (h *Handler) getRuntimes(w http.ResponseWriter, req *http.Request) {
 
 		}
 		if bindings {
-			h.applyBindings(&dto)
+			err := h.applyBindings(&dto)
+			if err != nil {
+				h.logger.Warn(fmt.Sprintf("unable to apply bindings: %s", err.Error()))
+				httputil.WriteErrorResponse(w, http.StatusInternalServerError, err)
+				return
+			}
 		}
 
 		toReturn = append(toReturn, dto)
