@@ -57,6 +57,7 @@ func NewHandler(instanceDb storage.Instances, operationDb storage.Operations, ru
 		instancesDb:         instanceDb,
 		operationsDb:        operationDb,
 		runtimeStatesDb:     runtimeStatesDb,
+		bindingsDb:          bindingsDb,
 		converter:           NewConverter(defaultRequestRegion),
 		defaultMaxPage:      defaultMaxPage,
 		provisionerClient:   provisionerClient,
