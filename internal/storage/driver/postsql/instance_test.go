@@ -378,7 +378,8 @@ func TestInstance(t *testing.T) {
 		}
 		fixBinding := fixture.FixBinding("binding1")
 		fixBinding.InstanceID = fixInstances[0].InstanceID
-		brokerStorage.Bindings().Insert(&fixBinding)
+		err = brokerStorage.Bindings().Insert(&fixBinding)
+		require.NoError(t, err)
 		for i, v := range fixInstances {
 			v.InstanceDetails = fixture.FixInstanceDetails(v.InstanceID)
 			fixInstances[i] = v

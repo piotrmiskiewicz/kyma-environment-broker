@@ -1225,7 +1225,8 @@ func TestRuntimeHandler_WithKimOnlyDrivenInstances(t *testing.T) {
 
 		binding := fixture.FixBinding("abcd")
 		binding.InstanceID = testInstance.InstanceID
-		bindings.Insert(&binding)
+		err = bindings.Insert(&binding)
+		require.NoError(t, err)
 
 		input, err := operation.InputCreator.CreateProvisionRuntimeInput()
 		require.NoError(t, err)
