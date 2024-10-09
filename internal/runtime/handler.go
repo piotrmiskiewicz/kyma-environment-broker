@@ -266,7 +266,7 @@ func (h *Handler) getRuntimes(w http.ResponseWriter, req *http.Request) {
 
 		}
 		if bindings {
-			err := h.applyBindings(&dto)
+			err := h.addBindings(&dto)
 			if err != nil {
 				h.logger.Warn(fmt.Sprintf("unable to apply bindings: %s", err.Error()))
 				httputil.WriteErrorResponse(w, http.StatusInternalServerError, err)
@@ -519,7 +519,7 @@ func (h *Handler) getFilters(req *http.Request) dbmodel.InstanceFilter {
 	return filter
 }
 
-func (h *Handler) applyBindings(p *pkg.RuntimeDTO) error {
+func (h *Handler) addBindings(p *pkg.RuntimeDTO) error {
 	bindings, err := h.bindingsDb.ListByInstanceID(p.InstanceID)
 	if err != nil {
 		return err
