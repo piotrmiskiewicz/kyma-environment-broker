@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
+	rbac "k8s.io/client-go/kubernetes/typed/rbac/v1"
 	"net/http"
 	"os"
 	gruntime "runtime"
@@ -58,7 +60,6 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -166,7 +167,7 @@ type ProfilerConfig struct {
 
 type K8sClientProvider interface {
 	K8sClientForRuntimeID(rid string) (client.Client, error)
-	K8sClientSetForRuntimeID(runtimeID string) (*kubernetes.Clientset, error)
+	K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1Interface, rbac.RbacV1Interface, error)
 }
 
 type KubeconfigProvider interface {

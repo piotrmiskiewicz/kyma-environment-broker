@@ -926,8 +926,12 @@ func fixConfig() *Config {
 		Broker: broker.Config{
 			EnablePlans: []string{"azure", "trial", "aws", "own_cluster", "preview", "sap-converged-cloud", "gcp", "free"},
 			Binding: broker.BindingConfig{
-				Enabled:       true,
-				BindablePlans: []string{"aws", "azure"},
+				Enabled:              true,
+				BindablePlans:        []string{"aws", "azure"},
+				ExpirationSeconds:    100,
+				MaxExpirationSeconds: 1000,
+				MinExpirationSeconds: 1,
+				MaxBindingsCount:     2,
 			},
 			AllowUpdateExpiredInstanceWithContext: true,
 			KimConfig: broker.KimConfig{

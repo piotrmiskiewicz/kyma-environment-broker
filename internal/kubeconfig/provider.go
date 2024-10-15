@@ -3,12 +3,16 @@ package kubeconfig
 import (
 	"context"
 	"fmt"
+	machineryv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/kubernetes/scheme"
+	rbac "k8s.io/client-go/kubernetes/typed/rbac/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -71,23 +75,28 @@ func (p *SecretProvider) K8sClientForRuntimeID(runtimeID string) (client.Client,
 	return k8sCli, nil
 }
 
-func (p *SecretProvider) K8sClientSetForRuntimeID(runtimeID string) (*kubernetes.Clientset, error) {
+func (p *SecretProvider) K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1Interface, rbac.RbacV1Interface, error) {
 	kubeconfig, err := p.KubeconfigForRuntimeID(runtimeID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	restCfg, err := clientcmd.RESTConfigFromKubeConfig(kubeconfig)
 
 	if err != nil {
-		return nil, fmt.Errorf("while creating k8s client set - rest config from kubeconfig")
+		return nil, nil, fmt.Errorf("while creating k8s client set - rest config from kubeconfig")
 	}
 
 	clientset, err := kubernetes.NewForConfig(restCfg)
 	if err != nil {
-		return nil, fmt.Errorf("while creating k8s client set")
+		return nil, nil, fmt.Errorf("while creating k8s client set")
 	}
 
-	return clientset, nil
+	return clientset.CoreV1(), clientset.RbacV1(), nil
+}
+
+type CoreRbacInterface interface {
+	v12.CoreV1Interface
+	rbac.RbacV1Interface
 }
 
 type FakeProvider struct {
@@ -106,9 +115,34 @@ func (p *FakeProvider) K8sClientForRuntimeID(_ string) (client.Client, error) {
 }
 
 func (p *FakeProvider) KubeconfigForRuntimeID(runtimeID string) ([]byte, error) {
-	return []byte("fake kubeconfig"), nil
+	return []byte(`
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: ca
+    server: https://my.cluster
+  name: <cluster-name>
+contexts:
+- context:
+    cluster:  cname
+    user:  cuser
+  name:  cname
+current-context:  cname
+kind: Config
+preferences: {}
+users:
+- name:  cuser
+  user:
+    token: some-token
+`), nil
 }
 
-func (p *FakeProvider) K8sClientSetForRuntimeID(runtimeID string) (*kubernetes.Clientset, error) {
-	return nil, fmt.Errorf("not implemented")
+func (p *FakeProvider) K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1Interface, rbac.RbacV1Interface, error) {
+	c := fake.NewSimpleClientset()
+	c.CoreV1().Namespaces().Create(context.Background(), &v1.Namespace{
+		ObjectMeta: machineryv1.ObjectMeta{Name: "kyma-system", Namespace: "kyma-system"},
+	}, machineryv1.CreateOptions{})
+	coreClient := c.CoreV1()
+	rbacClient := c.RbacV1()
+	return coreClient, rbacClient, nil
 }

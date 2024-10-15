@@ -3,6 +3,8 @@ package broker
 import (
 	"context"
 	"fmt"
+	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
+	rbac "k8s.io/client-go/kubernetes/typed/rbac/v1"
 	"time"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -14,7 +16,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	mv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -31,7 +32,7 @@ type BindingsManager interface {
 }
 
 type ClientProvider interface {
-	K8sClientSetForRuntimeID(runtimeID string) (*kubernetes.Clientset, error)
+	K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1Interface, rbac.RbacV1Interface, error)
 }
 
 type KubeconfigProvider interface {
@@ -51,7 +52,7 @@ func NewServiceAccountBindingsManager(clientProvider ClientProvider, kubeconfigP
 }
 
 func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *internal.Instance, bindingID string, expirationSeconds int) (string, time.Time, error) {
-	clientset, err := c.clientProvider.K8sClientSetForRuntimeID(instance.RuntimeID)
+	coreCient, rbacClient, err := c.clientProvider.K8sClientSetForRuntimeID(instance.RuntimeID)
 
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("while creating a runtime client for binding creation: %v", err)
@@ -60,7 +61,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 	serviceBindingName := BindingName(bindingID)
 	fmt.Printf("Creating a service account binding for runtime %s with name %s", instance.RuntimeID, serviceBindingName)
 
-	_, err = clientset.CoreV1().ServiceAccounts(BindingNamespace).Create(ctx,
+	_, err = coreCient.ServiceAccounts(BindingNamespace).Create(ctx,
 		&v1.ServiceAccount{
 			ObjectMeta: mv1.ObjectMeta{
 				Name:      serviceBindingName,
@@ -73,13 +74,12 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 		return "", time.Time{}, fmt.Errorf("while creating a service account: %v", err)
 	}
 
-	_, err = clientset.RbacV1().ClusterRoles().Create(ctx,
+	_, e := rbacClient.ClusterRoles().Create(ctx,
 		&rbacv1.ClusterRole{
 			TypeMeta: mv1.TypeMeta{APIVersion: rbacv1.SchemeGroupVersion.String(), Kind: "ClusterRole"},
 			ObjectMeta: mv1.ObjectMeta{
-				Name:      serviceBindingName,
-				Labels:    map[string]string{"app.kubernetes.io/managed-by": "kcp-kyma-environment-broker"},
-				Namespace: BindingNamespace,
+				Name:   serviceBindingName,
+				Labels: map[string]string{"app.kubernetes.io/managed-by": "kcp-kyma-environment-broker"},
 			},
 			Rules: []rbacv1.PolicyRule{
 				{
@@ -89,12 +89,12 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 				},
 			},
 		}, mv1.CreateOptions{})
-
-	if err != nil && !apierrors.IsAlreadyExists(err) {
-		return "", time.Time{}, fmt.Errorf("while creating a cluster role: %v", err)
+	fmt.Printf("%v", e)
+	if e != nil && !apierrors.IsAlreadyExists(err) {
+		return "", time.Time{}, fmt.Errorf("while creating a cluster role: %v", e)
 	}
 
-	_, err = clientset.RbacV1().ClusterRoleBindings().Create(ctx, &rbacv1.ClusterRoleBinding{
+	_, err = rbacClient.ClusterRoleBindings().Create(ctx, &rbacv1.ClusterRoleBinding{
 		TypeMeta: mv1.TypeMeta{APIVersion: rbacv1.SchemeGroupVersion.String(), Kind: "ClusterRoleBinding"},
 		ObjectMeta: mv1.ObjectMeta{
 			Name:   serviceBindingName,
@@ -129,7 +129,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 		},
 	}
 
-	tkn, err := clientset.CoreV1().ServiceAccounts("kyma-system").CreateToken(ctx, serviceBindingName, tokenRequest, mv1.CreateOptions{})
+	tkn, err := coreCient.ServiceAccounts("kyma-system").CreateToken(ctx, serviceBindingName, tokenRequest, mv1.CreateOptions{})
 
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("while creating a service account kubeconfig: %v", err)
@@ -146,7 +146,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 }
 
 func (c *ServiceAccountBindingsManager) Delete(ctx context.Context, instance *internal.Instance, bindingID string) error {
-	clientset, err := c.clientProvider.K8sClientSetForRuntimeID(instance.RuntimeID)
+	coreClient, rbacClient, err := c.clientProvider.K8sClientSetForRuntimeID(instance.RuntimeID)
 
 	if err != nil {
 		return fmt.Errorf("while creating a runtime client for binding creation: %v", err)
@@ -155,21 +155,21 @@ func (c *ServiceAccountBindingsManager) Delete(ctx context.Context, instance *in
 	serviceBindingName := BindingName(bindingID)
 
 	// remove a binding
-	err = clientset.RbacV1().ClusterRoleBindings().Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
+	err = rbacClient.ClusterRoleBindings().Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("while removing a cluster role binding: %v", err)
 	}
 
 	// remove a role
-	err = clientset.RbacV1().ClusterRoles().Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
+	err = rbacClient.ClusterRoles().Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("while removing a cluster role: %v", err)
 	}
 
 	// remove an account
-	err = clientset.CoreV1().ServiceAccounts("kyma-system").Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
+	err = coreClient.ServiceAccounts("kyma-system").Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("while creating a service account: %v", err)
