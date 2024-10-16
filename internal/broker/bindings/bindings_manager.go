@@ -90,7 +90,6 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 				},
 			},
 		}, mv1.CreateOptions{})
-	fmt.Printf("%v", e)
 	if e != nil && !apierrors.IsAlreadyExists(err) {
 		return "", time.Time{}, fmt.Errorf("while creating a cluster role: %v", e)
 	}
