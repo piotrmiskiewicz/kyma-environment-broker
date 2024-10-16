@@ -96,11 +96,14 @@ func (p *SecretProvider) K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1I
 }
 
 type FakeProvider struct {
-	c client.Client
+	c          client.Client
+	coreClient v12.CoreV1Interface
+	rbacClient rbac.RbacV1Interface
 }
 
 func NewFakeK8sClientProvider(c client.Client) *FakeProvider {
-	return &FakeProvider{c: c}
+	coreClient, rbacClient := createFakeClients()
+	return &FakeProvider{c: c, coreClient: coreClient, rbacClient: rbacClient}
 }
 
 func (p *FakeProvider) K8sClientForRuntimeID(_ string) (client.Client, error) {
@@ -134,14 +137,19 @@ users:
 }
 
 func (p *FakeProvider) K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1Interface, rbac.RbacV1Interface, error) {
+	return p.coreClient, p.rbacClient, nil
+}
+
+func createFakeClients() (v12.CoreV1Interface, rbac.RbacV1Interface) {
 	c := fake.NewSimpleClientset()
 	_, err := c.CoreV1().Namespaces().Create(context.Background(), &v1.Namespace{
 		ObjectMeta: machineryv1.ObjectMeta{Name: "kyma-system", Namespace: "kyma-system"},
 	}, machineryv1.CreateOptions{})
 	if err != nil {
-		return nil, nil, err
+		// this method is used only for tests
+		panic(err)
 	}
 	coreClient := c.CoreV1()
 	rbacClient := c.RbacV1()
-	return coreClient, rbacClient, nil
+	return coreClient, rbacClient
 }
