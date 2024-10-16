@@ -143,7 +143,7 @@ func (p *FakeProvider) K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1Int
 func createFakeClients() (v12.CoreV1Interface, rbac.RbacV1Interface) {
 	c := fake.NewSimpleClientset()
 	_, err := c.CoreV1().Namespaces().Create(context.Background(), &v1.Namespace{
-		ObjectMeta: machineryv1.ObjectMeta{Name: "kyma-system", Namespace: "kyma-system"},
+		ObjectMeta: machineryv1.ObjectMeta{Name: "kyma-system", Namespace: ""},
 	}, machineryv1.CreateOptions{})
 	if err != nil {
 		// this method is used only for tests
