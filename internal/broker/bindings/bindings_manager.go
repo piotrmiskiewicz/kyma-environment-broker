@@ -91,7 +91,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 			},
 		}, mv1.CreateOptions{})
 	if err != nil && !apierrors.IsAlreadyExists(err) {
-		return "", time.Time{}, fmt.Errorf("while creating a cluster role: %v", e)
+		return "", time.Time{}, fmt.Errorf("while creating a cluster role: %v", err)
 	}
 
 	_, err = rbacClient.ClusterRoleBindings().Create(ctx, &rbacv1.ClusterRoleBinding{
