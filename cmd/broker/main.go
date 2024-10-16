@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"io"
-	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
-	rbac "k8s.io/client-go/kubernetes/typed/rbac/v1"
 	"net/http"
 	"os"
 	gruntime "runtime"
 	"runtime/pprof"
 	"sort"
 	"time"
+
+	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
+	rbac "k8s.io/client-go/kubernetes/typed/rbac/v1"
 
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 
