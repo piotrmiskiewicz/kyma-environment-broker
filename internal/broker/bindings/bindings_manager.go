@@ -75,7 +75,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 		return "", time.Time{}, fmt.Errorf("while creating a service account: %v", err)
 	}
 
-	_, e := rbacClient.ClusterRoles().Create(ctx,
+	_, err = rbacClient.ClusterRoles().Create(ctx,
 		&rbacv1.ClusterRole{
 			TypeMeta: mv1.TypeMeta{APIVersion: rbacv1.SchemeGroupVersion.String(), Kind: "ClusterRole"},
 			ObjectMeta: mv1.ObjectMeta{
@@ -90,7 +90,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 				},
 			},
 		}, mv1.CreateOptions{})
-	if e != nil && !apierrors.IsAlreadyExists(err) {
+	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return "", time.Time{}, fmt.Errorf("while creating a cluster role: %v", e)
 	}
 
