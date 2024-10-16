@@ -94,11 +94,6 @@ func (p *SecretProvider) K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1I
 	return clientset.CoreV1(), clientset.RbacV1(), nil
 }
 
-type CoreRbacInterface interface {
-	v12.CoreV1Interface
-	rbac.RbacV1Interface
-}
-
 type FakeProvider struct {
 	c client.Client
 }
