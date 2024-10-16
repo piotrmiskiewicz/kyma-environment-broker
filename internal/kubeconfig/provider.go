@@ -3,6 +3,7 @@ package kubeconfig
 import (
 	"context"
 	"fmt"
+
 	machineryv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
 
@@ -134,9 +135,12 @@ users:
 
 func (p *FakeProvider) K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1Interface, rbac.RbacV1Interface, error) {
 	c := fake.NewSimpleClientset()
-	c.CoreV1().Namespaces().Create(context.Background(), &v1.Namespace{
+	_, err := c.CoreV1().Namespaces().Create(context.Background(), &v1.Namespace{
 		ObjectMeta: machineryv1.ObjectMeta{Name: "kyma-system", Namespace: "kyma-system"},
 	}, machineryv1.CreateOptions{})
+	if err != nil {
+		return nil, nil, err
+	}
 	coreClient := c.CoreV1()
 	rbacClient := c.RbacV1()
 	return coreClient, rbacClient, nil
