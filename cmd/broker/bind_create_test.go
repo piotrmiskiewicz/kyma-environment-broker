@@ -226,6 +226,8 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, expirationSeconds*time.Second, duration)
 
+		assert.NotEmpty(t, binding.Metadata.ExpiresAt)
+
 		//// verify connectivity using kubeconfig from the generated binding
 		assertClusterAccess(t, "secret-to-check-first", binding)
 		assertRolesExistence(t, brokerBindings.BindingName("binding-id"), binding)
@@ -299,15 +301,15 @@ func TestCreateBindingEndpoint(t *testing.T) {
 
 	t.Run("should return created bindings when multiple bindings created", func(t *testing.T) {
 		// given
-		firstInstanceFirstBindingID, firstInstancefirstBinding := createBindingForInstanceWithRandomBindingID(instanceID1, httpServer, t)
+		firstInstanceFirstBindingID, firstInstancefirstBinding := createBindingWithRandomBindingID(instanceID1, httpServer, t)
 		firstInstanceFirstBindingDB, err := db.Bindings().Get(instanceID1, firstInstanceFirstBindingID)
 		assert.NoError(t, err)
 
-		secondInstanceBindingID, secondInstanceFirstBinding := createBindingForInstanceWithRandomBindingID(instanceID2, httpServer, t)
+		secondInstanceBindingID, secondInstanceFirstBinding := createBindingWithRandomBindingID(instanceID2, httpServer, t)
 		secondInstanceFirstBindingDB, err := db.Bindings().Get(instanceID2, secondInstanceBindingID)
 		assert.NoError(t, err)
 
-		firstInstanceSecondBindingID, firstInstanceSecondBinding := createBindingForInstanceWithRandomBindingID(instanceID1, httpServer, t)
+		firstInstanceSecondBindingID, firstInstanceSecondBinding := createBindingWithRandomBindingID(instanceID1, httpServer, t)
 		firstInstanceSecondBindingDB, err := db.Bindings().Get(instanceID1, firstInstanceSecondBindingID)
 		assert.NoError(t, err)
 
@@ -319,7 +321,7 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusOK, response.StatusCode)
 		binding := unmarshal(t, response)
-		assert.Equal(t, firstInstancefirstBinding, binding)
+		assertKubeconfigsEqual(t, firstInstancefirstBinding, binding)
 		assert.Equal(t, firstInstanceFirstBindingDB.Kubeconfig, binding.Credentials.(map[string]interface{})["kubeconfig"])
 		assertClusterAccess(t, "secret-to-check-first", binding)
 
@@ -330,7 +332,7 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusOK, response.StatusCode)
 		binding = unmarshal(t, response)
-		assert.Equal(t, secondInstanceFirstBinding, binding)
+		assertKubeconfigsEqual(t, secondInstanceFirstBinding, binding)
 		assert.Equal(t, secondInstanceFirstBindingDB.Kubeconfig, binding.Credentials.(map[string]interface{})["kubeconfig"])
 		assertClusterAccess(t, "secret-to-check-second", binding)
 
@@ -341,59 +343,58 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusOK, response.StatusCode)
 		binding = unmarshal(t, response)
-		assert.Equal(t, firstInstanceSecondBinding, binding)
+		assertKubeconfigsEqual(t, firstInstanceSecondBinding, binding)
 		assert.Equal(t, firstInstanceSecondBindingDB.Kubeconfig, binding.Credentials.(map[string]interface{})["kubeconfig"])
 		assertClusterAccess(t, "secret-to-check-first", binding)
 	})
 
 	t.Run("should delete created binding", func(t *testing.T) {
 		// given
-		createdBindingID, createdBinding := createBindingForInstanceWithRandomBindingID(instanceID1, httpServer, t)
-		createdBindingIDDB, err := db.Bindings().Get(instanceID1, createdBindingID)
+		bindingID, binding := createBindingWithRandomBindingID(instanceID1, httpServer, t)
+		bindingFromDB, err := db.Bindings().Get(instanceID1, bindingID)
 		assert.NoError(t, err)
-		assert.Equal(t, createdBinding.Credentials.(map[string]interface{})["kubeconfig"], createdBindingIDDB.Kubeconfig)
+		assert.Equal(t, binding.Credentials.(map[string]interface{})["kubeconfig"], bindingFromDB.Kubeconfig)
 
 		// when
-		path := fmt.Sprintf(bindingsPath+deleteParams, instanceID1, createdBindingID, "123", fixture.PlanId)
-
+		path := fmt.Sprintf(bindingsPath+deleteParams, instanceID1, bindingID, "123", fixture.PlanId)
 		response := CallAPI(httpServer, http.MethodDelete, path, "", t)
 		defer response.Body.Close()
 
 		// then
 		assert.Equal(t, http.StatusOK, response.StatusCode)
-		createdBindingIDDB, err = db.Bindings().Get(instanceID1, createdBindingID)
+		bindingFromDB, err = db.Bindings().Get(instanceID1, bindingID)
 		assert.Error(t, err)
-		assert.Nil(t, createdBindingIDDB)
+		assert.Nil(t, bindingFromDB)
 	})
 
 	t.Run("should delete created binding and fail after the second call", func(t *testing.T) {
 		// given
-		createdBindingID, createdBinding := createBindingForInstanceWithRandomBindingID(instanceID1, httpServer, t)
-		createdBindingIDDB, err := db.Bindings().Get(instanceID1, createdBindingID)
+		bindingID, binding := createBindingWithRandomBindingID(instanceID1, httpServer, t)
+		bindingFromDB, err := db.Bindings().Get(instanceID1, bindingID)
 		assert.NoError(t, err)
-		assert.Equal(t, createdBinding.Credentials.(map[string]interface{})["kubeconfig"], createdBindingIDDB.Kubeconfig)
+		assert.Equal(t, binding.Credentials.(map[string]interface{})["kubeconfig"], bindingFromDB.Kubeconfig)
 
 		// when
-		path := fmt.Sprintf(bindingsPath+deleteParams, instanceID1, createdBindingID, "123", fixture.PlanId)
+		path := fmt.Sprintf(bindingsPath+deleteParams, instanceID1, bindingID, "123", fixture.PlanId)
 		response := CallAPI(httpServer, http.MethodDelete, path, "", t)
 		defer response.Body.Close()
 
 		// then
 		assert.Equal(t, http.StatusOK, response.StatusCode)
-		createdBindingIDDB, err = db.Bindings().Get(instanceID1, createdBindingID)
+		bindingFromDB, err = db.Bindings().Get(instanceID1, bindingID)
 		assert.Error(t, err)
-		assert.Nil(t, createdBindingIDDB)
+		assert.Nil(t, bindingFromDB)
 
 		// when
-		path = fmt.Sprintf(bindingsPath+deleteParams, instanceID1, createdBindingID, "123", fixture.PlanId)
+		path = fmt.Sprintf(bindingsPath+deleteParams, instanceID1, bindingID, "123", fixture.PlanId)
 		response = CallAPI(httpServer, http.MethodDelete, path, "", t)
 		defer response.Body.Close()
 
 		// then
 		assert.Equal(t, http.StatusGone, response.StatusCode)
-		createdBindingIDDB, err = db.Bindings().Get(instanceID1, createdBindingID)
+		bindingFromDB, err = db.Bindings().Get(instanceID1, bindingID)
 		assert.Error(t, err)
-		assert.Nil(t, createdBindingIDDB)
+		assert.Nil(t, bindingFromDB)
 	})
 
 	t.Run("should selectively delete created binding and its service account resources", func(t *testing.T) {
@@ -401,14 +402,14 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		instanceFirst := "1"
 
 		//// first instance first binding
-		createdBindingIDInstanceFirstFirst, createdBindingInstanceFirstFirst := createBindingForInstanceWithRandomBindingID(instanceFirst, httpServer, t)
+		createdBindingIDInstanceFirstFirst, createdBindingInstanceFirstFirst := createBindingWithRandomBindingID(instanceFirst, httpServer, t)
 
 		assertExistsAndKubeconfigCreated(t, createdBindingInstanceFirstFirst, createdBindingIDInstanceFirstFirst, instanceFirst, httpServer, db)
 
 		assertResourcesExistence(t, clientFirst, createdBindingIDInstanceFirstFirst)
 
 		//// first instance second binding
-		createdBindingIDInstanceFirstSecond, createdBindingInstanceFirstSecond := createBindingForInstanceWithRandomBindingID(instanceFirst, httpServer, t)
+		createdBindingIDInstanceFirstSecond, createdBindingInstanceFirstSecond := createBindingWithRandomBindingID(instanceFirst, httpServer, t)
 
 		assertExistsAndKubeconfigCreated(t, createdBindingInstanceFirstSecond, createdBindingIDInstanceFirstSecond, instanceFirst, httpServer, db)
 
@@ -416,14 +417,14 @@ func TestCreateBindingEndpoint(t *testing.T) {
 
 		//// second instance first binding
 		instanceSecond := "2"
-		createdBindingIDInstanceSecondFirst, createdBindingInstanceSecondFirst := createBindingForInstanceWithRandomBindingID(instanceSecond, httpServer, t)
+		createdBindingIDInstanceSecondFirst, createdBindingInstanceSecondFirst := createBindingWithRandomBindingID(instanceSecond, httpServer, t)
 
 		assertExistsAndKubeconfigCreated(t, createdBindingInstanceSecondFirst, createdBindingIDInstanceSecondFirst, instanceSecond, httpServer, db)
 
 		assertResourcesExistence(t, clientSecond, createdBindingIDInstanceSecondFirst)
 
 		//// second instance second binding
-		createdBindingIDInstanceSecondSecond, createdBindingInstanceSecondSecond := createBindingForInstanceWithRandomBindingID(instanceSecond, httpServer, t)
+		createdBindingIDInstanceSecondSecond, createdBindingInstanceSecondSecond := createBindingWithRandomBindingID(instanceSecond, httpServer, t)
 
 		assertExistsAndKubeconfigCreated(t, createdBindingInstanceSecondSecond, createdBindingIDInstanceSecondSecond, instanceSecond, httpServer, db)
 
@@ -601,7 +602,11 @@ func assertRolesExistence(t *testing.T, bindingID string, binding domain.Binding
 	assert.NoError(t, err)
 }
 
-func createBindingForInstanceWithRandomBindingID(instanceID string, httpServer *httptest.Server, t *testing.T) (string, domain.Binding) {
+func assertKubeconfigsEqual(t *testing.T, expected, actual domain.Binding) {
+	assert.Equal(t, expected.Credentials.(map[string]interface{})["kubeconfig"], actual.Credentials.(map[string]interface{})["kubeconfig"])
+}
+
+func createBindingWithRandomBindingID(instanceID string, httpServer *httptest.Server, t *testing.T) (string, domain.Binding) {
 	bindingID := uuid.New().String()
 
 	response := createBinding(instanceID, bindingID, t)
