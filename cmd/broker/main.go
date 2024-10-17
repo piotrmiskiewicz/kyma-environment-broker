@@ -11,8 +11,7 @@ import (
 	"sort"
 	"time"
 
-	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
-	rbac "k8s.io/client-go/kubernetes/typed/rbac/v1"
+	"k8s.io/client-go/kubernetes"
 
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 
@@ -168,7 +167,7 @@ type ProfilerConfig struct {
 
 type K8sClientProvider interface {
 	K8sClientForRuntimeID(rid string) (client.Client, error)
-	K8sClientSetForRuntimeID(runtimeID string) (v12.CoreV1Interface, rbac.RbacV1Interface, error)
+	K8sClientSetForRuntimeID(runtimeID string) (kubernetes.Interface, error)
 }
 
 type KubeconfigProvider interface {
