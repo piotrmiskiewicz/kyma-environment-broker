@@ -52,7 +52,7 @@ func NewServiceAccountBindingsManager(clientProvider ClientProvider, kubeconfigP
 }
 
 func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *internal.Instance, bindingID string, expirationSeconds int) (string, time.Time, error) {
-	clientSet, err := c.clientProvider.K8sClientSetForRuntimeID(instance.RuntimeID)
+	clientset, err := c.clientProvider.K8sClientSetForRuntimeID(instance.RuntimeID)
 
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("while creating a runtime client for binding creation: %v", err)
@@ -61,7 +61,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 	serviceBindingName := BindingName(bindingID)
 	fmt.Printf("Creating a service account binding for runtime %s with name %s", instance.RuntimeID, serviceBindingName)
 
-	_, err = clientSet.CoreV1().ServiceAccounts(BindingNamespace).Create(ctx,
+	_, err = clientset.CoreV1().ServiceAccounts(BindingNamespace).Create(ctx,
 		&v1.ServiceAccount{
 			ObjectMeta: mv1.ObjectMeta{
 				Name:      serviceBindingName,
@@ -74,7 +74,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 		return "", time.Time{}, fmt.Errorf("while creating a service account: %v", err)
 	}
 
-	_, err = clientSet.RbacV1().ClusterRoles().Create(ctx,
+	_, err = clientset.RbacV1().ClusterRoles().Create(ctx,
 		&rbacv1.ClusterRole{
 			TypeMeta: mv1.TypeMeta{APIVersion: rbacv1.SchemeGroupVersion.String(), Kind: "ClusterRole"},
 			ObjectMeta: mv1.ObjectMeta{
@@ -93,7 +93,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 		return "", time.Time{}, fmt.Errorf("while creating a cluster role: %v", err)
 	}
 
-	_, err = clientSet.RbacV1().ClusterRoleBindings().Create(ctx, &rbacv1.ClusterRoleBinding{
+	_, err = clientset.RbacV1().ClusterRoleBindings().Create(ctx, &rbacv1.ClusterRoleBinding{
 		TypeMeta: mv1.TypeMeta{APIVersion: rbacv1.SchemeGroupVersion.String(), Kind: "ClusterRoleBinding"},
 		ObjectMeta: mv1.ObjectMeta{
 			Name:   serviceBindingName,
@@ -128,7 +128,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 		},
 	}
 
-	tkn, err := clientSet.CoreV1().ServiceAccounts("kyma-system").CreateToken(ctx, serviceBindingName, tokenRequest, mv1.CreateOptions{})
+	tkn, err := clientset.CoreV1().ServiceAccounts("kyma-system").CreateToken(ctx, serviceBindingName, tokenRequest, mv1.CreateOptions{})
 
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("while creating a service account kubeconfig: %v", err)
@@ -145,7 +145,7 @@ func (c *ServiceAccountBindingsManager) Create(ctx context.Context, instance *in
 }
 
 func (c *ServiceAccountBindingsManager) Delete(ctx context.Context, instance *internal.Instance, bindingID string) error {
-	clientSet, err := c.clientProvider.K8sClientSetForRuntimeID(instance.RuntimeID)
+	clientset, err := c.clientProvider.K8sClientSetForRuntimeID(instance.RuntimeID)
 
 	if err != nil {
 		return fmt.Errorf("while creating a runtime client for binding creation: %v", err)
@@ -154,21 +154,21 @@ func (c *ServiceAccountBindingsManager) Delete(ctx context.Context, instance *in
 	serviceBindingName := BindingName(bindingID)
 
 	// remove a binding
-	err = clientSet.RbacV1().ClusterRoleBindings().Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
+	err = clientset.RbacV1().ClusterRoleBindings().Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("while removing a cluster role binding: %v", err)
 	}
 
 	// remove a role
-	err = clientSet.RbacV1().ClusterRoles().Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
+	err = clientset.RbacV1().ClusterRoles().Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("while removing a cluster role: %v", err)
 	}
 
 	// remove an account
-	err = clientSet.CoreV1().ServiceAccounts("kyma-system").Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
+	err = clientset.CoreV1().ServiceAccounts("kyma-system").Delete(ctx, serviceBindingName, mv1.DeleteOptions{})
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("while creating a service account: %v", err)
