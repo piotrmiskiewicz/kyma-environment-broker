@@ -3,12 +3,13 @@ package kubeconfig
 import (
 	"context"
 	"fmt"
+	"time"
+
 	authv1 "k8s.io/api/authentication/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	machineryv1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/testing"
-	"time"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
