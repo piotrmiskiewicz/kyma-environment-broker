@@ -3,7 +3,14 @@ package broker
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/fake"
+	k8stesting "k8s.io/client-go/testing"
+	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
@@ -11,8 +18,107 @@ import (
 	"github.com/pivotal-cf/brokerapi/v8/domain"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+<<<<<<< Updated upstream
 )
 
+=======
+
+	"code.cloudfoundry.org/lager"
+	"github.com/kyma-project/kyma-environment-broker/internal/storage/dberr"
+	"github.com/stretchr/testify/require"
+)
+
+type Kubeconfig struct {
+	Users []User `yaml:"users"`
+}
+
+type User struct {
+	Name string `yaml:"name"`
+	User struct {
+		Token string `yaml:"token"`
+	} `yaml:"user"`
+}
+
+const (
+	instanceID1 = "1"
+	instanceID2 = "2"
+	instanceID3 = "max-bindings"
+)
+
+var httpServer *httptest.Server
+
+type provider struct {
+}
+
+func (p *provider) K8sClientSetForRuntimeID(runtimeID string) (kubernetes.Interface, error) {
+	c := fake.NewSimpleClientset()
+	c.PrependReactor("create", "serviceaccounts", func(action k8stesting.Action) (bool, runtime.Object, error) {
+		return true, nil, fmt.Errorf("error")
+	})
+	return c, nil
+}
+
+func TestCreateBindingEndpoint(t *testing.T) {
+	t.Log("test create binding endpoint")
+
+	// Given
+	//// logger
+	logs := logrus.New()
+	logs.SetLevel(logrus.DebugLevel)
+	logs.SetFormatter(&logrus.JSONFormatter{
+		TimestampFormat: time.RFC3339Nano,
+	})
+
+	brokerLogger := lager.NewLogger("test")
+	brokerLogger.RegisterSink(lager.NewWriterSink(logs.Writer(), lager.DEBUG))
+
+	//// schema
+
+	//// database
+	db := storage.NewMemoryStorage()
+
+	err := db.Instances().Insert(fixture.FixInstance(instanceID1))
+	require.NoError(t, err)
+
+	err = db.Instances().Insert(fixture.FixInstance(instanceID2))
+	require.NoError(t, err)
+
+	err = db.Instances().Insert(fixture.FixInstance(instanceID3))
+	require.NoError(t, err)
+
+	//// binding configuration
+	bindingCfg := &BindingConfig{
+		Enabled: true,
+		BindablePlans: EnablePlans{
+			fixture.PlanName,
+		},
+		MaxBindingsCount: 10,
+	}
+
+	p := &provider{}                                                                  //// api handler
+	bindEndpoint := NewBind(*bindingCfg, db.Instances(), db.Bindings(), logs, p, nil) // test relies on checking if got nil on kubeconfig provider but the instance got inserted either way
+
+	//t.Run("should INSERT binding despite error on k8s api call", func(t *testing.T) {
+	// given
+	_, err = db.Bindings().Get(instanceID1, "binding-id")
+	require.Error(t, err)
+	require.True(t, dberr.IsNotFound(err))
+
+	// when
+	_, _ = bindEndpoint.Bind(context.Background(), instanceID1, "binding-id", domain.BindDetails{
+		ServiceID: "123",
+		PlanID:    fixture.PlanId,
+	}, false)
+
+	// then
+	binding, err := db.Bindings().Get(instanceID1, "binding-id")
+	require.NoError(t, err)
+	require.Equal(t, instanceID1, binding.InstanceID)
+	require.Equal(t, "binding-id", binding.ID)
+	//})
+}
+
+>>>>>>> Stashed changes
 func TestCreatedBy(t *testing.T) {
 	emptyStr := ""
 	email := "john.smith@email.com"

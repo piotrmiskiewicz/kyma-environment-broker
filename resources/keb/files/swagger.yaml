@@ -267,6 +267,17 @@ paths:
           schema:
             type: boolean
         - in: query
+          name: bindings
+          required: false
+          description: Provides bindings for every runtime
+          schema:
+            type: boolean
+        - in: query
+          name: with_bindings
+          description: Filter runtimes to show only those with bindings.
+          schema:
+            type: boolean
+        - in: query
           name: state
           required: false
           description: Filter by Runtime state. By default, if no state(s) are provided, suspended Runtimes are filtered out.
@@ -1784,6 +1795,31 @@ components:
           example: azure
         status:
           $ref: '#/components/schemas/StatusDTO'
+        bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceBindingDTO'
+
+    ServiceBindingDTO:
+        type: object
+        properties:
+          id:
+            type: string
+            example: 054ac2c2-318f-45dd-855c-eee41513d40d
+          createdAt:
+            type: string
+            example: 2024-10-22T07:41:00.52046Z
+          expiresInSeconds:
+            type: integer
+            example: 600
+          expiresAt:
+            type: string
+            example: 2024-10-22T07:51:00Z
+          kubeconfigExists:
+            type: boolean
+          createdBy:
+            type: string
+            example: john.smith@email.com
 
     EventDTO:
       type: object
