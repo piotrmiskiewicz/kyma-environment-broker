@@ -209,7 +209,7 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		UpdateEndpoint:               nil,
 		GetInstanceEndpoint:          nil,
 		LastOperationEndpoint:        nil,
-		BindEndpoint:                 bindEndpoint,
+		Binder:                       bindEndpoint,
 		UnbindEndpoint:               unbindEndpoint,
 		GetBindingEndpoint:           getBindingEndpoint,
 		LastBindingOperationEndpoint: nil,

@@ -390,6 +390,10 @@ type ERSContextStats struct {
 	LicenseType map[string]int
 }
 
+type BindingStats struct {
+	MaxExpirationTimeInHours float64
+}
+
 // NewProvisioningOperation creates a fresh (just starting) instance of the ProvisioningOperation
 func NewProvisioningOperation(instanceID string, parameters ProvisioningParameters) (ProvisioningOperation, error) {
 	return NewProvisioningOperationWithID(uuid.New().String(), instanceID, parameters)

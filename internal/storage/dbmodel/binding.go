@@ -15,3 +15,7 @@ type BindingDTO struct {
 	ExpirationSeconds int64
 	CreatedBy         string
 }
+
+type BindingStats struct {
+	MaxExpirationTimeInHours float64 `db:"max_expiration_time_in_hours"`
+}

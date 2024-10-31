@@ -3,6 +3,7 @@ package metricsv2
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"math/rand"
 	"time"
 
@@ -60,12 +61,18 @@ func Register(ctx context.Context, sub event.Subscriber, operations storage.Oper
 	opStats := NewOperationsStats(operations, cfg, logger)
 	opStats.MustRegister(ctx)
 
+	bindDurationCollector := NewBindDurationCollector(logger)
+	prometheus.MustRegister(bindDurationCollector)
+
 	sub.Subscribe(process.ProvisioningSucceeded{}, opDurationCollector.OnProvisioningSucceeded)
 	sub.Subscribe(process.DeprovisioningStepProcessed{}, opDurationCollector.OnDeprovisioningStepProcessed)
 	sub.Subscribe(process.OperationSucceeded{}, opDurationCollector.OnOperationSucceeded)
 	sub.Subscribe(process.OperationStepProcessed{}, opDurationCollector.OnOperationStepProcessed)
 	sub.Subscribe(process.OperationFinished{}, opStats.Handler)
 	sub.Subscribe(process.OperationFinished{}, opResult.Handler)
+
+	sub.Subscribe(broker.BindRequestProcessed{}, bindDurationCollector.OnBindingExecuted)
+	sub.Subscribe(broker.UnbindRequestProcessed{}, bindDurationCollector.OnUnbindingExecuted)
 
 	logger.Infof(fmt.Sprintf("%s -> enabled", logPrefix))
 

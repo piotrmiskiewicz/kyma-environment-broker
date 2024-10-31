@@ -28,7 +28,7 @@ type KymaEnvironmentBroker struct {
 	*UpdateEndpoint
 	*GetInstanceEndpoint
 	*LastOperationEndpoint
-	*BindEndpoint
+	Binder
 	*UnbindEndpoint
 	*GetBindingEndpoint
 	*LastBindingOperationEndpoint
