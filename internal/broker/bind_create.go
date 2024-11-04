@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/event"
 	"net/http"
 	"strings"
 	"time"
@@ -39,6 +40,7 @@ type BindEndpoint struct {
 	bindingsStorage  storage.Bindings
 
 	serviceAccountBindingManager broker.BindingsManager
+	publisher                    event.Publisher
 
 	log logrus.FieldLogger
 }
@@ -65,10 +67,12 @@ type Credentials struct {
 	Kubeconfig string `json:"kubeconfig"`
 }
 
-func NewBind(cfg BindingConfig, db storage.BrokerStorage, log logrus.FieldLogger, clientProvider broker.ClientProvider, kubeconfigProvider broker.KubeconfigProvider) *BindEndpoint {
+func NewBind(cfg BindingConfig, db storage.BrokerStorage, log logrus.FieldLogger, clientProvider broker.ClientProvider, kubeconfigProvider broker.KubeconfigProvider,
+	publisher event.Publisher) *BindEndpoint {
 	return &BindEndpoint{config: cfg,
 		instancesStorage:             db.Instances(),
 		bindingsStorage:              db.Bindings(),
+		publisher:                    publisher,
 		log:                          log.WithField("service", "BindEndpoint"),
 		serviceAccountBindingManager: broker.NewServiceAccountBindingsManager(clientProvider, kubeconfigProvider),
 	}
@@ -227,6 +231,7 @@ func (b *BindEndpoint) Bind(ctx context.Context, instanceID, bindingID string, d
 		return domain.Binding{}, apiresponses.NewFailureResponse(fmt.Errorf(message), http.StatusInternalServerError, message)
 	}
 	b.log.Infof("Successfully created binding %s for instance %s", bindingID, instanceID)
+	b.publisher.Publish(context.Background(), BindingCreated{PlanID: instance.ServicePlanID})
 
 	return domain.Binding{
 		IsAsync: false,

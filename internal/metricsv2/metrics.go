@@ -64,6 +64,9 @@ func Register(ctx context.Context, sub event.Subscriber, operations storage.Oper
 	bindDurationCollector := NewBindDurationCollector(logger)
 	prometheus.MustRegister(bindDurationCollector)
 
+	bindCrestedCollector := NewBindingCreationCollector()
+	prometheus.MustRegister(bindCrestedCollector)
+
 	sub.Subscribe(process.ProvisioningSucceeded{}, opDurationCollector.OnProvisioningSucceeded)
 	sub.Subscribe(process.DeprovisioningStepProcessed{}, opDurationCollector.OnDeprovisioningStepProcessed)
 	sub.Subscribe(process.OperationSucceeded{}, opDurationCollector.OnOperationSucceeded)
@@ -73,6 +76,7 @@ func Register(ctx context.Context, sub event.Subscriber, operations storage.Oper
 
 	sub.Subscribe(broker.BindRequestProcessed{}, bindDurationCollector.OnBindingExecuted)
 	sub.Subscribe(broker.UnbindRequestProcessed{}, bindDurationCollector.OnUnbindingExecuted)
+	sub.Subscribe(broker.BindingCreated{}, bindCrestedCollector.OnBindingCreated)
 
 	logger.Infof(fmt.Sprintf("%s -> enabled", logPrefix))
 

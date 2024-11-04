@@ -27,6 +27,10 @@ type UnbindRequestProcessed struct {
 	Error              error
 }
 
+type BindingCreated struct {
+	PlanID string
+}
+
 func NewBindMetrics(target Binder, publisher event.Publisher) *BindMetrics {
 	return &BindMetrics{
 		target:    target,

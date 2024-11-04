@@ -54,3 +54,32 @@ func (c *BindDurationCollector) OnUnbindingExecuted(ctx context.Context, ev inte
 	c.bindHistorgam.WithLabelValues().Observe(float64(obj.ProcessingDuration.Milliseconds()))
 	return nil
 }
+
+type BindingCreationCollector struct {
+	bindingCreated *prometheus.CounterVec
+}
+
+func NewBindingCreationCollector() *BindingCreationCollector {
+	return &BindingCreationCollector{
+		bindingCreated: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: prometheusNamespacev2,
+			Subsystem: prometheusSubsystemv2,
+			Name:      "binding_created_total",
+			Help:      "The total number of created bindings",
+		}, []string{"plan_id"}),
+	}
+}
+
+func (c *BindingCreationCollector) Describe(ch chan<- *prometheus.Desc) {
+	c.bindingCreated.Describe(ch)
+}
+
+func (c *BindingCreationCollector) Collect(ch chan<- prometheus.Metric) {
+	c.bindingCreated.Collect(ch)
+}
+
+func (c *BindingCreationCollector) OnBindingCreated(ctx context.Context, ev interface{}) error {
+	obj := ev.(broker.BindingCreated)
+	c.bindingCreated.WithLabelValues(obj.PlanID).Inc()
+	return nil
+}
