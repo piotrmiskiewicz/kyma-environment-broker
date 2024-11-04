@@ -82,6 +82,17 @@ func NewBind(cfg BindingConfig, db storage.BrokerStorage, log logrus.FieldLogger
 //
 //	PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}
 func (b *BindEndpoint) Bind(ctx context.Context, instanceID, bindingID string, details domain.BindDetails, asyncAllowed bool) (domain.Binding, error) {
+	start := time.Now()
+	response, err := b.bind(ctx, instanceID, bindingID, details, asyncAllowed)
+	processingDuration := time.Since(start)
+
+	b.publisher.Publish(ctx, BindRequestProcessed{ProcessingDuration: processingDuration, Error: err})
+
+	return response, err
+}
+
+func (b *BindEndpoint) bind(ctx context.Context, instanceID, bindingID string, details domain.BindDetails, asyncAllowed bool) (domain.Binding, error) {
+
 	b.log.Infof("Bind instanceID: %s", instanceID)
 	b.log.Infof("Bind parameters: %s", string(details.RawParameters))
 	b.log.Infof("Bind context: %s", string(details.RawContext))
@@ -252,4 +263,18 @@ func (b *BindEndpoint) IsPlanBindable(planName string) bool {
 		}
 	}
 	return false
+}
+
+type BindRequestProcessed struct {
+	ProcessingDuration time.Duration
+	Error              error
+}
+
+type UnbindRequestProcessed struct {
+	ProcessingDuration time.Duration
+	Error              error
+}
+
+type BindingCreated struct {
+	PlanID string
 }
