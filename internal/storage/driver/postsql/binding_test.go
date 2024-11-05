@@ -251,6 +251,26 @@ func TestBindingMetrics(t *testing.T) {
 
 	// then
 	require.NoError(t, err)
-	assert.GreaterOrEqual(t, got.MaxExpirationTimeInHours, 2.0)
-	assert.Less(t, got.MaxExpirationTimeInHours-2.0, 0.01)
+	// assert if the expiration time is close to 120 minutes
+	assert.GreaterOrEqual(t, got.MinutesSinceEarliestExpiration, 120.0)
+	assert.Less(t, got.MinutesSinceEarliestExpiration-120.0, 0.01)
+}
+
+func TestBindingMetrics_NoBindings(t *testing.T) {
+	storageCleanup, brokerStorage, err := GetStorageForDatabaseTests()
+	require.NoError(t, err)
+	require.NotNil(t, brokerStorage)
+	defer func() {
+		err := storageCleanup()
+		assert.NoError(t, err)
+	}()
+
+	// when
+	got, err := brokerStorage.Bindings().GetStatistics()
+
+	// then
+	require.NoError(t, err)
+	// assert if the expiration time is close to 120 minutes
+	assert.Equal(t, got.MinutesSinceEarliestExpiration, 0.0)
+
 }

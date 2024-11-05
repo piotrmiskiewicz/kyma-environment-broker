@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/metricsv2"
 	"sort"
 	"strings"
 	"testing"
@@ -941,8 +942,6 @@ func fixConfig() *Config {
 				KimOnlyPlans: []string{"preview"},
 			},
 		},
-		TrialRegionMappingFilePath: "testdata/trial-regions.yaml",
-
 		Notification: notification.Config{
 			Url: "http://host:8080/",
 		},
@@ -950,18 +949,25 @@ func fixConfig() *Config {
 			Namespace: "kcp-system",
 			Name:      "orchestration-config",
 		},
+		TrialRegionMappingFilePath:                "testdata/trial-regions.yaml",
+		SapConvergedCloudRegionMappingsFilePath:   "testdata/old-sap-converged-cloud-region-mappings.yaml",
 		MaxPaginationPage:                         100,
 		FreemiumProviders:                         []string{"aws", "azure"},
 		FreemiumWhitelistedGlobalAccountsFilePath: "testdata/freemium_whitelist.yaml",
-
-		Provisioning:   process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
-		Deprovisioning: process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
-		Update:         process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
-
-		ArchiveEnabled:                          true,
-		CleaningEnabled:                         true,
-		SapConvergedCloudRegionMappingsFilePath: "testdata/old-sap-converged-cloud-region-mappings.yaml",
-		UpdateRuntimeResourceDelay:              time.Millisecond,
+		Provisioning:                              process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
+		Deprovisioning:                            process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
+		Update:                                    process.StagedManagerConfiguration{MaxStepProcessingTime: time.Minute},
+		ArchiveEnabled:                            true,
+		CleaningEnabled:                           true,
+		UpdateRuntimeResourceDelay:                time.Millisecond,
+		MetricsV2: metricsv2.Config{
+			Enabled:                                         true,
+			OperationResultRetentionPeriod:                  time.Hour,
+			OperationResultPoolingInterval:                  3 * time.Second,
+			OperationStatsPoolingInterval:                   3 * time.Second,
+			OperationResultFinishedOperationRetentionPeriod: time.Hour,
+			BindingsStatsPoolingInterval:                    3 * time.Second,
+		},
 	}
 }
 

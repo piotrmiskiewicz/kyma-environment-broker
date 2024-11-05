@@ -92,7 +92,6 @@ func (b *BindEndpoint) Bind(ctx context.Context, instanceID, bindingID string, d
 }
 
 func (b *BindEndpoint) bind(ctx context.Context, instanceID, bindingID string, details domain.BindDetails, asyncAllowed bool) (domain.Binding, error) {
-
 	b.log.Infof("Bind instanceID: %s", instanceID)
 	b.log.Infof("Bind parameters: %s", string(details.RawParameters))
 	b.log.Infof("Bind context: %s", string(details.RawContext))

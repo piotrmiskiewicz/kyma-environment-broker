@@ -121,7 +121,7 @@ func (s *Binding) GetStatistics() (internal.BindingStats, error) {
 	if err != nil {
 		return internal.BindingStats{}, err
 	}
-	return internal.BindingStats{MaxExpirationTimeInHours: dto.MaxExpirationTimeInHours}, nil
+	return internal.BindingStats{MinutesSinceEarliestExpiration: *dto.MaxExpirationTimeInSeconds / 60}, nil
 }
 
 func (s *Binding) toBindingDTO(binding *internal.Binding) (dbmodel.BindingDTO, error) {

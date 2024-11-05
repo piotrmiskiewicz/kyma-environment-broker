@@ -1055,12 +1055,14 @@ func (r readSession) ListInstancesArchived(filter dbmodel.InstanceFilter) ([]dbm
 
 func (r readSession) GetBindingsStatistics() (dbmodel.BindingStats, error) {
 	dto := dbmodel.BindingStats{}
-	dto.MaxExpirationTimeInHours = 2
-	statement := r.session.Select("max(extract(epoch from AGE(now(), expires_at))) as max_expiration_time_in_minutes").From(BindingsTableName)
+	statement := r.session.Select("max(extract(epoch from AGE(now(), expires_at))) as max_expiration_time_in_seconds").From(BindingsTableName)
 
 	err := statement.LoadOne(&dto)
 	if err != nil {
 		return dbmodel.BindingStats{}, err
+	}
+	if dto.MaxExpirationTimeInSeconds == nil {
+		dto.MaxExpirationTimeInSeconds = new(float64)
 	}
 	return dto, nil
 }

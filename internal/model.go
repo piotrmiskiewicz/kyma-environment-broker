@@ -391,7 +391,7 @@ type ERSContextStats struct {
 }
 
 type BindingStats struct {
-	MaxExpirationTimeInHours float64
+	MinutesSinceEarliestExpiration float64
 }
 
 // NewProvisioningOperation creates a fresh (just starting) instance of the ProvisioningOperation

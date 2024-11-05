@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/event"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -198,10 +199,12 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		MaxBindingsCount:     maxBindingsCount,
 	}
 
+	publisher := event.NewPubSub(logs)
+
 	//// api handler
-	bindEndpoint := broker.NewBind(*bindingCfg, db, logs, skrK8sClientProvider, skrK8sClientProvider)
+	bindEndpoint := broker.NewBind(*bindingCfg, db, logs, skrK8sClientProvider, skrK8sClientProvider, publisher)
 	getBindingEndpoint := broker.NewGetBinding(logs, db)
-	unbindEndpoint := broker.NewUnbind(logs, db, brokerBindings.NewServiceAccountBindingsManager(skrK8sClientProvider, skrK8sClientProvider))
+	unbindEndpoint := broker.NewUnbind(logs, db, brokerBindings.NewServiceAccountBindingsManager(skrK8sClientProvider, skrK8sClientProvider), publisher)
 	apiHandler := handlers.NewApiHandler(broker.KymaEnvironmentBroker{
 		ServicesEndpoint:             nil,
 		ProvisionEndpoint:            nil,
@@ -209,7 +212,7 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		UpdateEndpoint:               nil,
 		GetInstanceEndpoint:          nil,
 		LastOperationEndpoint:        nil,
-		Binder:                       bindEndpoint,
+		BindEndpoint:                 bindEndpoint,
 		UnbindEndpoint:               unbindEndpoint,
 		GetBindingEndpoint:           getBindingEndpoint,
 		LastBindingOperationEndpoint: nil,

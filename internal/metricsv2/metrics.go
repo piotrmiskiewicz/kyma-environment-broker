@@ -38,6 +38,7 @@ type Config struct {
 	OperationResultPoolingInterval                  time.Duration `envconfig:"default=1m"`
 	OperationStatsPoolingInterval                   time.Duration `envconfig:"default=1m"`
 	OperationResultFinishedOperationRetentionPeriod time.Duration `envconfig:"default=3h"`
+	BindingsStatsPoolingInterval                    time.Duration `envconfig:"default=1m"`
 }
 
 type RegisterContainer struct {
@@ -47,19 +48,22 @@ type RegisterContainer struct {
 	InstancesCollector         *InstancesCollector
 }
 
-func Register(ctx context.Context, sub event.Subscriber, operations storage.Operations, instances storage.Instances, cfg Config, logger logrus.FieldLogger) *RegisterContainer {
+func Register(ctx context.Context, sub event.Subscriber, db storage.BrokerStorage, cfg Config, logger logrus.FieldLogger) *RegisterContainer {
 	logger = logger.WithField("from:", logPrefix)
 	logrus.Infof("Registering metricsv2")
 	opDurationCollector := NewOperationDurationCollector(logger)
 	prometheus.MustRegister(opDurationCollector)
 
-	opInstanceCollector := NewInstancesCollector(instances, logger)
+	opInstanceCollector := NewInstancesCollector(db.Instances(), logger)
 	prometheus.MustRegister(opInstanceCollector)
 
-	opResult := NewOperationResult(ctx, operations, cfg, logger)
+	opResult := NewOperationResult(ctx, db.Operations(), cfg, logger)
 
-	opStats := NewOperationsStats(operations, cfg, logger)
+	opStats := NewOperationsStats(db.Operations(), cfg, logger)
 	opStats.MustRegister(ctx)
+
+	bindingStats := NewBindingStatsCollector(db.Bindings(), cfg.BindingsStatsPoolingInterval, logger)
+	bindingStats.MustRegister(ctx)
 
 	bindDurationCollector := NewBindDurationCollector(logger)
 	prometheus.MustRegister(bindDurationCollector)

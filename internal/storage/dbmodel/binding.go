@@ -17,5 +17,5 @@ type BindingDTO struct {
 }
 
 type BindingStats struct {
-	MaxExpirationTimeInHours float64 `db:"max_expiration_time_in_hours"`
+	MaxExpirationTimeInSeconds *float64 `db:"max_expiration_time_in_seconds"`
 }

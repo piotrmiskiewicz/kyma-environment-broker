@@ -143,7 +143,7 @@ func NewBrokerSuitTestWithMetrics(t *testing.T, cfg *Config, version ...string) 
 		}
 	}()
 	broker := NewBrokerSuiteTestWithConfig(t, cfg, version...)
-	broker.metrics = metricsv2.Register(context.Background(), broker.eventBroker, broker.db.Operations(), broker.db.Instances(), cfg.MetricsV2, logrus.New())
+	broker.metrics = metricsv2.Register(context.Background(), broker.eventBroker, broker.db, cfg.MetricsV2, logrus.New())
 	broker.router.Handle("/metrics", promhttp.Handler())
 	return broker
 }
