@@ -270,7 +270,7 @@ func TestBindingMetrics_NoBindings(t *testing.T) {
 
 	// then
 	require.NoError(t, err)
-	// assert if the expiration time is close to 120 minutes
-	assert.Equal(t, got.MinutesSinceEarliestExpiration, 0.0)
 
+	// in case of no bindings, the metric should be 0
+	assert.Equal(t, got.MinutesSinceEarliestExpiration, 0.0)
 }

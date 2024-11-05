@@ -11,6 +11,9 @@ import (
 	"time"
 )
 
+// BindDurationCollector provides histograms which describes the time of bind/unbind request processing:
+// - kcp_keb_v2_bind_duration_millisecond
+// - kcp_keb_v2_unbind_duration_millisecond
 type BindDurationCollector struct {
 	bindHistorgam   *prometheus.HistogramVec
 	unbindHistogram *prometheus.HistogramVec
@@ -63,12 +66,14 @@ type BindingCreationCollector struct {
 	bindingCreated *prometheus.CounterVec
 }
 
+// BindingCreationCollector provides a counter which shows the total number of created bindings:
+// - kcp_keb_v2_binding_created_total{plan_id}
 func NewBindingCreationCollector() *BindingCreationCollector {
 	return &BindingCreationCollector{
 		bindingCreated: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: prometheusNamespacev2,
 			Subsystem: prometheusSubsystemv2,
-			Name:      "binding_created_total",
+			Name:      "kcp_keb_v2_binding_created_total",
 			Help:      "The total number of created bindings",
 		}, []string{"plan_id"}),
 	}
@@ -97,6 +102,8 @@ type BindingStatitics struct {
 	MinutesSinceEarliestExpirationMetric prometheus.Gauge
 }
 
+// NewBindingStatsCollector provides a collector which shows the time in minutes since the earliest binding expiration:
+// - kcp_keb_v2_minutes_since_earliest_binding_expiration
 func NewBindingStatsCollector(db storage.Bindings, poolingInterval time.Duration, logger logrus.FieldLogger) *BindingStatitics {
 	return &BindingStatitics{
 		db:              db,
