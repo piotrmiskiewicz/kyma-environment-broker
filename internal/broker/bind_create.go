@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/event"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/event"
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	broker "github.com/kyma-project/kyma-environment-broker/internal/broker/bindings"
