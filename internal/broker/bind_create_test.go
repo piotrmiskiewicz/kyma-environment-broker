@@ -196,7 +196,6 @@ func TestCreateSecondBindingWithTheSameIdButDifferentParams(t *testing.T) {
 	err = brokerStorage.Bindings().Insert(&binding)
 	assert.NoError(t, err)
 
-	// event publisher
 	publisher := event.NewPubSub(logrus.New())
 
 	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, publisher)
@@ -240,7 +239,9 @@ func TestCreateSecondBindingWithTheSameIdAndParams(t *testing.T) {
 	err = brokerStorage.Bindings().Insert(&binding)
 	assert.NoError(t, err)
 
-	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, nil)
+	publisher := event.NewPubSub(logrus.New())
+
+	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, publisher)
 	params := BindingParams{
 		ExpirationSeconds: 600,
 	}
@@ -281,7 +282,9 @@ func TestCreateSecondBindingWithTheSameIdAndParamsNotExplicitlyDefined(t *testin
 	err = brokerStorage.Bindings().Insert(&binding)
 	assert.NoError(t, err)
 
-	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, nil)
+	publisher := event.NewPubSub(logrus.New())
+
+	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, publisher)
 
 	// when
 	resp, err := svc.Bind(context.Background(), instanceID, bindingID, domain.BindDetails{}, false)
