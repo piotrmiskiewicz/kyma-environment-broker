@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/event"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/event"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
