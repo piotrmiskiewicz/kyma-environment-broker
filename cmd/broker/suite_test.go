@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/metricsv2"
 	"sort"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/metricsv2"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 
