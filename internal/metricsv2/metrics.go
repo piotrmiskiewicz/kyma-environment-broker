@@ -3,9 +3,10 @@ package metricsv2
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"math/rand"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/internal"

@@ -3,9 +3,10 @@ package broker
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/event"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/event"
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	broker "github.com/kyma-project/kyma-environment-broker/internal/broker/bindings"

@@ -3,12 +3,13 @@ package metricsv2
 import (
 	"context"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
-	"sync"
-	"time"
 )
 
 // BindDurationCollector provides histograms which describes the time of bind/unbind request processing:
