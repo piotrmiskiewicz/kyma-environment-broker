@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/event"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -89,8 +90,11 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		MaxBindingsCount: maxBindingsCount,
 	}
 
+	// event publisher
+	publisher := event.NewPubSub(logrus.New())
+
 	//// api handler
-	bindEndpoint := NewBind(*bindingCfg, db, logs, &provider{}, &provider{})
+	bindEndpoint := NewBind(*bindingCfg, db, logs, &provider{}, &provider{}, publisher)
 
 	// test relies on checking if got nil on kubeconfig provider but the instance got inserted either way
 	t.Run("should INSERT binding despite error on k8s api call", func(t *testing.T) {
@@ -192,7 +196,7 @@ func TestCreateSecondBindingWithTheSameIdButDifferentParams(t *testing.T) {
 	err = brokerStorage.Bindings().Insert(&binding)
 	assert.NoError(t, err)
 
-	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil)
+	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, nil)
 	params := BindingParams{
 		ExpirationSeconds: 601,
 	}
@@ -233,7 +237,7 @@ func TestCreateSecondBindingWithTheSameIdAndParams(t *testing.T) {
 	err = brokerStorage.Bindings().Insert(&binding)
 	assert.NoError(t, err)
 
-	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil)
+	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, nil)
 	params := BindingParams{
 		ExpirationSeconds: 600,
 	}
@@ -274,7 +278,7 @@ func TestCreateSecondBindingWithTheSameIdAndParamsNotExplicitlyDefined(t *testin
 	err = brokerStorage.Bindings().Insert(&binding)
 	assert.NoError(t, err)
 
-	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil)
+	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, nil)
 
 	// when
 	resp, err := svc.Bind(context.Background(), instanceID, bindingID, domain.BindDetails{}, false)
