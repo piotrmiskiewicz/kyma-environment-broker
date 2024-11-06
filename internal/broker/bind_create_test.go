@@ -196,7 +196,10 @@ func TestCreateSecondBindingWithTheSameIdButDifferentParams(t *testing.T) {
 	err = brokerStorage.Bindings().Insert(&binding)
 	assert.NoError(t, err)
 
-	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, nil)
+	// event publisher
+	publisher := event.NewPubSub(logrus.New())
+
+	svc := NewBind(*bindingCfg, brokerStorage, logrus.New(), nil, nil, publisher)
 	params := BindingParams{
 		ExpirationSeconds: 601,
 	}
