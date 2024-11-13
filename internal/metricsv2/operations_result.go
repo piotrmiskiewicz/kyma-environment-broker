@@ -41,7 +41,7 @@ func NewOperationResult(ctx context.Context, db storage.Operations, cfg Config, 
 			Name:      "operation_result",
 			Help:      "Results of metrics",
 		}, []string{"operation_id", "instance_id", "global_account_id", "plan_id", "type", "state", "error_category", "error_reason", "error"}),
-		poolingInterval:                  cfg.OperationResultPollingInterval,
+		pollingInterval:                  cfg.OperationResultPollingInterval,
 		finishedOperationRetentionPeriod: cfg.OperationResultFinishedOperationRetentionPeriod,
 	}
 	go opInfo.Job(ctx)
