@@ -22,7 +22,7 @@ type operationsResult struct {
 	lastUpdate                       time.Time
 	operations                       storage.Operations
 	cache                            map[string]internal.Operation
-	poolingInterval                  time.Duration
+	pollingInterval                  time.Duration
 	sync                             sync.Mutex
 	finishedOperationRetentionPeriod time.Duration // zero means metrics are stored forever, otherwise they are deleted after this period (starting from the time of operation finish)
 }
@@ -139,7 +139,7 @@ func (s *operationsResult) Job(ctx context.Context) {
 		s.logger.Error("failed to update metrics metrics", err)
 	}
 
-	ticker := time.NewTicker(s.poolingInterval)
+	ticker := time.NewTicker(s.pollingInterval)
 	for {
 		select {
 		case <-ticker.C:
