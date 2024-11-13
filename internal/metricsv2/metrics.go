@@ -36,10 +36,10 @@ type Exposer interface {
 type Config struct {
 	Enabled                                         bool          `envconfig:"default=false"`
 	OperationResultRetentionPeriod                  time.Duration `envconfig:"default=1h"`
-	OperationResultPoolingInterval                  time.Duration `envconfig:"default=1m"`
-	OperationStatsPoolingInterval                   time.Duration `envconfig:"default=1m"`
+	OperationResultPollingInterval                  time.Duration `envconfig:"default=1m"`
+	OperationStatsPollingInterval                   time.Duration `envconfig:"default=1m"`
 	OperationResultFinishedOperationRetentionPeriod time.Duration `envconfig:"default=3h"`
-	BindingsStatsPoolingInterval                    time.Duration `envconfig:"default=1m"`
+	BindingsStatsPollingInterval                    time.Duration `envconfig:"default=1m"`
 }
 
 type RegisterContainer struct {
@@ -63,7 +63,7 @@ func Register(ctx context.Context, sub event.Subscriber, db storage.BrokerStorag
 	opStats := NewOperationsStats(db.Operations(), cfg, logger)
 	opStats.MustRegister(ctx)
 
-	bindingStats := NewBindingStatsCollector(db.Bindings(), cfg.BindingsStatsPoolingInterval, logger)
+	bindingStats := NewBindingStatsCollector(db.Bindings(), cfg.BindingsStatsPollingInterval, logger)
 	bindingStats.MustRegister(ctx)
 
 	bindDurationCollector := NewBindDurationCollector(logger)

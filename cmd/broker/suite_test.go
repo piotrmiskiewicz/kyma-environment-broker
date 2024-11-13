@@ -964,10 +964,10 @@ func fixConfig() *Config {
 		MetricsV2: metricsv2.Config{
 			Enabled:                                         true,
 			OperationResultRetentionPeriod:                  time.Hour,
-			OperationResultPoolingInterval:                  3 * time.Second,
-			OperationStatsPoolingInterval:                   3 * time.Second,
+			OperationResultPollingInterval:                  3 * time.Second,
+			OperationStatsPollingInterval:                   3 * time.Second,
 			OperationResultFinishedOperationRetentionPeriod: time.Hour,
-			BindingsStatsPoolingInterval:                    3 * time.Second,
+			BindingsStatsPollingInterval:                    3 * time.Second,
 		},
 	}
 }
