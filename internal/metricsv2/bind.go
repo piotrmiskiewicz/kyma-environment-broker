@@ -105,11 +105,11 @@ type BindingStatitics struct {
 
 // NewBindingStatsCollector provides a collector which shows the time in minutes since the earliest binding expiration:
 // - kcp_keb_v2_minutes_since_earliest_binding_expiration
-func NewBindingStatsCollector(db storage.Bindings, poolingInterval time.Duration, logger logrus.FieldLogger) *BindingStatitics {
+func NewBindingStatsCollector(db storage.Bindings, pollingInterval time.Duration, logger logrus.FieldLogger) *BindingStatitics {
 	return &BindingStatitics{
 		db:              db,
 		logger:          logger,
-		pollingInterval: poolingInterval,
+		pollingInterval: pollingInterval,
 		MinutesSinceEarliestExpirationMetric: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: prometheusNamespacev2,
 			Subsystem: prometheusSubsystemv2,
