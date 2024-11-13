@@ -118,7 +118,7 @@ func TestBinding(t *testing.T) {
                 "service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
                 "plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 				"parameters": {
-					"expiration_seconds": 1
+					"expiration_seconds": 600
 				}
                }`)
 
