@@ -391,7 +391,7 @@ type ERSContextStats struct {
 }
 
 type BindingStats struct {
-	MinutesSinceEarliestExpiration float64
+	MinutesSinceEarliestExpiration float64 `db:"minutes_since_earliest_expiration"`
 }
 
 // NewProvisioningOperation creates a fresh (just starting) instance of the ProvisioningOperation

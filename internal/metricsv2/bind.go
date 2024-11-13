@@ -99,7 +99,7 @@ type BindingStatitics struct {
 	logger logrus.FieldLogger
 
 	sync                                 sync.Mutex
-	poolingInterval                      time.Duration
+	pollingInterval                      time.Duration
 	MinutesSinceEarliestExpirationMetric prometheus.Gauge
 }
 
@@ -109,12 +109,13 @@ func NewBindingStatsCollector(db storage.Bindings, poolingInterval time.Duration
 	return &BindingStatitics{
 		db:              db,
 		logger:          logger,
-		poolingInterval: poolingInterval,
+		pollingInterval: poolingInterval,
 		MinutesSinceEarliestExpirationMetric: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: prometheusNamespacev2,
 			Subsystem: prometheusSubsystemv2,
 			Name:      "minutes_since_earliest_binding_expiration",
-			Help:      "Specifies the time in minutes since the earliest binding expiration.",
+			Help: "Specifies the time in minutes since the earliest binding expiration. " +
+				"The value should not be greater than the binding cleaning job interval. The metric is created to detect problems with the job.",
 		}),
 	}
 }
@@ -135,7 +136,7 @@ func (c *BindingStatitics) Job(ctx context.Context) {
 		c.logger.Error("failed to update metrics metrics", err)
 	}
 
-	ticker := time.NewTicker(c.poolingInterval)
+	ticker := time.NewTicker(c.pollingInterval)
 	for {
 		select {
 		case <-ticker.C:
