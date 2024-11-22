@@ -241,7 +241,6 @@ type InstanceDetails struct {
 	CompassRuntimeId *string
 
 	// Used during KIM integration while deprovisioning - to be removed later on when provisioner not used anymore
-	// TODO: what about suspension?
 	KimDeprovisionsOnly *bool `json:"kim_deprovisions_only"`
 }
 
