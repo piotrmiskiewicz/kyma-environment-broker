@@ -70,12 +70,13 @@ func (step *DeleteRuntimeResourceStep) Run(operation internal.Operation, logger 
 	// save the information about the controller of SKR (Provisioner or KIM) only once, when the first deprovisioning is triggered
 	if operation.KimDeprovisionsOnly == nil {
 		controlledByKimOnly := !runtime.IsControlledByProvisioner()
-		operation, backoff, _ := step.operationManager.UpdateOperation(operation, func(operation *internal.Operation) {
+		newOperation, backoff, _ := step.operationManager.UpdateOperation(operation, func(operation *internal.Operation) {
 			operation.KimDeprovisionsOnly = ptr.Bool(controlledByKimOnly)
 		}, logger)
 		if backoff > 0 {
-			return operation, backoff, nil
+			return newOperation, backoff, nil
 		}
+		operation = newOperation
 	}
 
 	err = step.kcpClient.Delete(context.Background(), &runtime)
