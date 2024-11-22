@@ -2,6 +2,7 @@ package deprovisioning
 
 import (
 	"context"
+	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 	"time"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
@@ -66,12 +67,15 @@ func (step *DeleteRuntimeResourceStep) Run(operation internal.Operation, logger 
 		}
 	}
 
-	controlledByKimOnly := !runtime.IsControlledByProvisioner()
-	operation, backoff, _ := step.operationManager.UpdateOperation(operation, func(operation *internal.Operation) {
-		operation.KimDeprovisionsOnly = controlledByKimOnly
-	}, logger)
-	if backoff > 0 {
-		return operation, backoff, nil
+	// save the information about the controller of SKR (Provisioner or KIM) only once, when the first deprovisioning is triggered
+	if operation.KimDeprovisionsOnly == nil {
+		controlledByKimOnly := !runtime.IsControlledByProvisioner()
+		operation, backoff, _ := step.operationManager.UpdateOperation(operation, func(operation *internal.Operation) {
+			operation.KimDeprovisionsOnly = ptr.Bool(controlledByKimOnly)
+		}, logger)
+		if backoff > 0 {
+			return operation, backoff, nil
+		}
 	}
 
 	err = step.kcpClient.Delete(context.Background(), &runtime)

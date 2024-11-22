@@ -1,6 +1,7 @@
 package deprovisioning
 
 import (
+	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 	"testing"
 	"time"
 
@@ -21,7 +22,7 @@ func TestRemoveRuntimeStep_Run(t *testing.T) {
 		operation.GlobalAccountID = fixGlobalAccountID
 		operation.RuntimeID = fixRuntimeID
 		operation.KymaResourceNamespace = "kcp-system"
-		operation.KimDeprovisionsOnly = false
+		operation.KimDeprovisionsOnly = ptr.Bool(false)
 		err := memoryStorage.Operations().InsertDeprovisioningOperation(operation)
 		assert.NoError(t, err)
 
@@ -59,7 +60,7 @@ func TestRemoveRuntimeStep_Run(t *testing.T) {
 		operation.GlobalAccountID = fixGlobalAccountID
 		operation.RuntimeID = fixRuntimeID
 		operation.KymaResourceNamespace = "kcp-system"
-		operation.KimDeprovisionsOnly = true
+		operation.KimDeprovisionsOnly = ptr.Bool(true)
 		err := memoryStorage.Operations().InsertDeprovisioningOperation(operation)
 		assert.NoError(t, err)
 
