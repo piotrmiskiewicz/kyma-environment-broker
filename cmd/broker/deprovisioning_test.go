@@ -112,7 +112,7 @@ func TestReDeprovision(t *testing.T) {
 }
 
 func TestReDeprovision_BlockProvisionerCallSecondTime(t *testing.T) {
-	// TODO: remove this tests when migration to KIM is done
+	// TODO: remove this tests when migration to from Provisioner to KIM is done
 	// given
 	cfg := fixConfig()
 	//cfg.EDP.Disabled = true // disable EDP to have all steps successful executed
