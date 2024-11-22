@@ -112,7 +112,7 @@ func TestReDeprovision(t *testing.T) {
 }
 
 func TestReDeprovision_BlockProvisionerCallSecondTime(t *testing.T) {
-
+	// TODO: remove this tests when migration to KIM is done
 	// given
 	cfg := fixConfig()
 	//cfg.EDP.Disabled = true // disable EDP to have all steps successful executed
@@ -144,16 +144,12 @@ func TestReDeprovision_BlockProvisionerCallSecondTime(t *testing.T) {
 	// then
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
-	// 1. Provisioning KIM only
-	// 2. Deprovisioning deprovisionIncomplete (for example EDP)
-
-	// 3. Second deprovisioning - assert provisioner was not called
-
 	// when
 	resp = suite.CallAPI("DELETE", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", iid), ``)
 	opID = suite.DecodeOperationID(resp)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
+	// second deprovisioning (the first one removed runtime resource, but second must not call Provisioner)
 	resp = suite.CallAPI("DELETE", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", iid), ``)
 	opID = suite.DecodeOperationID(resp)
 	suite.WaitForOperationState(opID, domain.Succeeded)
