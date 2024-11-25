@@ -115,7 +115,6 @@ func TestReDeprovision_BlockProvisionerCallSecondTime(t *testing.T) {
 	// TODO: remove this tests when migration to from Provisioner to KIM is done
 	// given
 	cfg := fixConfig()
-	//cfg.EDP.Disabled = true // disable EDP to have all steps successful executed
 	suite := NewBrokerSuiteTestWithConfig(t, cfg)
 	suite.DisableProvisioner()
 	defer suite.TearDown()
