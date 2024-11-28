@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	kebError "github.com/kyma-project/kyma-environment-broker/internal/error"
+
 	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 )
 
@@ -58,6 +60,8 @@ type RuntimeDTO struct {
 	ClusterConfig               *gqlschema.GardenerConfigInput `json:"clusterConfig,omitempty"`
 	RuntimeConfig               *map[string]interface{}        `json:"runtimeConfig,omitempty"`
 	Bindings                    []BindingDTO                   `json:"bindings,omitempty"`
+	BetaEnabled                 string                         `json:"betaEnabled,omitempty"`
+	UsedForProduction           string                         `json:"usedForProduction,omitempty"`
 }
 
 type CloudProvider string
@@ -252,6 +256,7 @@ type Operation struct {
 	FinishedStages               []string                  `json:"finishedStages"`
 	ExecutedButNotCompletedSteps []string                  `json:"executedButNotCompletedSteps,omitempty"`
 	Parameters                   ProvisioningParametersDTO `json:"parameters,omitempty"`
+	Error                        *kebError.LastError       `json:"error,omitempty"`
 }
 
 type RuntimesPage struct {

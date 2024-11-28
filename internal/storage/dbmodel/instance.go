@@ -36,6 +36,7 @@ type InstanceFilter struct {
 	Expired                      *bool
 	DeletionAttempted            *bool
 	BindingExists                *bool
+	Suspended                    *bool
 }
 
 type InstanceDTO struct {
@@ -75,4 +76,11 @@ type InstanceWithOperationDTO struct {
 type InstanceWithExtendedOperationDTO struct {
 	InstanceDTO
 	OperationDTO
+}
+
+type InstanceWithSubaccountStateDTO struct {
+	InstanceDTO
+	OperationDTO
+	BetaEnabled       *string
+	UsedForProduction *string
 }

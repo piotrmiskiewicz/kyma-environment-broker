@@ -17,11 +17,12 @@ type Instances interface {
 	Insert(instance internal.Instance) error
 	Update(instance internal.Instance) (*internal.Instance, error)
 	Delete(instanceID string) error
-	GetInstanceStats() (internal.InstanceStats, error)
+	GetActiveInstanceStats() (internal.InstanceStats, error)
 	GetERSContextStats() (internal.ERSContextStats, error)
 	GetDistinctSubAccounts() ([]string, error)
 	GetNumberOfInstancesForGlobalAccountID(globalAccountID string) (int, error)
 	List(dbmodel.InstanceFilter) ([]internal.Instance, int, int, error)
+	ListWithSubaccountState(dbmodel.InstanceFilter) ([]internal.InstanceWithSubaccountState, int, int, error)
 
 	// todo: remove after instances parameters migration is done
 	InsertWithoutEncryption(instance internal.Instance) error
