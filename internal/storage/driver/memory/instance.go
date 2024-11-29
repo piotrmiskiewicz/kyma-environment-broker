@@ -17,15 +17,17 @@ import (
 )
 
 type instances struct {
-	mu                sync.Mutex
-	instances         map[string]internal.Instance
-	operationsStorage *operations
+	mu                      sync.Mutex
+	instances               map[string]internal.Instance
+	operationsStorage       *operations
+	subaccountStatesStorage *SubaccountStates
 }
 
-func NewInstance(operations *operations) *instances {
+func NewInstance(operations *operations, subaccountStates *SubaccountStates) *instances {
 	return &instances{
-		instances:         make(map[string]internal.Instance, 0),
-		operationsStorage: operations,
+		instances:               make(map[string]internal.Instance, 0),
+		operationsStorage:       operations,
+		subaccountStatesStorage: subaccountStates,
 	}
 }
 
@@ -237,6 +239,36 @@ func (s *instances) List(filter dbmodel.InstanceFilter) ([]internal.Instance, in
 		nil
 }
 
+func (s *instances) ListWithSubaccountState(filter dbmodel.InstanceFilter) ([]internal.InstanceWithSubaccountState, int, int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var toReturn []internal.InstanceWithSubaccountState
+
+	offset := pagination.ConvertPageAndPageSizeToOffset(filter.PageSize, filter.Page)
+
+	instances := s.filterInstances(filter)
+	sort.Slice(instances, func(i, j int) bool {
+		return instances[i].CreatedAt.Before(instances[j].CreatedAt)
+	})
+
+	for i := offset; (filter.PageSize < 1 || i < offset+filter.PageSize) && i < len(instances); i++ {
+		instanceToReturn := s.instances[instances[i].InstanceID]
+		instanceWithSubaccountState := internal.InstanceWithSubaccountState{
+			Instance: instanceToReturn,
+		}
+		if _, exists := s.subaccountStatesStorage.subaccountStates[instanceToReturn.SubAccountID]; exists {
+			instanceWithSubaccountState.BetaEnabled = s.subaccountStatesStorage.subaccountStates[instanceToReturn.SubAccountID].BetaEnabled
+			instanceWithSubaccountState.UsedForProduction = s.subaccountStatesStorage.subaccountStates[instanceToReturn.SubAccountID].UsedForProduction
+		}
+		toReturn = append(toReturn, instanceWithSubaccountState)
+	}
+
+	return toReturn,
+		len(toReturn),
+		len(instances),
+		nil
+}
+
 func sortInstancesByCreatedAt(instances []internal.Instance) {
 	sort.Slice(instances, func(i, j int) bool {
 		return instances[i].CreatedAt.Before(instances[j].CreatedAt)
@@ -279,9 +311,7 @@ func (s *instances) filterInstances(filter dbmodel.InstanceFilter) []internal.In
 			continue
 		}
 		if len(filter.Shoots) > 0 {
-			// required for shootName
-			lastOp, _ := s.operationsStorage.GetLastOperation(v.InstanceID)
-			if ok = matchFilter(lastOp.ShootName, filter.Shoots, shootMatch); !ok {
+			if ok = matchFilter(v.InstanceDetails.ShootName, filter.Shoots, shootMatch); !ok {
 				continue
 			}
 		}
