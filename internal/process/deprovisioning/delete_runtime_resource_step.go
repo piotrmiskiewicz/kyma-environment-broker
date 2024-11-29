@@ -2,8 +2,9 @@ package deprovisioning
 
 import (
 	"context"
-	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
 
