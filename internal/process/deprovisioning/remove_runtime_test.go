@@ -1,9 +1,10 @@
 package deprovisioning
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
 	provisionerAutomock "github.com/kyma-project/kyma-environment-broker/internal/provisioner/automock"
