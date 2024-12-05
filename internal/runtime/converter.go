@@ -68,6 +68,7 @@ func (c *converter) applyOperation(source *internal.Operation, target *pkg.Opera
 		target.FinishedStages = source.FinishedStages
 		target.ExecutedButNotCompletedSteps = source.ExcutedButNotCompleted
 		target.Parameters = source.ProvisioningParameters.Parameters
+		target.Parameters.TargetSecret = nil
 		if !reflect.DeepEqual(source.LastError, kebError.LastError{}) {
 			target.Error = &source.LastError
 		}
@@ -96,6 +97,10 @@ func (c *converter) NewDTO(instance internal.Instance) (pkg.RuntimeDTO, error) {
 		},
 		Parameters: instance.Parameters.Parameters,
 	}
+
+	toReturn.SubscriptionSecretName = instance.Parameters.Parameters.TargetSecret
+
+	toReturn.Parameters.TargetSecret = nil // TargetSecret is not a parameter sent by a customer
 	if !instance.DeletedAt.IsZero() {
 		toReturn.Status.DeletedAt = &instance.DeletedAt
 	}
