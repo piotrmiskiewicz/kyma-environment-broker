@@ -69,6 +69,7 @@ func (c *converter) applyOperation(source *internal.Operation, target *pkg.Opera
 		target.ExecutedButNotCompletedSteps = source.ExcutedButNotCompleted
 		target.Parameters = source.ProvisioningParameters.Parameters
 		target.Parameters.TargetSecret = nil
+		target.Parameters.Kubeconfig = ""
 		if !reflect.DeepEqual(source.LastError, kebError.LastError{}) {
 			target.Error = &source.LastError
 		}
