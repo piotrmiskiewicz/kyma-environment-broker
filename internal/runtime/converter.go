@@ -43,6 +43,7 @@ func (c *converter) ApplyProvisioningOperation(dto *pkg.RuntimeDTO, pOpr *intern
 		dto.Status.Provisioning = &pkg.Operation{}
 		c.applyOperation(&pOpr.Operation, dto.Status.Provisioning)
 		c.adjustRuntimeState(dto)
+		dto.SubscriptionSecretName = pOpr.ProvisioningParameters.Parameters.TargetSecret
 	}
 }
 
