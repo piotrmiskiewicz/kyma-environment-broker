@@ -121,49 +121,9 @@ func TestCreatingKymaResourceWithCloudProviderInOperation(t *testing.T) {
 }
 
 func TestCreatingInternalKymaResource(t *testing.T) {
-	t.Run("With compass runtime ID", func(t *testing.T) {
-		// given
-		operation, cli := fixOperationForApplyKymaResource(t)
-		storage := storage.NewMemoryStorage()
-		err := storage.Operations().InsertOperation(operation)
-		require.NoError(t, err)
-		svc := NewApplyKymaStep(storage.Operations(), cli)
-
-		// when
-		_, backoff, err := svc.Run(operation, logrus.New())
-
-		// then
-		require.NoError(t, err)
-		require.Zero(t, backoff)
-		aList := unstructured.UnstructuredList{}
-		aList.SetGroupVersionKind(schema.GroupVersionKind{Group: "operator.kyma-project.io", Version: "v1beta2", Kind: "KymaList"})
-
-		err = cli.List(context.Background(), &aList)
-		require.NoError(t, err)
-		assert.Equal(t, 1, len(aList.Items))
-		expectedLabels := map[string]string{
-			"kyma-project.io/instance-id":         "inst-id",
-			"kyma-project.io/runtime-id":          "runtime-inst-id",
-			"kyma-project.io/global-account-id":   "e8f7ec0a-0cd6-41f0-905d-5d1efa9fb6c4",
-			"kyma-project.io/subaccount-id":       "SA-op-id",
-			"kyma-project.io/shoot-name":          "Shoot-inst-id",
-			"kyma-project.io/platform-region":     "westeurope",
-			"operator.kyma-project.io/kyma-name":  "runtime-inst-id",
-			"kyma-project.io/broker-plan-id":      "4deee563-e5ec-4731-b9b1-53b42d855f0c",
-			"kyma-project.io/broker-plan-name":    "azure",
-			"operator.kyma-project.io/managed-by": "lifecycle-manager",
-			"kyma-project.io/provider":            "Test"}
-		assertLabelsExistsForInternalKymaResource(t, expectedLabels, aList.Items[0])
-
-		assertCompassRuntimeIdAnnotationExists(t, aList.Items[0])
-		_, _, err = svc.Run(operation, logrus.New())
-		require.NoError(t, err)
-	})
-
 	t.Run("Without compass runtime ID", func(t *testing.T) {
 		// given
 		operation, cli := fixOperationForApplyKymaResource(t)
-		operation.SetCompassRuntimeIdNotRegisteredByProvisioner()
 		storage := storage.NewMemoryStorage()
 		err := storage.Operations().InsertOperation(operation)
 		require.NoError(t, err)
