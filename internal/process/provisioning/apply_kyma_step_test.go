@@ -353,16 +353,6 @@ func assertLabelsExistsForInternalKymaResource(t *testing.T, expectedLabels map[
 	assertLabelsExists(t, expectedLabels, obj)
 }
 
-func assertCompassRuntimeIdAnnotationExists(t *testing.T, obj unstructured.Unstructured) {
-	t.Helper()
-	assert.Contains(t, obj.GetAnnotations(), "compass-runtime-id-for-migration")
-}
-
-func assertCompassRuntimeIdAnnotationNotExists(t *testing.T, obj unstructured.Unstructured) {
-	t.Helper()
-	assert.NotContains(t, obj.GetAnnotations(), "compass-runtime-id-for-migration")
-}
-
 func assertLabelsExistsForExternalKymaResource(t *testing.T, expectedLabels map[string]string, obj unstructured.Unstructured) {
 	assert.NotContains(t, obj.GetLabels(), "operator.kyma-project.io/internal")
 	assertLabelsExists(t, expectedLabels, obj)
