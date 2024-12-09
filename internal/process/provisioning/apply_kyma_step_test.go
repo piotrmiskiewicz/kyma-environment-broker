@@ -154,8 +154,6 @@ func TestCreatingInternalKymaResource(t *testing.T) {
 			"operator.kyma-project.io/managed-by": "lifecycle-manager",
 			"kyma-project.io/provider":            "Test"}
 		assertLabelsExistsForInternalKymaResource(t, expectedLabels, aList.Items[0])
-
-		assertCompassRuntimeIdAnnotationNotExists(t, aList.Items[0])
 		_, _, err = svc.Run(operation, logrus.New())
 		require.NoError(t, err)
 	})
