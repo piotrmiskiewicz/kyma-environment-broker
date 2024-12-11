@@ -229,18 +229,6 @@ func TestCreateBindng(t *testing.T) {
 		assert.NotEmptyf(t, binding.Credentials.(Credentials).Kubeconfig, "kubeconfig is empty")
 	})
 
-	t.Run("should create binding", func(t *testing.T) {
-		binding, err := bindEndpoint.Bind(context.Background(), instanceID1, "binding-id-003", domain.BindDetails{
-			ServiceID:     "123",
-			PlanID:        fixture.PlanId,
-			RawParameters: json.RawMessage(`{}`),
-		}, false)
-
-		// then
-		require.NoError(t, err)
-		assert.NotEmptyf(t, binding.Credentials.(Credentials).Kubeconfig, "kubeconfig is empty")
-	})
-
 	t.Run("should report a conflict", func(t *testing.T) {
 		_, err := bindEndpoint.Bind(context.Background(), instanceID1, "binding-id-004", domain.BindDetails{
 			ServiceID:     "123",
