@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal"
-	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
-	"github.com/pivotal-cf/brokerapi/v8/domain/apiresponses"
 	"log/slog"
 	"net/http"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal"
+	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
+	"github.com/pivotal-cf/brokerapi/v8/domain/apiresponses"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/event"
 
