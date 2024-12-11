@@ -29,7 +29,7 @@ import (
 
 const (
 	instanceID1      = "1"
-	maxBindingsCount = 1000
+	maxBindingsCount = 10
 )
 
 func fixBindingConfig() BindingConfig {
