@@ -78,8 +78,6 @@ func TestCreateBinding(t *testing.T) {
 		}...).
 		Build()
 
-	fmt.Println(string(kbcfgFirst))
-
 	//// secret check in assertions
 	err = clientFirst.Create(context.Background(), &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{

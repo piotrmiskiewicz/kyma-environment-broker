@@ -566,7 +566,6 @@ func prepareBindingEndpoint(t *testing.T, cfg BindingConfig) (*BindEndpoint, sto
 	log := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	}))
-	//// binding configuration
 
 	logs := logrus.New()
 	logs.SetLevel(logrus.DebugLevel)
