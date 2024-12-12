@@ -567,11 +567,6 @@ func prepareBindingEndpoint(t *testing.T, cfg BindingConfig) (*BindEndpoint, sto
 		Level: slog.LevelDebug,
 	}))
 
-	logs := logrus.New()
-	logs.SetLevel(logrus.DebugLevel)
-	logs.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat: time.RFC3339Nano,
-	})
 	err := db.Instances().Insert(fixture.FixInstance(instanceID1))
 	require.NoError(t, err)
 
@@ -579,5 +574,5 @@ func prepareBindingEndpoint(t *testing.T, cfg BindingConfig) (*BindEndpoint, sto
 	err = db.Operations().InsertOperation(operation)
 	require.NoError(t, err)
 
-	return NewBind(cfg, db, logs, k8sClientProvider, k8sClientProvider, event.NewPubSub(log)), db
+	return NewBind(cfg, db, log, k8sClientProvider, k8sClientProvider, event.NewPubSub(log)), db
 }

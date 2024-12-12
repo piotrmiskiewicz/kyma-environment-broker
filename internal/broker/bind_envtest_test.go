@@ -110,8 +110,8 @@ func TestCreateBinding(t *testing.T) {
 		Level: slog.LevelDebug,
 	}))
 	publisher := event.NewPubSub(log)
-	svc := NewBind(bindingCfg, db, logs, skrK8sClientProvider, skrK8sClientProvider, publisher)
-	unbindSvc := NewUnbind(logs, db, brokerBindings.NewServiceAccountBindingsManager(skrK8sClientProvider, skrK8sClientProvider), publisher)
+	svc := NewBind(bindingCfg, db, log, skrK8sClientProvider, skrK8sClientProvider, publisher)
+	unbindSvc := NewUnbind(log, db, brokerBindings.NewServiceAccountBindingsManager(skrK8sClientProvider, skrK8sClientProvider), publisher)
 
 	t.Run("should create a new service binding without error", func(t *testing.T) {
 		// When
