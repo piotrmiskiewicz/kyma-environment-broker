@@ -121,7 +121,7 @@ func TestCreateBinding(t *testing.T) {
 			ServiceID:     "",
 			BindResource:  nil,
 			RawContext:    json.RawMessage(`{}`),
-			RawParameters: json.RawMessage(`{"expirationSeconds": 660}`),
+			RawParameters: json.RawMessage(`{"expiration_seconds": 660}`),
 		}, false)
 
 		// then
