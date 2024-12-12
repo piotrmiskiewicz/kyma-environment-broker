@@ -58,7 +58,7 @@ func (p *provider) KubeconfigForRuntimeID(runtimeID string) ([]byte, error) {
 	return []byte{}, nil
 }
 
-func TestCreateBindingEndpoint(t *testing.T) {
+func TestCreateBindingEndpoint_dbInsertionInCaseOfError(t *testing.T) {
 	t.Log("test create binding endpoint")
 
 	// Given
@@ -118,36 +118,6 @@ func TestCreateBindingEndpoint(t *testing.T) {
 		require.NotNil(t, binding.ExpiresAt)
 		require.Empty(t, binding.Kubeconfig)
 	})
-
-	t.Run("should return error when expiration_seconds is greater than maxExpirationSeconds", func(t *testing.T) {
-		// when
-		_, err := bindEndpoint.Bind(context.Background(), instanceID1, "binding-id-001", domain.BindDetails{
-			ServiceID:     "123",
-			PlanID:        fixture.PlanId,
-			RawParameters: json.RawMessage(`{"expirationSeconds": 10}`),
-		}, false)
-		require.Error(t, err)
-
-		// then
-		assert.IsType(t, err, &apiresponses.FailureResponse{}, "Get request returned error of unexpected type")
-		apierr := err.(*apiresponses.FailureResponse)
-		assert.Equal(t, http.StatusBadRequest, apierr.ValidatedStatusCode(nil), "Get request status code not matching")
-	})
-
-	t.Run("should return error when expiration_seconds is less than minExpirationSeconds", func(t *testing.T) {
-		// when
-		_, err := bindEndpoint.Bind(context.Background(), instanceID1, "binding-id-002", domain.BindDetails{
-			ServiceID:     "123",
-			PlanID:        fixture.PlanId,
-			RawParameters: json.RawMessage(`{"expirationSeconds": 100000}`),
-		}, false)
-		require.Error(t, err)
-
-		// then
-		assert.IsType(t, err, &apiresponses.FailureResponse{}, "Get request returned error of unexpected type")
-		apierr := err.(*apiresponses.FailureResponse)
-		assert.Equal(t, http.StatusBadRequest, apierr.ValidatedStatusCode(nil), "Get request status code not matching")
-	})
 }
 
 func TestCreateBindingExceedsAllowedNumberOfNonExpiredBindings(t *testing.T) {
@@ -189,7 +159,7 @@ func TestCreateBindingExceedsAllowedNumberOfNonExpiredBindings(t *testing.T) {
 
 }
 
-func TestCreateBindng(t *testing.T) {
+func TestCreateBindingEndpoint(t *testing.T) {
 	bindEndpoint, _ := prepareBindingEndpoint(t, fixBindingConfig())
 
 	t.Run("should return error when expiration_seconds is less than minExpirationSeconds", func(t *testing.T) {
@@ -230,6 +200,18 @@ func TestCreateBindng(t *testing.T) {
 		assert.NotEmptyf(t, binding.Credentials.(Credentials).Kubeconfig, "kubeconfig is empty")
 	})
 
+	t.Run("should create binding with expiration seconds provided", func(t *testing.T) {
+		binding, err := bindEndpoint.Bind(context.Background(), instanceID1, "binding-id-003", domain.BindDetails{
+			ServiceID:     "123",
+			PlanID:        fixture.PlanId,
+			RawParameters: json.RawMessage(`{"expiration_seconds": 1000}`),
+		}, false)
+
+		// then
+		require.NoError(t, err)
+		assert.NotEmptyf(t, binding.Credentials.(Credentials).Kubeconfig, "kubeconfig is empty")
+	})
+
 	t.Run("should report a conflict", func(t *testing.T) {
 		_, err := bindEndpoint.Bind(context.Background(), instanceID1, "binding-id-004", domain.BindDetails{
 			ServiceID:     "123",
@@ -252,6 +234,27 @@ func TestCreateBindng(t *testing.T) {
 		assert.IsType(t, err, &apiresponses.FailureResponse{}, "Get request returned error of unexpected type")
 		apierr := err.(*apiresponses.FailureResponse)
 		assert.Equal(t, http.StatusConflict, apierr.ValidatedStatusCode(nil), "Get request status code not matching")
+	})
+
+	t.Run("should not report a conflict if parameters are the same", func(t *testing.T) {
+		_, err := bindEndpoint.Bind(context.Background(), instanceID1, "binding-id-005", domain.BindDetails{
+			ServiceID:     "123",
+			PlanID:        fixture.PlanId,
+			RawParameters: json.RawMessage(`{"expiration_seconds": 1000}`),
+		}, false)
+
+		// then
+		require.NoError(t, err)
+
+		// when
+		_, err = bindEndpoint.Bind(context.Background(), instanceID1, "binding-id-005", domain.BindDetails{
+			ServiceID:     "123",
+			PlanID:        fixture.PlanId,
+			RawParameters: json.RawMessage(`{"expiration_seconds": 1000}`),
+		}, false)
+
+		// then
+		require.NoError(t, err)
 	})
 
 }
