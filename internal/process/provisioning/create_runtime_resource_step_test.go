@@ -164,6 +164,97 @@ func TestCreateRuntimeResourceStep_Defaults_Azure_MultiZone_YamlOnly(t *testing.
 	assert.Zero(t, repeat)
 }
 
+func TestCreateRuntimeResourceStep_FailureToleranceForTrial(t *testing.T) {
+	// given
+	assert.NoError(t, imv1.AddToScheme(scheme.Scheme))
+	memoryStorage := storage.NewMemoryStorage()
+
+	instance, operation := fixInstanceAndOperation(broker.TrialPlanID, "westeurope", "platform-region")
+	assertInsertions(t, memoryStorage, instance, operation)
+
+	kimConfig := fixKimConfig("trial", false)
+	inputConfig := input.Config{MultiZoneCluster: true}
+	inputConfig.ControlPlaneFailureTolerance = "zone"
+	inputConfig.DefaultTrialProvider = "AWS"
+
+	cli := getClientForTests(t)
+
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
+
+	// when
+	_, _, err := step.Run(operation, fixLogger())
+
+	// then
+	assert.NoError(t, err)
+	runtime := imv1.Runtime{}
+	err = cli.Get(context.Background(), client.ObjectKey{
+		Namespace: "kyma-system",
+		Name:      operation.RuntimeID,
+	}, &runtime)
+	assert.NoError(t, err)
+	assert.Nil(t, runtime.Spec.Shoot.ControlPlane.HighAvailability)
+}
+
+func TestCreateRuntimeResourceStep_FailureToleranceForCommercial(t *testing.T) {
+	// given
+	assert.NoError(t, imv1.AddToScheme(scheme.Scheme))
+	memoryStorage := storage.NewMemoryStorage()
+
+	instance, operation := fixInstanceAndOperation(broker.AzurePlanID, "westeurope", "platform-region")
+	assertInsertions(t, memoryStorage, instance, operation)
+
+	kimConfig := fixKimConfig("azure", false)
+	inputConfig := input.Config{MultiZoneCluster: true}
+	inputConfig.ControlPlaneFailureTolerance = "zone"
+
+	cli := getClientForTests(t)
+
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
+
+	// when
+	_, _, err := step.Run(operation, fixLogger())
+
+	// then
+	assert.NoError(t, err)
+	runtime := imv1.Runtime{}
+	err = cli.Get(context.Background(), client.ObjectKey{
+		Namespace: "kyma-system",
+		Name:      operation.RuntimeID,
+	}, &runtime)
+	assert.NoError(t, err)
+	assert.Equal(t, "zone", string(runtime.Spec.Shoot.ControlPlane.HighAvailability.FailureTolerance.Type))
+}
+
+func TestCreateRuntimeResourceStep_FailureToleranceForCommercialWithConfiguredNode(t *testing.T) {
+	// given
+	assert.NoError(t, imv1.AddToScheme(scheme.Scheme))
+	memoryStorage := storage.NewMemoryStorage()
+
+	instance, operation := fixInstanceAndOperation(broker.AWSPlanID, "westeurope", "platform-region")
+	assertInsertions(t, memoryStorage, instance, operation)
+
+	kimConfig := fixKimConfig("aws", false)
+	inputConfig := input.Config{MultiZoneCluster: true}
+	inputConfig.ControlPlaneFailureTolerance = "node"
+
+	cli := getClientForTests(t)
+
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
+
+	// when
+	_, _, err := step.Run(operation, fixLogger())
+
+	// then
+	assert.NoError(t, err)
+	runtime := imv1.Runtime{}
+	err = cli.Get(context.Background(), client.ObjectKey{
+		Namespace: "kyma-system",
+		Name:      operation.RuntimeID,
+	}, &runtime)
+	assert.NoError(t, err)
+	assert.Equal(t, "node", string(runtime.Spec.Shoot.ControlPlane.HighAvailability.FailureTolerance.Type))
+}
+
 func TestCreateRuntimeResourceStep_AllYamls(t *testing.T) {
 
 	for _, testCase := range []struct {
