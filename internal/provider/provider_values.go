@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
@@ -19,6 +18,7 @@ func GetPlanSpecificValues(
 	useSmallerMachineTypes bool,
 	trialPlatformRegionMapping map[string]string,
 	defaultPurpose string,
+	commercialFailureTolerance string,
 ) (Values, error) {
 	var p Provider
 	switch operation.ProvisioningParameters.PlanID {
@@ -27,6 +27,7 @@ func GetPlanSpecificValues(
 			Purpose:                defaultPurpose,
 			MultiZone:              multiZoneCluster,
 			ProvisioningParameters: operation.ProvisioningParameters,
+			FailureTolerance:       commercialFailureTolerance,
 		}
 	case broker.PreviewPlanID:
 		p = &AWSInputProvider{
@@ -39,6 +40,7 @@ func GetPlanSpecificValues(
 			Purpose:                defaultPurpose,
 			MultiZone:              multiZoneCluster,
 			ProvisioningParameters: operation.ProvisioningParameters,
+			FailureTolerance:       commercialFailureTolerance,
 		}
 	case broker.AzureLitePlanID:
 		p = &AzureLiteInputProvider{
@@ -51,6 +53,7 @@ func GetPlanSpecificValues(
 			Purpose:                defaultPurpose,
 			MultiZone:              multiZoneCluster,
 			ProvisioningParameters: operation.ProvisioningParameters,
+			FailureTolerance:       commercialFailureTolerance,
 		}
 	case broker.FreemiumPlanID:
 		switch operation.ProvisioningParameters.PlatformProvider {
@@ -72,6 +75,7 @@ func GetPlanSpecificValues(
 			Purpose:                defaultPurpose,
 			MultiZone:              multiZoneCluster,
 			ProvisioningParameters: operation.ProvisioningParameters,
+			FailureTolerance:       commercialFailureTolerance,
 		}
 	case broker.TrialPlanID:
 		var trialProvider pkg.CloudProvider
