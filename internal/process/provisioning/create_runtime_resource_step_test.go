@@ -192,7 +192,7 @@ func TestCreateRuntimeResourceStep_FailureToleranceForTrial(t *testing.T) {
 		Name:      operation.RuntimeID,
 	}, &runtime)
 	assert.NoError(t, err)
-	assert.Nil(t, runtime.Spec.Shoot.ControlPlane.HighAvailability)
+	assert.Nil(t, runtime.Spec.Shoot.ControlPlane)
 }
 
 func TestCreateRuntimeResourceStep_FailureToleranceForCommercial(t *testing.T) {
@@ -223,6 +223,36 @@ func TestCreateRuntimeResourceStep_FailureToleranceForCommercial(t *testing.T) {
 	}, &runtime)
 	assert.NoError(t, err)
 	assert.Equal(t, "zone", string(runtime.Spec.Shoot.ControlPlane.HighAvailability.FailureTolerance.Type))
+}
+
+func TestCreateRuntimeResourceStep_FailureToleranceForCommercialWithNoConfig(t *testing.T) {
+	// given
+	assert.NoError(t, imv1.AddToScheme(scheme.Scheme))
+	memoryStorage := storage.NewMemoryStorage()
+
+	instance, operation := fixInstanceAndOperation(broker.AzurePlanID, "westeurope", "platform-region")
+	assertInsertions(t, memoryStorage, instance, operation)
+
+	kimConfig := fixKimConfig("azure", false)
+	inputConfig := input.Config{MultiZoneCluster: true}
+	inputConfig.ControlPlaneFailureTolerance = ""
+
+	cli := getClientForTests(t)
+
+	step := NewCreateRuntimeResourceStep(memoryStorage.Operations(), memoryStorage.Instances(), cli, kimConfig, inputConfig, nil, false, defaultOIDSConfig)
+
+	// when
+	_, _, err := step.Run(operation, fixLogger())
+
+	// then
+	assert.NoError(t, err)
+	runtime := imv1.Runtime{}
+	err = cli.Get(context.Background(), client.ObjectKey{
+		Namespace: "kyma-system",
+		Name:      operation.RuntimeID,
+	}, &runtime)
+	assert.NoError(t, err)
+	assert.Nil(t, runtime.Spec.Shoot.ControlPlane)
 }
 
 func TestCreateRuntimeResourceStep_FailureToleranceForCommercialWithConfiguredNode(t *testing.T) {
@@ -800,7 +830,7 @@ func TestCreateRuntimeResourceStep_Defaults_Freemium(t *testing.T) {
 			assert.Equal(t, testCase.expectedProvider, runtime.Spec.Shoot.Provider.Type)
 			assertWorkers(t, runtime.Spec.Shoot.Provider.Workers, testCase.expectedMachineType, 1, 1, 1, 0, 1, testCase.possibleZones)
 
-			assert.Nil(t, runtime.Spec.Shoot.ControlPlane.HighAvailability)
+			assert.Nil(t, runtime.Spec.Shoot.ControlPlane)
 		})
 	}
 }
