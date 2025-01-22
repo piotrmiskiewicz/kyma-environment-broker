@@ -22,14 +22,14 @@ func NewDeprovisionCmd() *cobra.Command {
 		Aliases: []string{"d"},
 		Short:   "Deprovisions an instance",
 		Long:    "Deprovisions an instance",
-		Example: "skr-tester deprovision -i instanceID                            Deprovisions the instance.",
+		Example: "	skr-tester deprovision -i instanceID                            Deprovisions the instance.",
 
 		PreRunE: func(_ *cobra.Command, _ []string) error { return cmd.Validate() },
 		RunE:    func(_ *cobra.Command, _ []string) error { return cmd.Run() },
 	}
 	cmd.cobraCmd = cobraCmd
 
-	cobraCmd.Flags().StringVarP(&cmd.instanceID, "instanceID", "i", "", "InstanceID of the specific instance.")
+	cobraCmd.Flags().StringVarP(&cmd.instanceID, "instanceID", "i", "", "Instance ID of the specific instance.")
 
 	return cobraCmd
 }

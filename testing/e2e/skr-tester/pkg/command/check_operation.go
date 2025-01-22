@@ -25,14 +25,14 @@ func NewCheckOperationCommand() *cobra.Command {
 		Aliases: []string{"o"},
 		Short:   "Waits for operation to finish",
 		Long:    "Waits for operation to finish",
-		Example: "skr-tester operation -i instanceID -op operationID                            Checks the operation status.",
+		Example: "	skr-tester operation -i instanceID -op operationID                            Checks the operation status.",
 
 		PreRunE: func(_ *cobra.Command, _ []string) error { return cmd.Validate() },
 		RunE:    func(_ *cobra.Command, _ []string) error { return cmd.Run() },
 	}
 	cmd.cobraCmd = cobraCmd
 
-	cobraCmd.Flags().StringVarP(&cmd.instanceID, "instanceID", "i", "", "InstanceID of the specific instance.")
+	cobraCmd.Flags().StringVarP(&cmd.instanceID, "instanceID", "i", "", "Instance ID of the specific instance.")
 	cobraCmd.Flags().StringVarP(&cmd.operationID, "operationID", "o", "", "OperationID of the specific operation.")
 	cobraCmd.Flags().DurationVarP(&cmd.timeout, "timeout", "t", 40*time.Minute, "Timeout for the operation to finish.")
 	cobraCmd.Flags().DurationVarP(&cmd.interval, "interval", "n", 1*time.Minute, "Interval between operation checks.")
