@@ -27,6 +27,8 @@ const (
 	oldMigrationsSrc          = "migrations"
 )
 
+// testing
+
 //go:generate mockery --name=FileSystem
 type FileSystem interface {
 	Open(name string) (*os.File, error)

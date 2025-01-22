@@ -69,6 +69,10 @@ func (om *OperationManager) OperationCanceled(operation internal.Operation, desc
 func (om *OperationManager) RetryOperation(operation internal.Operation, errorMessage string, err error, retryInterval time.Duration, maxTime time.Duration, log *slog.Logger) (internal.Operation, time.Duration, error) {
 	log.Info(fmt.Sprintf("Retry Operation was triggered with message: %s", errorMessage))
 	log.Info(fmt.Sprintf("Retrying for %s in %s steps", maxTime.String(), retryInterval.String()))
+
+	// jezeli nie ma wpisu - to twórz
+	// a jezeli jest, to sprawdz timeout
+
 	if time.Since(operation.UpdatedAt) < maxTime {
 		return operation, retryInterval, nil
 	}
