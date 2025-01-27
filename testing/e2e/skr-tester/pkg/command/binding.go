@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -44,16 +43,27 @@ func NewBindingCmd() *cobra.Command {
 		Aliases: []string{"b"},
 		Short:   "Provides operations for bindings",
 		Long:    "Provides operations for bindings",
-		Example: "skr-tester binding -i instanceID --create                           Creates a binding.",
+		Example: `  skr-tester binding -i instanceID --create                             Creates a binding.
+  skr-tester binding -i instanceID --getByID bindingID                  Gets a binding by ID.
+  skr-tester binding -i instanceID --checkKubeconfigValidity            Checks the validity of the kubeconfig created by a binding.
+  skr-tester binding -i instanceID --deleteByID bindingID               Deletes a binding by ID.
+  skr-tester binding -i instanceID --deleteNonExistingByID bindingID    Deletes a non-existing binding.
+  skr-tester binding -i instanceID --getNonExistingByID bindingID       Gets a non-existing binding.
+  skr-tester binding -i instanceID --deleteAndCheckKubeconfig           Deletes a binding and checks if the kubeconfig is still valid.
+  skr-tester binding -i instanceID --checkExpirationBelowMin            Checks if the expiration time below the minimum value is correctly handled.
+  skr-tester binding -i instanceID --checkExpirationAboveMax            Checks if the expiration time above the maximum value is correctly handled.
+  skr-tester binding -i instanceID --createTwoTimesTheSame              Creates a binding two times with the same ID.
+  skr-tester binding -i instanceID --createCheckConflict                Checks if creating a binding two times with the same ID but different expiration time is possible.
+  skr-tester binding -i instanceID --createAboveLimit                   Checks if creating more bindings than the maximum limit is possible.`,
 
 		PreRunE: func(_ *cobra.Command, _ []string) error { return cmd.Validate() },
 		RunE:    func(_ *cobra.Command, _ []string) error { return cmd.Run() },
 	}
 	cmd.cobraCmd = cobraCmd
 
-	cobraCmd.Flags().StringVarP(&cmd.instanceID, "instanceID", "i", "", "InstanceID of the specific instance.")
+	cobraCmd.Flags().StringVarP(&cmd.instanceID, "instanceID", "i", "", "Instance ID of the specific instance.")
 	cobraCmd.Flags().BoolVar(&cmd.create, "create", false, "Create a binding.")
-	cobraCmd.Flags().IntVar(&cmd.expirationSeconds, "expirationSeconds", 600, "Expiration time in seconds for the binding. Leave empty for default value.")
+	cobraCmd.Flags().IntVar(&cmd.expirationSeconds, "expirationSeconds", 600, "Expiration time in seconds for the binding. Leave empty for the default value.")
 	cobraCmd.Flags().StringVar(&cmd.getByID, "getByID", "", "Get a binding by ID.")
 	cobraCmd.Flags().BoolVar(&cmd.checkKubeconfigValidity, "checkKubeconfigValidity", false, "Check the validity of the kubeconfig created by a binding.")
 	cobraCmd.Flags().StringVar(&cmd.deleteByID, "deleteByID", "", "Delete a binding by ID.")
@@ -63,7 +73,7 @@ func NewBindingCmd() *cobra.Command {
 	cobraCmd.Flags().BoolVar(&cmd.checkExpirationBelowMin, "checkExpirationBelowMin", false, "Check if the expiration time below the minimum value is correctly handled.")
 	cobraCmd.Flags().BoolVar(&cmd.checkExpirationAboveMax, "checkExpirationAboveMax", false, "Check if the expiration time above the maximum value is correctly handled.")
 	cobraCmd.Flags().BoolVar(&cmd.createTwoTimesTheSame, "createTwoTimesTheSame", false, "Create a binding two times with the same ID.")
-	cobraCmd.Flags().BoolVar(&cmd.createCheckConflict, "createCheckConflict", false, "Create a binding two times with the same ID but different expiration time.")
+	cobraCmd.Flags().BoolVar(&cmd.createCheckConflict, "createCheckConflict", false, "Create a binding two times with the same ID but different expiration times.")
 	cobraCmd.Flags().BoolVar(&cmd.createAboveLimit, "createAboveLimit", false, "Create more bindings than the maximum allowed limit.")
 
 	return cobraCmd
@@ -137,7 +147,7 @@ func (cmd *BindingCommand) checkKubeconfig(brokerClient *broker.BrokerClient) er
 	}
 	kubeconfig, ok := resp["credentials"].(map[string]interface{})["kubeconfig"].(string)
 	if !ok {
-		return errors.New("failed to parse kubeconfig from binding credentials")
+		return fmt.Errorf("failed to parse kubeconfig from binding credentials")
 	}
 	fmt.Println("Testing kubeconfig returned in response from create binding.")
 	if err := cmd.validateKubeconfig(kubeconfig); err != nil {
@@ -150,7 +160,7 @@ func (cmd *BindingCommand) checkKubeconfig(brokerClient *broker.BrokerClient) er
 	}
 	kubeconfig, ok = binding["credentials"].(map[string]interface{})["kubeconfig"].(string)
 	if !ok {
-		return errors.New("failed to parse kubeconfig from binding credentials")
+		return fmt.Errorf("failed to parse kubeconfig from binding credentials")
 	}
 	fmt.Println("Testing kubeconfig returned in response from get binding.")
 	return cmd.validateKubeconfig(kubeconfig)
@@ -224,7 +234,7 @@ func (cmd *BindingCommand) deleteAndCheckKubeconfigValidity(brokerClient *broker
 	}
 	kubeconfig, ok := resp["credentials"].(map[string]interface{})["kubeconfig"].(string)
 	if !ok {
-		return errors.New("failed to parse kubeconfig from binding credentials")
+		return fmt.Errorf("failed to parse kubeconfig from binding credentials")
 	}
 	if err := cmd.validateKubeconfig(kubeconfig); err != nil {
 		return err
@@ -239,7 +249,7 @@ func (cmd *BindingCommand) deleteAndCheckKubeconfigValidity(brokerClient *broker
 
 	fmt.Printf("Binding with ID %s deleted successfully.\n", bindingID)
 	if err := cmd.validateKubeconfig(kubeconfig); err == nil {
-		return errors.New("expected kubeconfig to be invalid after binding deletion, but it is still valid")
+		return fmt.Errorf("expected kubeconfig to be invalid after binding deletion, but it is still valid")
 	} else if !strings.Contains(err.Error(), "failed to get secret: secrets") {
 		return fmt.Errorf("unexpected error: %v", err)
 	}
@@ -342,7 +352,7 @@ func (cmd *BindingCommand) createBindingsAboveLimit(brokerClient *broker.BrokerC
 
 func (cmd *BindingCommand) Validate() error {
 	if cmd.instanceID == "" {
-		return errors.New("instanceID must be specified")
+		return fmt.Errorf("instanceID must be specified")
 	}
 	count := 0
 	if cmd.create {
@@ -382,7 +392,7 @@ func (cmd *BindingCommand) Validate() error {
 		count++
 	}
 	if count != 1 {
-		return errors.New("you must use exactly one of create, getByID, checkKubeconfigValidity, deleteByID, deleteNonExistingByID, getNonExistingByID, deleteAndCheckKubeconfig, checkExpirationBelowMin, checkExpirationAboveMax, createTwoTimesTheSame, createCheckConflict, or createAboveLimit")
+		return fmt.Errorf("you must use exactly one of create, getByID, checkKubeconfigValidity, deleteByID, deleteNonExistingByID, getNonExistingByID, deleteAndCheckKubeconfig, checkExpirationBelowMin, checkExpirationAboveMax, createTwoTimesTheSame, createCheckConflict, or createAboveLimit")
 	}
 	return nil
 }
