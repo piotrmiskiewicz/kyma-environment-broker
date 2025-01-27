@@ -99,8 +99,8 @@ func (om *OperationManager) RetryOperation(operation internal.Operation, errorMe
 	log.Info(fmt.Sprintf("Retry Operation was triggered with message: %s", errorMessage))
 	log.Info(fmt.Sprintf("Retrying for %s in %s steps", maxTime.String(), retryInterval.String()))
 
-	om.StoreTimestampIfMissing(operation.ID)
-	if !om.IsTimeoutOccurred(operation.ID, maxTime) {
+	om.storeTimestampIfMissing(operation.ID)
+	if !om.isTimeoutOccurred(operation.ID, maxTime) {
 		return operation, retryInterval, nil
 	}
 
@@ -122,8 +122,8 @@ func (om *OperationManager) RetryOperationWithoutFail(operation internal.Operati
 	}
 
 	log.Info(fmt.Sprintf("retrying for %s in %s steps", maxTime.String(), retryInterval.String()))
-	om.StoreTimestampIfMissing(operation.ID)
-	if !om.IsTimeoutOccurred(operation.ID, maxTime) {
+	om.storeTimestampIfMissing(operation.ID)
+	if !om.isTimeoutOccurred(operation.ID, maxTime) {
 		return operation, retryInterval, nil
 	}
 	// update description to track failed steps
@@ -198,7 +198,7 @@ func (om *OperationManager) update(operation internal.Operation, state domain.La
 	}, log)
 }
 
-func (om *OperationManager) StoreTimestampIfMissing(id string) {
+func (om *OperationManager) storeTimestampIfMissing(id string) {
 	om.mu.Lock()
 	defer om.mu.Unlock()
 	if om.retryTimestamps[id].IsZero() {
@@ -206,7 +206,7 @@ func (om *OperationManager) StoreTimestampIfMissing(id string) {
 	}
 }
 
-func (om *OperationManager) IsTimeoutOccurred(id string, maxTime time.Duration) bool {
+func (om *OperationManager) isTimeoutOccurred(id string, maxTime time.Duration) bool {
 	om.mu.RLock()
 	defer om.mu.RUnlock()
 	return !om.retryTimestamps[id].IsZero() && time.Since(om.retryTimestamps[id]) > maxTime
