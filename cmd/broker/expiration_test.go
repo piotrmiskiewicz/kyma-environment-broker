@@ -119,7 +119,7 @@ func TestExpiration(t *testing.T) {
 				assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 				provisioningOpID := suite.DecodeOperationID(resp)
-				suite.processProvisioningByOperationID(provisioningOpID)
+				suite.processKIMProvisioningByOperationID(provisioningOpID)
 				suite.WaitForOperationState(provisioningOpID, domain.Succeeded)
 
 				// when
@@ -134,7 +134,7 @@ func TestExpiration(t *testing.T) {
 				assert.NotEmpty(t, suspensionOpID)
 
 				suite.WaitForOperationState(suspensionOpID, domain.InProgress)
-				suite.FinishDeprovisioningOperationByProvisionerForGivenOpId(suspensionOpID)
+				suite.FinishDeprovisioningOperationByKIM(suspensionOpID)
 				suite.WaitForOperationState(suspensionOpID, domain.Succeeded)
 
 				actualInstance := suite.GetInstance(instanceID)
@@ -152,7 +152,7 @@ func TestExpiration(t *testing.T) {
 				assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 				provisioningOpID := suite.DecodeOperationID(resp)
-				suite.processProvisioningByOperationID(provisioningOpID)
+				suite.processKIMProvisioningByOperationID(provisioningOpID)
 				suite.WaitForOperationState(provisioningOpID, domain.Succeeded)
 
 				// when
@@ -167,7 +167,7 @@ func TestExpiration(t *testing.T) {
 				assert.NotEmpty(t, suspensionOpID)
 
 				suite.WaitForOperationState(suspensionOpID, domain.InProgress)
-				suite.FinishDeprovisioningOperationByProvisionerForGivenOpId(suspensionOpID)
+				suite.FinishDeprovisioningOperationByKIM(suspensionOpID)
 				suite.WaitForOperationState(suspensionOpID, domain.Succeeded)
 
 				actualInstance := suite.GetInstance(instanceID)
@@ -202,7 +202,7 @@ func TestExpiration(t *testing.T) {
 				assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 				provisioningOpID := suite.DecodeOperationID(resp)
-				suite.failProvisioningByOperationID(provisioningOpID)
+				suite.failRuntimeByKIM(provisioningOpID)
 				suite.WaitForOperationState(provisioningOpID, domain.Failed)
 
 				// when
@@ -217,7 +217,7 @@ func TestExpiration(t *testing.T) {
 				assert.NotEmpty(t, suspensionOpID)
 
 				suite.WaitForOperationState(suspensionOpID, domain.InProgress)
-				suite.FinishDeprovisioningOperationByProvisionerForGivenOpId(suspensionOpID)
+				suite.FinishDeprovisioningOperationByKIM(suspensionOpID)
 				suite.WaitForOperationState(suspensionOpID, domain.Succeeded)
 
 				actualInstance := suite.GetInstance(instanceID)
@@ -235,7 +235,7 @@ func TestExpiration(t *testing.T) {
 				assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 				provisioningOpID := suite.DecodeOperationID(resp)
-				suite.processProvisioningByOperationID(provisioningOpID)
+				suite.processKIMProvisioningByOperationID(provisioningOpID)
 				suite.WaitForOperationState(provisioningOpID, domain.Succeeded)
 
 				resp = suite.CallAPI(http.MethodDelete,
@@ -260,7 +260,7 @@ func TestExpiration(t *testing.T) {
 				assert.NotEmpty(t, suspensionOpID)
 
 				suite.WaitForOperationState(suspensionOpID, domain.InProgress)
-				suite.FinishDeprovisioningOperationByProvisionerForGivenOpId(suspensionOpID)
+				suite.FinishDeprovisioningOperationByKIM(suspensionOpID)
 				suite.WaitForOperationState(suspensionOpID, domain.Succeeded)
 
 				actualInstance := suite.GetInstance(instanceID)
@@ -278,7 +278,7 @@ func TestExpiration(t *testing.T) {
 				assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 				provisioningOpID := suite.DecodeOperationID(resp)
-				suite.processProvisioningByOperationID(provisioningOpID)
+				suite.processKIMProvisioningByOperationID(provisioningOpID)
 				suite.WaitForOperationState(provisioningOpID, domain.Succeeded)
 
 				// when
@@ -293,7 +293,7 @@ func TestExpiration(t *testing.T) {
 				assert.NotEmpty(t, suspensionOpID)
 
 				suite.WaitForOperationState(suspensionOpID, domain.InProgress)
-				suite.FinishDeprovisioningOperationByProvisionerForGivenOpId(suspensionOpID)
+				suite.FinishDeprovisioningOperationByKIM(suspensionOpID)
 				suite.WaitForOperationState(suspensionOpID, domain.Succeeded)
 
 				actualInstance := suite.GetInstance(instanceID)
@@ -326,7 +326,7 @@ func TestExpiration(t *testing.T) {
 		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 		provisioningOpID := suite.DecodeOperationID(resp)
-		suite.processProvisioningByOperationID(provisioningOpID)
+		suite.processKIMProvisioningByOperationID(provisioningOpID)
 		suite.WaitForOperationState(provisioningOpID, domain.Succeeded)
 
 		// when

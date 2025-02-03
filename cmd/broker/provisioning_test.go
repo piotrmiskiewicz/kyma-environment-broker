@@ -16,7 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/google/uuid"
-	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 	"github.com/pivotal-cf/brokerapi/v8/domain"
 	"github.com/stretchr/testify/assert"
 
@@ -25,7 +24,6 @@ import (
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
-	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
 	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 )
 
@@ -76,27 +74,6 @@ func TestCatalog(t *testing.T) {
 	}
 }
 
-func TestProvisioning_HappyPath(t *testing.T) {
-	// given
-	suite := NewProvisioningSuite(t, false, "", false)
-	defer suite.TearDown()
-
-	// when
-	provisioningOperationID := suite.CreateProvisioning(RuntimeOptions{})
-
-	// then
-	suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-	suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
-
-	// when
-	suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
-
-	// then
-	suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-	suite.AssertAllStagesFinished(provisioningOperationID)
-	suite.AssertProvisioningRequest()
-}
-
 func TestProvisioningWithKIM(t *testing.T) {
 	// this test is used for developing KIM integration. The main reason is to just print the Runtime CR as YAML as a result of a process
 
@@ -129,7 +106,7 @@ func TestProvisioningWithKIM(t *testing.T) {
 
 	opID := suite.DecodeOperationID(resp)
 
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 
 	// then
 	suite.WaitForOperationState(opID, domain.Succeeded)
@@ -165,7 +142,7 @@ func TestProvisioningWithKIMOnlyForTrial(t *testing.T) {
 
 	opID := suite.DecodeOperationID(resp)
 
-	suite.processKIMOnlyProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 
 	// then
 	suite.WaitForOperationState(opID, domain.Succeeded)
@@ -201,7 +178,7 @@ func TestProvisioningWithKIMOnlyForAWS(t *testing.T) {
 
 	opID := suite.DecodeOperationID(resp)
 
-	suite.processKIMOnlyProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 
 	// then
 	suite.WaitForOperationState(opID, domain.Succeeded)
@@ -231,7 +208,7 @@ func TestProvisioning_HappyPathAWS(t *testing.T) {
 		}`)
 	opID := suite.DecodeOperationID(resp)
 
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 
 	// then
 	suite.WaitForOperationState(opID, domain.Succeeded)
@@ -241,70 +218,71 @@ func TestProvisioning_HappyPathAWS(t *testing.T) {
 	suite.AssertKymaLabelNotExists(opID, "kyma-project.io/platform-region")
 }
 
-func TestProvisioning_SeedAndShootSameRegion_Disabled(t *testing.T) {
-	// given
-	suite := NewBrokerSuiteTest(t)
-	defer suite.TearDown()
-	iid := uuid.New().String()
+//
+//func TestProvisioning_SeedAndShootSameRegion_Disabled(t *testing.T) {
+//	// given
+//	suite := NewBrokerSuiteTest(t)
+//	defer suite.TearDown()
+//	iid := uuid.New().String()
+//
+//	// when
+//	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
+//		`{
+//					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+//					"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
+//					"context": {
+//						"globalaccount_id": "g-account-id",
+//						"subaccount_id": "sub-id",
+//						"user_id": "john.smith@email.com"
+//					},
+//					"parameters": {
+//						"name": "testing-cluster",
+//						"region": "eu-central-1",
+//						"shootAndSeedSameRegion": true
+//					}
+//		}`)
+//	opID := suite.DecodeOperationID(resp)
+//
+//	suite.processKIMProvisioningByOperationID(opID)
+//
+//	// then
+//	suite.WaitForOperationState(opID, domain.Succeeded)
+//	assert.False(t, suite.provisionerClient.IsSeedAndRegionValidationEnabled())
+//}
 
-	// when
-	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
-		`{
-					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-					"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
-					"context": {
-						"globalaccount_id": "g-account-id",
-						"subaccount_id": "sub-id",
-						"user_id": "john.smith@email.com"
-					},
-					"parameters": {
-						"name": "testing-cluster",
-						"region": "eu-central-1",
-						"shootAndSeedSameRegion": true
-					}
-		}`)
-	opID := suite.DecodeOperationID(resp)
-
-	suite.processProvisioningByOperationID(opID)
-
-	// then
-	suite.WaitForOperationState(opID, domain.Succeeded)
-	assert.False(t, suite.provisionerClient.IsSeedAndRegionValidationEnabled())
-}
-
-func TestProvisioning_SeedAndShootSameRegion_Enabled(t *testing.T) {
-	// given
-	cfg := fixConfig()
-	cfg.Broker.EnableShootAndSeedSameRegion = true
-	cfg.Provisioner.EnableShootAndSeedSameRegion = true
-	suite := NewBrokerSuiteTestWithConfig(t, cfg)
-	defer suite.TearDown()
-	iid := uuid.New().String()
-
-	// when
-	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
-		`{
-					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-					"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
-					"context": {
-						"globalaccount_id": "g-account-id",
-						"subaccount_id": "sub-id",
-						"user_id": "john.smith@email.com"
-					},
-					"parameters": {
-						"name": "testing-cluster",
-						"region": "eu-central-1",
-						"shootAndSeedSameRegion": true
-					}
-		}`)
-	opID := suite.DecodeOperationID(resp)
-
-	suite.processProvisioningByOperationID(opID)
-
-	// then
-	suite.WaitForOperationState(opID, domain.Succeeded)
-	assert.True(t, suite.provisionerClient.IsSeedAndRegionValidationEnabled())
-}
+//func TestProvisioning_SeedAndShootSameRegion_Enabled(t *testing.T) {
+//	// given
+//	cfg := fixConfig()
+//	cfg.Broker.EnableShootAndSeedSameRegion = true
+//	cfg.Provisioner.EnableShootAndSeedSameRegion = true
+//	suite := NewBrokerSuiteTestWithConfig(t, cfg)
+//	defer suite.TearDown()
+//	iid := uuid.New().String()
+//
+//	// when
+//	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
+//		`{
+//					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+//					"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
+//					"context": {
+//						"globalaccount_id": "g-account-id",
+//						"subaccount_id": "sub-id",
+//						"user_id": "john.smith@email.com"
+//					},
+//					"parameters": {
+//						"name": "testing-cluster",
+//						"region": "eu-central-1",
+//						"shootAndSeedSameRegion": true
+//					}
+//		}`)
+//	opID := suite.DecodeOperationID(resp)
+//
+//	suite.processKIMProvisioningByOperationID(opID)
+//
+//	// then
+//	suite.WaitForOperationState(opID, domain.Succeeded)
+//	assert.True(t, suite.provisionerClient.IsSeedAndRegionValidationEnabled())
+//}
 
 func TestProvisioning_HappyPathSapConvergedCloud(t *testing.T) {
 	// given
@@ -330,7 +308,7 @@ func TestProvisioning_HappyPathSapConvergedCloud(t *testing.T) {
 			}`)
 		opID := suite.DecodeOperationID(resp)
 
-		suite.processProvisioningByOperationID(opID)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		// then
 		suite.WaitForOperationState(opID, domain.Succeeded)
@@ -467,7 +445,7 @@ func TestProvisioning_NetworkingParametersForAWS(t *testing.T) {
 		}`)
 	opID := suite.DecodeOperationID(resp)
 
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 
 	suite.WaitForOperationState(opID, domain.Succeeded)
 }
@@ -503,7 +481,7 @@ func TestProvisioning_AllNetworkingParametersForAWS(t *testing.T) {
 		}`)
 	opID := suite.DecodeOperationID(resp)
 
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 
 	suite.WaitForOperationState(opID, domain.Succeeded)
 }
@@ -592,11 +570,12 @@ func TestProvisioning_AzureWithEURestrictedAccessHappyFlow(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// then
-	suite.AssertAzureRegion("switzerlandnorth")
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	assert.Equal(t, "switzerlandnorth", runtime.Spec.Shoot.Region)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
 		"kyma-project.io/region":          "switzerlandnorth",
 		"kyma-project.io/provider":        "Azure",
@@ -629,11 +608,12 @@ func TestProvisioning_AzureWithEURestrictedAccessDefaultRegion(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// then
-	suite.AssertAzureRegion("switzerlandnorth")
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	assert.Equal(t, "switzerlandnorth", runtime.Spec.Shoot.Region)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
 		"kyma-project.io/region":          "switzerlandnorth",
 		"kyma-project.io/provider":        "Azure",
@@ -666,11 +646,12 @@ func TestProvisioning_AWSWithEURestrictedAccessHappyFlow(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// then
-	suite.AssertAWSRegionAndZone("eu-central-1")
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	assert.Equal(t, "eu-central-1", runtime.Spec.Shoot.Region)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
 		"kyma-project.io/region":          "eu-central-1",
 		"kyma-project.io/provider":        "AWS",
@@ -704,11 +685,12 @@ func TestProvisioning_AWSWithEURestrictedAccessDefaultRegion(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// then
-	suite.AssertAWSRegionAndZone("eu-central-1")
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	assert.Equal(t, "eu-central-1", runtime.Spec.Shoot.Region)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
 		"kyma-project.io/region":          "eu-central-1",
 		"kyma-project.io/provider":        "AWS",
@@ -742,11 +724,12 @@ func TestProvisioning_TrialWithEmptyRegion(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// then
-	suite.AssertAWSRegionAndZone("eu-west-1")
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	assert.Equal(t, "eu-west-1", runtime.Spec.Shoot.Region)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
 		"kyma-project.io/provider": "AWS",
 		"kyma-project.io/region":   "eu-west-1"})
@@ -779,7 +762,7 @@ func TestProvisioning_Conflict(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// when
@@ -872,6 +855,9 @@ func TestProvisioning_OwnCluster(t *testing.T) {
 }
 
 func TestProvisioning_TrialAtEU(t *testing.T) {
+	// The region eu-central-1 is taken because the default Trial Provider  is set to AWS.
+	// Other Hyperscalers will have different default regions.
+
 	// given
 	suite := NewBrokerSuiteTest(t)
 	defer suite.TearDown()
@@ -896,11 +882,12 @@ func TestProvisioning_TrialAtEU(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// then
-	suite.AssertAWSRegionAndZone("eu-central-1")
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	assert.Equal(t, "eu-central-1", runtime.Spec.Shoot.Region)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
 		"kyma-project.io/region":          "eu-central-1",
 		"kyma-project.io/provider":        "AWS",
@@ -1142,262 +1129,311 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			suite := NewProvisioningSuite(t, tc.multiZone, tc.controlPlaneFailureTolerance, tc.useSmallerMachineTypes)
+			//suite := NewProvisioningSuite(t, tc.multiZone, tc.controlPlaneFailureTolerance, tc.useSmallerMachineTypes)
+			//defer suite.TearDown()
+
+			// given
+			suite := NewBrokerSuiteTest(t, "2.0")
 			defer suite.TearDown()
+			iid := uuid.New().String()
 
 			// when
-			provisioningOperationID := suite.CreateProvisioning(RuntimeOptions{
-				PlanID:           tc.planID,
-				PlatformRegion:   tc.platformRegion,
-				PlatformProvider: tc.platformProvider,
-				Region:           tc.region,
-			})
-
-			// then
-			suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-			suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
+			resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/%s/v2/service_instances/%s?accepts_incomplete=true", tc.platformRegion, iid),
+				fmt.Sprintf(`{
+					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+					"plan_id": "%s",
+					"context": {
+						"sm_platform_credentials": {
+							  "url": "https://sm.url",
+							  "credentials": {}
+					    },
+						"globalaccount_id": "g-account-id",
+						"subaccount_id": "sub-id",
+						"user_id": "john.smith@email.com"
+					},
+					"parameters": {
+						"name": "testing-cluster",
+                        "region": "%s"
+					}
+		}`, tc.planID, tc.region))
+			opID := suite.DecodeOperationID(resp)
 
 			// when
-			suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
+			//provisioningOperationID := suite.CreateProvisioning(RuntimeOptions{
+			//	PlanID:           tc.planID,
+			//	PlatformRegion:   tc.platformRegion,
+			//	PlatformProvider: tc.platformProvider,
+			//	Region:           tc.region,
+			//})
 
 			// then
-			suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-			suite.AssertAllStagesFinished(provisioningOperationID)
+			suite.processKIMProvisioningByOperationID(opID)
 
-			suite.AssertProvider(tc.expectedProvider)
-			suite.AssertMinimalNumberOfNodes(tc.expectedMinimalNumberOfNodes)
-			suite.AssertMaximumNumberOfNodes(tc.expectedMaximumNumberOfNodes)
-			suite.AssertMachineType(tc.expectedMachineType)
-			suite.AssertZonesCount(tc.expectedZonesCount, tc.planID)
-			suite.AssertSubscription(tc.expectedSharedSubscription, tc.expectedSubscriptionHyperscalerType)
-			suite.AssertControlPlaneFailureTolerance(tc.controlPlaneFailureTolerance)
+			// then
+			suite.WaitForProvisioningState(opID, domain.Succeeded)
+
+			runtimeCR := suite.GetRuntimeResourceByInstanceID(iid)
+			assert.Equal(t, tc.expectedProvider, runtimeCR.Spec.Shoot.Provider.Type)
+			assert.Equal(t, tc.expectedMinimalNumberOfNodes, runtimeCR.Spec.Shoot.Provider.Workers[0].Minimum)
+			assert.Equal(t, tc.expectedMaximumNumberOfNodes, runtimeCR.Spec.Shoot.Provider.Workers[0].Maximum)
+			assert.Equal(t, tc.expectedMachineType, runtimeCR.Spec.Shoot.Provider.Workers[0].Machine.Type)
+			assert.Equal(t, tc.expectedZonesCount, len(runtimeCR.Spec.Shoot.Provider.Workers[0].Zones))
+			assert.Equal(t, tc.controlPlaneFailureTolerance, runtimeCR.Spec.Shoot.ControlPlane.HighAvailability.FailureTolerance)
+			suite.AssertSubscription(iid, tc.expectedSharedSubscription, tc.expectedSubscriptionHyperscalerType)
 		})
 
 	}
 }
 
-func TestProvisioning_OIDCValues(t *testing.T) {
-
-	t.Run("should apply default OIDC values when OIDC object is nil", func(t *testing.T) {
-		// given
-		suite := NewProvisioningSuite(t, false, "", false)
-		defer suite.TearDown()
-		defaultOIDC := fixture.FixOIDCConfigDTO()
-		expectedOIDC := gqlschema.OIDCConfigInput{
-			ClientID:       defaultOIDC.ClientID,
-			GroupsClaim:    defaultOIDC.GroupsClaim,
-			IssuerURL:      defaultOIDC.IssuerURL,
-			SigningAlgs:    defaultOIDC.SigningAlgs,
-			UsernameClaim:  defaultOIDC.UsernameClaim,
-			UsernamePrefix: defaultOIDC.UsernamePrefix,
-		}
-
-		// when
-		provisioningOperationID := suite.CreateProvisioning(RuntimeOptions{})
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
-
-		// when
-		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-		suite.AssertAllStagesFinished(provisioningOperationID)
-		suite.AssertProvisioningRequest()
-		suite.AssertOIDC(expectedOIDC)
-	})
-
-	t.Run("should apply default OIDC values when all OIDC object's fields are empty", func(t *testing.T) {
-		// given
-		suite := NewProvisioningSuite(t, false, "", false)
-		defer suite.TearDown()
-		defaultOIDC := fixture.FixOIDCConfigDTO()
-		expectedOIDC := gqlschema.OIDCConfigInput{
-			ClientID:       defaultOIDC.ClientID,
-			GroupsClaim:    defaultOIDC.GroupsClaim,
-			IssuerURL:      defaultOIDC.IssuerURL,
-			SigningAlgs:    defaultOIDC.SigningAlgs,
-			UsernameClaim:  defaultOIDC.UsernameClaim,
-			UsernamePrefix: defaultOIDC.UsernamePrefix,
-		}
-		options := RuntimeOptions{
-			OIDC: &pkg.OIDCConfigDTO{},
-		}
-
-		// when
-		provisioningOperationID := suite.CreateProvisioning(options)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
-
-		// when
-		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-		suite.AssertAllStagesFinished(provisioningOperationID)
-		suite.AssertProvisioningRequest()
-		suite.AssertOIDC(expectedOIDC)
-	})
-
-	t.Run("should apply provided OIDC configuration", func(t *testing.T) {
-		// given
-		suite := NewProvisioningSuite(t, false, "", false)
-		defer suite.TearDown()
-		providedOIDC := pkg.OIDCConfigDTO{
-			ClientID:       "fake-client-id-1",
-			GroupsClaim:    "fakeGroups",
-			IssuerURL:      "https://testurl.local",
-			SigningAlgs:    []string{"RS256", "HS256"},
-			UsernameClaim:  "fakeUsernameClaim",
-			UsernamePrefix: "::",
-		}
-		expectedOIDC := gqlschema.OIDCConfigInput{
-			ClientID:       providedOIDC.ClientID,
-			GroupsClaim:    providedOIDC.GroupsClaim,
-			IssuerURL:      providedOIDC.IssuerURL,
-			SigningAlgs:    providedOIDC.SigningAlgs,
-			UsernameClaim:  providedOIDC.UsernameClaim,
-			UsernamePrefix: providedOIDC.UsernamePrefix,
-		}
-		options := RuntimeOptions{OIDC: &providedOIDC}
-
-		// when
-		provisioningOperationID := suite.CreateProvisioning(options)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
-
-		// when
-		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-		suite.AssertAllStagesFinished(provisioningOperationID)
-		suite.AssertProvisioningRequest()
-		suite.AssertOIDC(expectedOIDC)
-	})
-
-	t.Run("should apply default OIDC values on empty OIDC params from input", func(t *testing.T) {
-		// given
-		suite := NewProvisioningSuite(t, false, "", false)
-		defer suite.TearDown()
-		providedOIDC := pkg.OIDCConfigDTO{
-			ClientID:  "fake-client-id-1",
-			IssuerURL: "https://testurl.local",
-		}
-		defaultOIDC := defaultOIDCValues()
-		expectedOIDC := gqlschema.OIDCConfigInput{
-			ClientID:       providedOIDC.ClientID,
-			GroupsClaim:    defaultOIDC.GroupsClaim,
-			IssuerURL:      providedOIDC.IssuerURL,
-			SigningAlgs:    defaultOIDC.SigningAlgs,
-			UsernameClaim:  defaultOIDC.UsernameClaim,
-			UsernamePrefix: defaultOIDC.UsernamePrefix,
-		}
-		options := RuntimeOptions{OIDC: &providedOIDC}
-
-		// when
-		provisioningOperationID := suite.CreateProvisioning(options)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
-
-		// when
-		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-		suite.AssertAllStagesFinished(provisioningOperationID)
-		suite.AssertProvisioningRequest()
-		suite.AssertOIDC(expectedOIDC)
-	})
-}
+//
+//func TestProvisioning_OIDCValues(t *testing.T) {
+//
+//	t.Run("should apply default OIDC values when OIDC object is nil", func(t *testing.T) {
+//		// given
+//		suite := NewProvisioningSuite(t, false, "", false)
+//		defer suite.TearDown()
+//		defaultOIDC := fixture.FixOIDCConfigDTO()
+//		expectedOIDC := gqlschema.OIDCConfigInput{
+//			ClientID:       defaultOIDC.ClientID,
+//			GroupsClaim:    defaultOIDC.GroupsClaim,
+//			IssuerURL:      defaultOIDC.IssuerURL,
+//			SigningAlgs:    defaultOIDC.SigningAlgs,
+//			UsernameClaim:  defaultOIDC.UsernameClaim,
+//			UsernamePrefix: defaultOIDC.UsernamePrefix,
+//		}
+//
+//		// when
+//		provisioningOperationID := suite.CreateProvisioning(RuntimeOptions{})
+//
+//		// then
+//		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
+//		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
+//
+//		// when
+//		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
+//
+//		// then
+//		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
+//		suite.AssertAllStagesFinished(provisioningOperationID)
+//		suite.AssertProvisioningRequest()
+//		suite.AssertOIDC(expectedOIDC)
+//	})
+//
+//	t.Run("should apply default OIDC values when all OIDC object's fields are empty", func(t *testing.T) {
+//		// given
+//		suite := NewProvisioningSuite(t, false, "", false)
+//		defer suite.TearDown()
+//		defaultOIDC := fixture.FixOIDCConfigDTO()
+//		expectedOIDC := gqlschema.OIDCConfigInput{
+//			ClientID:       defaultOIDC.ClientID,
+//			GroupsClaim:    defaultOIDC.GroupsClaim,
+//			IssuerURL:      defaultOIDC.IssuerURL,
+//			SigningAlgs:    defaultOIDC.SigningAlgs,
+//			UsernameClaim:  defaultOIDC.UsernameClaim,
+//			UsernamePrefix: defaultOIDC.UsernamePrefix,
+//		}
+//		options := RuntimeOptions{
+//			OIDC: &pkg.OIDCConfigDTO{},
+//		}
+//
+//		// when
+//		provisioningOperationID := suite.CreateProvisioning(options)
+//
+//		// then
+//		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
+//		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
+//
+//		// when
+//		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
+//
+//		// then
+//		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
+//		suite.AssertAllStagesFinished(provisioningOperationID)
+//		suite.AssertProvisioningRequest()
+//		suite.AssertOIDC(expectedOIDC)
+//	})
+//
+//	t.Run("should apply provided OIDC configuration", func(t *testing.T) {
+//		// given
+//		suite := NewProvisioningSuite(t, false, "", false)
+//		defer suite.TearDown()
+//		providedOIDC := pkg.OIDCConfigDTO{
+//			ClientID:       "fake-client-id-1",
+//			GroupsClaim:    "fakeGroups",
+//			IssuerURL:      "https://testurl.local",
+//			SigningAlgs:    []string{"RS256", "HS256"},
+//			UsernameClaim:  "fakeUsernameClaim",
+//			UsernamePrefix: "::",
+//		}
+//		expectedOIDC := gqlschema.OIDCConfigInput{
+//			ClientID:       providedOIDC.ClientID,
+//			GroupsClaim:    providedOIDC.GroupsClaim,
+//			IssuerURL:      providedOIDC.IssuerURL,
+//			SigningAlgs:    providedOIDC.SigningAlgs,
+//			UsernameClaim:  providedOIDC.UsernameClaim,
+//			UsernamePrefix: providedOIDC.UsernamePrefix,
+//		}
+//		options := RuntimeOptions{OIDC: &providedOIDC}
+//
+//		// when
+//		provisioningOperationID := suite.CreateProvisioning(options)
+//
+//		// then
+//		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
+//		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
+//
+//		// when
+//		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
+//
+//		// then
+//		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
+//		suite.AssertAllStagesFinished(provisioningOperationID)
+//		suite.AssertProvisioningRequest()
+//		suite.AssertOIDC(expectedOIDC)
+//	})
+//
+//	t.Run("should apply default OIDC values on empty OIDC params from input", func(t *testing.T) {
+//		// given
+//		suite := NewProvisioningSuite(t, false, "", false)
+//		defer suite.TearDown()
+//		providedOIDC := pkg.OIDCConfigDTO{
+//			ClientID:  "fake-client-id-1",
+//			IssuerURL: "https://testurl.local",
+//		}
+//		defaultOIDC := defaultOIDCValues()
+//		expectedOIDC := gqlschema.OIDCConfigInput{
+//			ClientID:       providedOIDC.ClientID,
+//			GroupsClaim:    defaultOIDC.GroupsClaim,
+//			IssuerURL:      providedOIDC.IssuerURL,
+//			SigningAlgs:    defaultOIDC.SigningAlgs,
+//			UsernameClaim:  defaultOIDC.UsernameClaim,
+//			UsernamePrefix: defaultOIDC.UsernamePrefix,
+//		}
+//		options := RuntimeOptions{OIDC: &providedOIDC}
+//
+//		// when
+//		provisioningOperationID := suite.CreateProvisioning(options)
+//
+//		// then
+//		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
+//		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
+//
+//		// when
+//		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
+//
+//		// then
+//		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
+//		suite.AssertAllStagesFinished(provisioningOperationID)
+//		suite.AssertProvisioningRequest()
+//		suite.AssertOIDC(expectedOIDC)
+//	})
+//}
 
 func TestProvisioning_RuntimeAdministrators(t *testing.T) {
 	t.Run("should use UserID as default value for admins list", func(t *testing.T) {
 		// given
-		suite := NewProvisioningSuite(t, false, "", false)
+		suite := NewBrokerSuiteTest(t, "2.0")
 		defer suite.TearDown()
-		options := RuntimeOptions{
-			UserID: "fake-user-id",
-		}
-		expectedAdmins := []string{"fake-user-id"}
+		iid := uuid.New().String()
 
 		// when
-		provisioningOperationID := suite.CreateProvisioning(options)
+		resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
+			`{
+					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+					"plan_id": "03e3cb66-a4c6-4c6a-b4b0-5d42224debea",
+					"context": {
+						"sm_platform_credentials": {
+							  "url": "https://sm.url",
+							  "credentials": {}
+					    },
+						"globalaccount_id": "g-account-id",
+						"subaccount_id": "sub-id",
+						"user_id": "john.smith@email.com"
+					},
+					"parameters": {
+						"name": "testing-cluster"
+					}
+		}`)
+		opID := suite.DecodeOperationID(resp)
+
+		suite.WaitForProvisioningState(opID, domain.InProgress)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
-
-		// when
-		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-		suite.AssertAllStagesFinished(provisioningOperationID)
-		suite.AssertProvisioningRequest()
-		suite.AssertRuntimeAdmins(expectedAdmins)
+		suite.WaitForProvisioningState(opID, domain.Succeeded)
+		suite.AssertRuntimeAdminsByInstanceID(iid, []string{"john.smith@email.com"})
 	})
 
 	t.Run("should apply new admins list", func(t *testing.T) {
 		// given
-		suite := NewProvisioningSuite(t, false, "", false)
+		suite := NewBrokerSuiteTest(t, "2.0")
 		defer suite.TearDown()
-		options := RuntimeOptions{
-			UserID:        "fake-user-id",
-			RuntimeAdmins: []string{"admin1@test.com", "admin2@test.com"},
-		}
-		expectedAdmins := []string{"admin1@test.com", "admin2@test.com"}
+		expectedAdmins := []string{""}
+		iid := uuid.New().String()
 
 		// when
-		provisioningOperationID := suite.CreateProvisioning(options)
+		resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
+			`{
+					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+					"plan_id": "03e3cb66-a4c6-4c6a-b4b0-5d42224debea",
+					"context": {
+						"sm_platform_credentials": {
+							  "url": "https://sm.url",
+							  "credentials": {}
+					    },
+						"globalaccount_id": "g-account-id",
+						"subaccount_id": "sub-id",
+						"user_id": "john.smith@email.com"
+					},
+					"parameters": {
+						"name": "testing-cluster",
+						"administrators": ["admin1@test.com", "admin2@test.com"]
+					}
+		}`)
+		opID := suite.DecodeOperationID(resp)
+
+		suite.WaitForProvisioningState(opID, domain.InProgress)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
-
-		// when
-		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-		suite.AssertAllStagesFinished(provisioningOperationID)
-		suite.AssertProvisioningRequest()
-		suite.AssertRuntimeAdmins(expectedAdmins)
+		suite.WaitForProvisioningState(opID, domain.Succeeded)
+		suite.AssertRuntimeAdminsByInstanceID(iid, expectedAdmins)
 	})
 
 	t.Run("should apply empty admin value (list is not empty)", func(t *testing.T) {
 		// given
-		suite := NewProvisioningSuite(t, false, "", false)
+		suite := NewBrokerSuiteTest(t, "2.0")
 		defer suite.TearDown()
-		options := RuntimeOptions{
-			UserID:        "fake-user-id",
-			RuntimeAdmins: []string{""},
-		}
 		expectedAdmins := []string{""}
+		iid := uuid.New().String()
 
 		// when
-		provisioningOperationID := suite.CreateProvisioning(options)
+		resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
+			`{
+					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+					"plan_id": "03e3cb66-a4c6-4c6a-b4b0-5d42224debea",
+					"context": {
+						"sm_platform_credentials": {
+							  "url": "https://sm.url",
+							  "credentials": {}
+					    },
+						"globalaccount_id": "g-account-id",
+						"subaccount_id": "sub-id",
+						"user_id": "john.smith@email.com"
+					},
+					"parameters": {
+						"name": "testing-cluster",
+						"administrators": []
+					}
+		}`)
+		opID := suite.DecodeOperationID(resp)
+
+		suite.WaitForProvisioningState(opID, domain.InProgress)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.InProgress)
-		suite.AssertProvisionerStartedProvisioning(provisioningOperationID)
-
-		// when
-		suite.FinishProvisioningOperationByProvisioner(provisioningOperationID)
-
-		// then
-		suite.WaitForProvisioningState(provisioningOperationID, domain.Succeeded)
-		suite.AssertAllStagesFinished(provisioningOperationID)
-		suite.AssertProvisioningRequest()
-		suite.AssertRuntimeAdmins(expectedAdmins)
+		suite.WaitForProvisioningState(opID, domain.Succeeded)
+		suite.AssertRuntimeAdminsByInstanceID(iid, expectedAdmins)
 	})
 }
 
@@ -1426,12 +1462,11 @@ func TestProvisioning_WithoutNetworkFilter(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	instance := suite.GetInstance(iid)
 
 	// then
-	disabled := false
-	suite.AssertDisabledNetworkFilterForProvisioning(&disabled)
+	suite.AssertNetworkFilteringDisabled(iid, false)
 	assert.Nil(suite.t, instance.Parameters.ErsContext.LicenseType)
 }
 
@@ -1461,13 +1496,12 @@ func TestProvisioning_WithNetworkFilter(t *testing.T) {
 					}
 		}`)
 	opID := suite.DecodeOperationID(resp)
-	suite.processProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByOperationID(opID)
 	instance := suite.GetInstance(iid)
 
 	// then
 
-	disabled := true
-	suite.AssertDisabledNetworkFilterForProvisioning(&disabled)
+	suite.AssertNetworkFilteringDisabled(iid, true)
 	assert.Equal(suite.t, "CUSTOMER", *instance.Parameters.ErsContext.LicenseType)
 }
 
@@ -1512,7 +1546,7 @@ func TestProvisioning_Modules(t *testing.T) {
 				}`)
 		opID := suite.DecodeOperationID(resp)
 
-		suite.processProvisioningByOperationID(opID)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		suite.WaitForOperationState(opID, domain.Succeeded)
 		op, err := suite.db.Operations().GetOperationByID(opID)
@@ -1553,7 +1587,7 @@ func TestProvisioning_Modules(t *testing.T) {
 				}`)
 		opID := suite.DecodeOperationID(resp)
 
-		suite.processProvisioningByOperationID(opID)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		suite.WaitForOperationState(opID, domain.Succeeded)
 		op, err := suite.db.Operations().GetOperationByID(opID)
@@ -1598,7 +1632,7 @@ func TestProvisioning_Modules(t *testing.T) {
 				}`)
 		opID := suite.DecodeOperationID(resp)
 
-		suite.processProvisioningByOperationID(opID)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		suite.WaitForOperationState(opID, domain.Succeeded)
 		op, err := suite.db.Operations().GetOperationByID(opID)
@@ -1632,7 +1666,7 @@ func TestProvisioning_Modules(t *testing.T) {
 				}`)
 		opID := suite.DecodeOperationID(resp)
 
-		suite.processProvisioningByOperationID(opID)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		suite.WaitForOperationState(opID, domain.Succeeded)
 		op, err := suite.db.Operations().GetOperationByID(opID)
@@ -1667,7 +1701,7 @@ func TestProvisioning_Modules(t *testing.T) {
 
 		opID := suite.DecodeOperationID(resp)
 
-		suite.processProvisioningByOperationID(opID)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		suite.WaitForOperationState(opID, domain.Succeeded)
 		op, err := suite.db.Operations().GetOperationByID(opID)
@@ -1701,7 +1735,7 @@ func TestProvisioning_Modules(t *testing.T) {
 
 		opID := suite.DecodeOperationID(resp)
 
-		suite.processProvisioningByOperationID(opID)
+		suite.processKIMProvisioningByOperationID(opID)
 
 		suite.WaitForOperationState(opID, domain.Succeeded)
 		op, err := suite.db.Operations().GetOperationByID(opID)

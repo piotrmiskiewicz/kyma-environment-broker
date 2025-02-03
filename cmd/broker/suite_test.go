@@ -724,48 +724,6 @@ func (s *ProvisioningSuite) ProcessInfrastructureManagerProvisioningByRuntimeID(
 	assert.NoError(s.t, err)
 }
 
-func (s *ProvisioningSuite) FinishProvisioningOperationByProvisioner(operationID string) {
-	var op *internal.Operation
-	err := wait.PollUntilContextTimeout(context.Background(), pollingInterval, 2*time.Second, true, func(ctx context.Context) (done bool, err error) {
-		op, _ = s.storage.Operations().GetOperationByID(operationID)
-		if op.RuntimeID != "" {
-			return true, nil
-		}
-		return false, nil
-	})
-	assert.NoError(s.t, err, "timeout waiting for the operation with runtimeID. The existing operation %+v", op)
-
-	s.finishOperationByProvisioner(gqlschema.OperationTypeProvision, op.RuntimeID)
-
-	s.ProcessInfrastructureManagerProvisioningByRuntimeID(op.RuntimeID)
-}
-
-func (s *ProvisioningSuite) AssertProvisionerStartedProvisioning(operationID string) {
-	// wait until ProvisioningOperation reaches CreateRuntime step
-	var provisioningOp *internal.Operation
-	err := wait.PollUntilContextTimeout(context.Background(), pollingInterval, 2*time.Second, false, func(ctx context.Context) (bool, error) {
-		op, err := s.storage.Operations().GetOperationByID(operationID)
-		assert.NoError(s.t, err)
-		if op.ProvisionerOperationID != "" {
-			provisioningOp = op
-			return true, nil
-		}
-		return false, nil
-	})
-	assert.NoError(s.t, err)
-
-	var status gqlschema.OperationStatus
-	err = wait.PollUntilContextTimeout(context.Background(), pollingInterval, 2*time.Second, false, func(ctx context.Context) (bool, error) {
-		status = s.provisionerClient.FindInProgressOperationByRuntimeIDAndType(provisioningOp.RuntimeID, gqlschema.OperationTypeProvision)
-		if status.ID != nil {
-			return true, nil
-		}
-		return false, nil
-	})
-	assert.NoError(s.t, err)
-	assert.Equal(s.t, gqlschema.OperationStateInProgress, status.State)
-}
-
 func (s *ProvisioningSuite) AssertAllStagesFinished(operationID string) {
 	operation, _ := s.storage.Operations().GetProvisioningOperationByID(operationID)
 	steps := s.provisioningManager.GetAllStages()
@@ -919,9 +877,10 @@ func fixConfig() *Config {
 			MachineImage:                            "gardenlinux",
 			MachineImageVersion:                     "12345.6",
 			MultiZoneCluster:                        true,
-			RuntimeResourceStepTimeout:              time.Minute,
+			RuntimeResourceStepTimeout:              200 * time.Millisecond,
 			ClusterUpdateStepTimeout:                time.Minute,
-			CheckRuntimeResourceDeletionStepTimeout: time.Minute,
+			CheckRuntimeResourceDeletionStepTimeout: 50 * time.Millisecond,
+			DefaultTrialProvider:                    "AWS",
 		},
 		Database: storage.Config{
 			SecretKey: dbSecretKey,
@@ -930,6 +889,7 @@ func fixConfig() *Config {
 			Project:     "kyma",
 			ShootDomain: "kyma.sap.com",
 		},
+
 		UpdateProcessingEnabled: true,
 		Broker: broker.Config{
 			EnablePlans:                           []string{"azure", "trial", "aws", "own_cluster", "preview", "sap-converged-cloud", "gcp", "free"},
@@ -945,8 +905,8 @@ func fixConfig() *Config {
 			},
 			KimConfig: broker.KimConfig{
 				Enabled:      true,
-				Plans:        []string{"preview"},
-				KimOnlyPlans: []string{"preview"},
+				Plans:        []string{"preview", "aws", "gcp", "azure", "trial", "free", "sap-converged-cloud", "azure_lite"},
+				KimOnlyPlans: []string{"preview", "aws", "gcp", "azure", "trial", "free", "sap-converged-cloud", "azure_lite"},
 			},
 			WorkerHealthCheckInterval:     10 * time.Minute,
 			WorkerHealthCheckWarnInterval: 10 * time.Minute,

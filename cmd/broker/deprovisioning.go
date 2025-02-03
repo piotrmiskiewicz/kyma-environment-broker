@@ -29,6 +29,12 @@ func NewDeprovisioningProcessingQueue(ctx context.Context, workersAmount int, de
 		{
 			step: deprovisioning.NewInitStep(db.Operations(), db.Instances(), 12*time.Hour),
 		},
+		//{
+		//	// This step is created to simulate an error in the deprovisioning process in unit tests.
+		//	// This must be disabled in a real environment.
+		//	step:     steps.NewFailingStep(db.Operations()),
+		//	disabled: true,
+		//},
 		{
 			step: deprovisioning.NewBTPOperatorCleanupStep(db.Operations(), k8sClientProvider),
 		},
