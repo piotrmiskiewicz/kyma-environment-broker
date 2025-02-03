@@ -59,7 +59,7 @@ func (s *ResolveCredentialsStep) Run(operation internal.Operation, log *slog.Log
 		return s.operationManager.RetryOperation(operation, msg, err, 10*time.Second, time.Minute, log)
 	}
 
-	log.Info(fmt.Sprintf("Resolved %s as target secret name to use for cluster provisioning for global account ID %s on Hyperscaler %s", *operation.ProvisioningParameters.Parameters.TargetSecret, operation.ProvisioningParameters.ErsContext.GlobalAccountID, hypType.GetKey()))
+	log.Info(fmt.Sprintf("Resolved %s as target secret name to use for cluster provisioning for global account ID %s on Hyperscaler %s", targetSecret, operation.ProvisioningParameters.ErsContext.GlobalAccountID, hypType.GetKey()))
 
 	return s.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
 		op.ProvisioningParameters.Parameters.TargetSecret = &targetSecret
