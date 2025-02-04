@@ -702,6 +702,21 @@ func (s *BrokerSuiteTest) processKIMProvisioningByOperationID(opID string) {
 	s.FinishProvisioningOperationByInfrastructureManager(opID)
 }
 
+func (s *BrokerSuiteTest) processKIMProvisioningByInstanceID(iid string) {
+	var runtimeID string
+	err := s.poller.Invoke(func() (done bool, err error) {
+		instance, _ := s.db.Instances().GetByID(iid)
+		if instance.RuntimeID != "" {
+			runtimeID = instance.RuntimeID
+			return true, nil
+		}
+		return false, nil
+	})
+	assert.NoError(s.t, err, "timeout waiting for the runtimeID to be created.")
+
+	s.ProcessInfrastructureManagerProvisioningRuntimeResource(runtimeID)
+}
+
 func (s *BrokerSuiteTest) fixGardenerShootForOperationID(opID string) *unstructured.Unstructured {
 	op, err := s.db.Operations().GetProvisioningOperationByID(opID)
 	require.NoError(s.t, err)
@@ -764,8 +779,13 @@ func (s *BrokerSuiteTest) AssertKymaResourceExistsByInstanceID(instanceID string
 		Kind:    "Kyma",
 	})
 
-	err := s.k8sKcp.Get(context.Background(), client.ObjectKeyFromObject(obj), obj)
-
+	err := s.poller.Invoke(func() (done bool, err error) {
+		err = s.k8sKcp.Get(context.Background(), client.ObjectKeyFromObject(obj), obj)
+		if err != nil {
+			return false, nil
+		}
+		return true, nil
+	})
 	assert.NoError(s.t, err)
 }
 
