@@ -111,7 +111,7 @@ type BrokerSuiteTest struct {
 
 	eventBroker              *event.PubSub
 	metrics                  *metricsv2.RegisterContainer
-	k8sDeletionObjectTracker RealDeleter
+	k8sDeletionObjectTracker Deleter
 }
 
 func (s *BrokerSuiteTest) TearDown() {
@@ -177,7 +177,7 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 	additionalKymaVersions := []string{"1.19", "1.20", "main", "2.0"}
 	additionalKymaVersions = append(additionalKymaVersions, version...)
 
-	ot := NewDeletionObjectTracker(sch)
+	ot := NewTestingObjectTracker(sch)
 	cli := fake.NewClientBuilder().WithScheme(sch).WithRuntimeObjects(fixK8sResources(defaultKymaVer, additionalKymaVersions)...).
 		WithObjectTracker(ot).Build()
 	log := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{

@@ -143,7 +143,6 @@ func TestMetrics(t *testing.T) {
 		// Updates
 
 		opID = updateReq(instance5)
-		//suite.FinishUpdatingOperationByProvisioner(opID)
 		suite.WaitForOperationState(opID, domain.Succeeded)
 		op8 := suite.GetOperation(opID)
 		assert.NotNil(t, op8)
