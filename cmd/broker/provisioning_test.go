@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	workersAmount                 int = 5
+	workersAmount                 int = 2
 	provisioningRequestPathFormat     = "oauth/cf-eu10/v2/service_instances/%s"
 )
 
