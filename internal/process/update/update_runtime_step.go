@@ -113,6 +113,11 @@ func (s *UpdateRuntimeStep) Run(operation internal.Operation, log *slog.Logger) 
 		}
 	}
 
+	if operation.ProvisioningParameters.ErsContext.LicenseType != nil {
+		disabled := *operation.ProvisioningParameters.ErsContext.DisableEnterprisePolicyFilter()
+		runtime.Spec.Security.Networking.Filter.Egress.Enabled = !disabled
+	}
+
 	err = s.k8sClient.Update(context.Background(), &runtime)
 	if err != nil {
 		return s.operationManager.RetryOperation(operation, "unable to update runtime", err, 10*time.Second, 1*time.Minute, log)

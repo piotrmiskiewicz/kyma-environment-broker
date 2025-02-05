@@ -1984,7 +1984,7 @@ func TestProvisioningWithAdditionalWorkerNodePools(t *testing.T) {
 		}`)
 
 	opID := suite.DecodeOperationID(resp)
-	suite.processKIMOnlyProvisioningByOperationID(opID)
+	suite.processKIMProvisioningByInstanceID(iid)
 
 	// then
 	suite.WaitForOperationState(opID, domain.Succeeded)

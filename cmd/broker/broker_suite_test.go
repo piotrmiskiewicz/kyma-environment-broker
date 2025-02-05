@@ -250,7 +250,7 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 
 		k8sDeletionObjectTracker: ot,
 	}
-	ts.poller = &broker.TimerPoller{PollInterval: 3 * time.Millisecond, PollTimeout: 3 * time.Second, Log: ts.t.Log}
+	ts.poller = &broker.TimerPoller{PollInterval: 8 * time.Millisecond, PollTimeout: 800 * time.Millisecond, Log: ts.t.Log}
 
 	ts.CreateAPI(inputFactory, cfg, db, provisioningQueue, deprovisioningQueue, updateQueue, log, k8sClientProvider, gardener.NewFakeClient(), eventBroker)
 
@@ -1015,8 +1015,7 @@ func (s *BrokerSuiteTest) FinishDeprovisioningOperationByKIM(opID string) {
 	require.NoError(s.t, err)
 	iid := op.InstanceID
 	runtime := s.GetRuntimeResourceByInstanceID(iid)
-	e := s.k8sDeletionObjectTracker.ProcessRuntimeDeletion(runtime.Name)
-	require.NoError(s.t, e)
+	s.k8sDeletionObjectTracker.ProcessRuntimeDeletion(runtime.Name)
 }
 
 func (s *BrokerSuiteTest) FailDeprovisioningOperationByProvisioner(id string) {

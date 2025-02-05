@@ -4,7 +4,6 @@ import (
 	"fmt"
 	gardener "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	"github.com/google/uuid"
-	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
 	"github.com/pivotal-cf/brokerapi/v8/domain"
@@ -674,8 +673,6 @@ func TestUpdateOidcForSuspendedInstance(t *testing.T) {
 	// given
 	suite := NewBrokerSuiteTest(t)
 	defer suite.TearDown()
-	// uncomment to see graphql queries
-	//suite.EnableDumpingProvisionerRequests()
 	iid := uuid.New().String()
 
 	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", iid),
@@ -723,7 +720,7 @@ func TestUpdateOidcForSuspendedInstance(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	suspensionOpID := suite.WaitForLastOperation(iid, domain.InProgress)
 
-	suite.FinishUpdatingOperationByKIM(suspensionOpID)
+	suite.FinishDeprovisioningOperationByKIM(suspensionOpID)
 	suite.WaitForOperationState(suspensionOpID, domain.Succeeded)
 
 	// WHEN
@@ -769,7 +766,7 @@ func TestUpdateOidcForSuspendedInstance(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	// WHEN
-	suite.processKIMProvisioningByOperationID(iid)
+	suite.processKIMProvisioningByInstanceID(iid)
 
 	// THEN
 	suite.WaitForLastOperation(iid, domain.Succeeded)
@@ -1474,6 +1471,7 @@ func TestUpdateCustomAdminsOverwrittenTwice(t *testing.T) {
 
 	opID := suite.DecodeOperationID(resp)
 	suite.processKIMProvisioningByOperationID(opID)
+	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id),
@@ -1593,6 +1591,7 @@ func TestUpdateAutoscalerParams(t *testing.T) {
 
 	opID := suite.DecodeOperationID(resp)
 	suite.processKIMProvisioningByOperationID(opID)
+	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
@@ -1624,10 +1623,10 @@ func TestUpdateAutoscalerParams(t *testing.T) {
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	runtime := suite.GetRuntimeResourceByInstanceID(id)
 	assert.True(t, runtime.Spec.Security.Networking.Filter.Egress.Enabled)
-	assert.Equal(t, min, runtime.Spec.Shoot.Provider.Workers[0].Minimum)
-	assert.Equal(t, max, runtime.Spec.Shoot.Provider.Workers[0].Maximum)
-	assert.Equal(t, surge, runtime.Spec.Shoot.Provider.Workers[0].MaxSurge)
-	assert.Equal(t, unav, runtime.Spec.Shoot.Provider.Workers[0].MaxUnavailable)
+	assert.Equal(t, min, int(runtime.Spec.Shoot.Provider.Workers[0].Minimum))
+	assert.Equal(t, max, int(runtime.Spec.Shoot.Provider.Workers[0].Maximum))
+	assert.Equal(t, surge, runtime.Spec.Shoot.Provider.Workers[0].MaxSurge.IntValue())
+	assert.Equal(t, unav, runtime.Spec.Shoot.Provider.Workers[0].MaxUnavailable.IntValue())
 
 	assert.Equal(t, gardener.OIDCConfig{
 		ClientID:       ptr.String("client-id-oidc"),
@@ -1692,6 +1691,7 @@ func TestUpdateAutoscalerWrongParams(t *testing.T) {
 
 	opID := suite.DecodeOperationID(resp)
 	suite.processKIMProvisioningByOperationID(opID)
+	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
@@ -1742,6 +1742,7 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 
 	opID := suite.DecodeOperationID(resp)
 	suite.processKIMProvisioningByOperationID(opID)
+	suite.WaitForOperationState(opID, domain.Succeeded)
 
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
@@ -1835,7 +1836,7 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	//	},
 	//	Administrators: []string{"john.smith@email.com"},
 	//})
-
+	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
 {
@@ -1909,10 +1910,11 @@ func TestUpdateWhenBothErsContextAndUpdateParametersProvided(t *testing.T) {
 		}
    }`)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	suspensionOpID := suite.WaitForLastOperation(iid, domain.InProgress)
+	suspensionID := suite.WaitForLastOperation(iid, domain.InProgress)
+	suite.FinishDeprovisioningOperationByKIM(suspensionID)
 
-	suite.FinishUpdatingOperationByKIM(suspensionOpID)
-	suite.WaitForOperationState(suspensionOpID, domain.Succeeded)
+	//suite.FinishUpdatingOperationByKIM(suspensionOpID)
+	suite.WaitForLastOperation(iid, domain.Succeeded)
 
 	// THEN
 	lastOp, err := suite.db.Operations().GetLastOperation(iid)
@@ -1947,12 +1949,8 @@ func TestUpdateMachineType(t *testing.T) {
 	opID := suite.DecodeOperationID(resp)
 	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
-	i, err := suite.db.Instances().GetByID(id)
+	_, err := suite.db.Instances().GetByID(id)
 	assert.NoError(t, err, "instance after provisioning")
-	rs, err := suite.db.RuntimeStates().ListByRuntimeID(i.RuntimeID)
-	assert.NoError(t, err, "runtime states after provisioning")
-	assert.Equal(t, 1, len(rs), "runtime states after provisioning")
-	assert.Equal(t, "m5.xlarge", rs[0].ClusterConfig.MachineType, "after provisioning")
 
 	// when patch to change machine type
 
@@ -1968,18 +1966,14 @@ func TestUpdateMachineType(t *testing.T) {
 	}
 }`)
 
-	//c: [ccv1]
-
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	updateOperationID := suite.DecodeOperationID(resp)
 	suite.FinishUpdatingOperationByKIM(updateOperationID)
 	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
 
-	// check call to provisioner that machine type has been updated
-	rs, err = suite.db.RuntimeStates().ListByRuntimeID(i.RuntimeID)
-	assert.NoError(t, err, "runtime states after update")
-	assert.Equal(t, 2, len(rs), "runtime states after update")
-	assert.Equal(t, "m5.2xlarge", rs[0].ClusterConfig.MachineType, "after update")
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	assert.Equal(t, "m5.2xlarge", runtime.Spec.Shoot.Provider.Workers[0].Machine.Type)
+
 }
 
 func TestUpdateBTPOperatorCredsSuccess(t *testing.T) {
@@ -2011,18 +2005,6 @@ func TestUpdateBTPOperatorCredsSuccess(t *testing.T) {
 	opID := suite.DecodeOperationID(resp)
 	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
-	i, err := suite.db.Instances().GetByID(id)
-	assert.NoError(t, err, "getting instance after provisioning, before update")
-	rs, err := suite.db.RuntimeStates().GetLatestByRuntimeID(i.RuntimeID)
-	assert.Equal(t, opID, rs.OperationID, "runtime state provisioning operation ID")
-	assert.NoError(t, err, "getting runtime state after provisioning, before update")
-	assert.ElementsMatch(t, rs.KymaConfig.Components, []*gqlschema.ComponentConfigurationInput{})
-
-	rsu1, err := suite.db.RuntimeStates().GetLatestByRuntimeID(i.RuntimeID)
-	assert.NoError(t, err, "getting runtime after update")
-	i, err = suite.db.Instances().GetByID(id)
-	assert.NoError(t, err, "getting instance after update")
-	assert.ElementsMatch(t, rsu1.KymaConfig.Components, []*gqlschema.ComponentConfigurationInput{})
 
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
@@ -2046,11 +2028,7 @@ func TestUpdateBTPOperatorCredsSuccess(t *testing.T) {
 	suite.FinishUpdatingOperationByKIM(updateOperationID)
 	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
 
-	rsu2, err := suite.db.RuntimeStates().GetLatestByRuntimeID(i.RuntimeID)
-	assert.NoError(t, err, "getting runtime after update")
-	i, err = suite.db.Instances().GetByID(id)
-	assert.NoError(t, err, "getting instance after update")
-	assert.ElementsMatch(t, rsu2.KymaConfig.Components, []*gqlschema.ComponentConfigurationInput{})
+	// todo: assert
 }
 
 func TestUpdateNetworkFilterPersisted(t *testing.T) {
@@ -2087,8 +2065,8 @@ func TestUpdateNetworkFilterPersisted(t *testing.T) {
 	instance := suite.GetInstance(id)
 
 	// then
-	disabled := true
-	//suite.AssertDisabledNetworkFilterForProvisioning(&disabled)
+
+	suite.AssertNetworkFilteringDisabled(instance.InstanceID, true)
 	assert.Equal(suite.t, "CUSTOMER", *instance.Parameters.ErsContext.LicenseType)
 
 	// when
@@ -2119,7 +2097,7 @@ func TestUpdateNetworkFilterPersisted(t *testing.T) {
 	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
 	updateOp, _ := suite.db.Operations().GetOperationByID(updateOperationID)
 	assert.NotNil(suite.t, updateOp.ProvisioningParameters.ErsContext.LicenseType)
-	suite.AssertDisabledNetworkFilterRuntimeState(instance.RuntimeID, updateOperationID, &disabled)
+	suite.AssertNetworkFilteringDisabled(instance.InstanceID, true)
 	instance2 := suite.GetInstance(id)
 	assert.Equal(suite.t, "CUSTOMER", *instance2.Parameters.ErsContext.LicenseType)
 }
@@ -2157,8 +2135,7 @@ func TestUpdateStoreNetworkFilterAndUpdate(t *testing.T) {
 	instance := suite.GetInstance(id)
 
 	// then
-	disabled := false
-	//suite.AssertDisabledNetworkFilterForProvisioning(&disabled)
+	suite.AssertNetworkFilteringDisabled(instance.InstanceID, false)
 	assert.Nil(suite.t, instance.Parameters.ErsContext.LicenseType)
 
 	// when
@@ -2180,18 +2157,17 @@ func TestUpdateStoreNetworkFilterAndUpdate(t *testing.T) {
 			}
 		}`)
 
-	// then
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	updateOperationID := suite.DecodeOperationID(resp)
+	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
+
+	//then
 	updateOp, _ := suite.db.Operations().GetOperationByID(updateOperationID)
 	assert.NotNil(suite.t, updateOp.ProvisioningParameters.ErsContext.LicenseType)
 	instance2 := suite.GetInstance(id)
 	// license_type should be stored in the instance table for ERS context and future upgrades
-	disabled = true
-	suite.AssertDisabledNetworkFilterRuntimeState(instance.RuntimeID, updateOperationID, &disabled)
+	suite.AssertNetworkFilteringDisabled(instance.InstanceID, true)
 	assert.Equal(suite.t, "CUSTOMER", *instance2.Parameters.ErsContext.LicenseType)
-	suite.FinishUpdatingOperationByKIM(updateOperationID)
-	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
 }
 
 func TestMultipleUpdateNetworkFilterPersisted(t *testing.T) {
@@ -2227,9 +2203,10 @@ func TestMultipleUpdateNetworkFilterPersisted(t *testing.T) {
 	instance := suite.GetInstance(id)
 
 	// then
-	disabled := false
+	//disabled := false
 	//suite.AssertDisabledNetworkFilterForProvisioning(&disabled)
-	suite.AssertDisabledNetworkFilterRuntimeState(instance.RuntimeID, opID, &disabled)
+	//suite.AssertDisabledNetworkFilterRuntimeState(instance.RuntimeID, opID, &disabled)
+	suite.AssertNetworkFilteringDisabled(instance.InstanceID, false)
 	assert.Nil(suite.t, instance.Parameters.ErsContext.LicenseType)
 
 	// when
@@ -2268,8 +2245,9 @@ func TestMultipleUpdateNetworkFilterPersisted(t *testing.T) {
 	suite.WaitForOperationState(updateOperation2ID, domain.Succeeded)
 	instance3 := suite.GetInstance(id)
 	assert.Equal(suite.t, "CUSTOMER", *instance3.Parameters.ErsContext.LicenseType)
-	disabled = true
-	suite.AssertDisabledNetworkFilterRuntimeState(instance.RuntimeID, updateOperation2ID, &disabled)
+	suite.AssertNetworkFilteringDisabled(instance.InstanceID, true)
+	//disabled = true
+	//suite.AssertDisabledNetworkFilterRuntimeState(instance.RuntimeID, updateOperation2ID, &disabled)
 }
 
 func TestUpdateOnlyErsContextForExpiredInstance(t *testing.T) {

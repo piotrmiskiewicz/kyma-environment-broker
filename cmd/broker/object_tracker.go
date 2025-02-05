@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	k8stesting "k8s.io/client-go/testing"
 	"sync"
+	"time"
 )
 
 func NewTestingObjectTracker(sch *runtime.Scheme) *testingObjectTracker {
@@ -66,10 +67,19 @@ func (m *testingObjectTracker) Watch(gvr schema.GroupVersionResource, ns string)
 }
 
 func (m *testingObjectTracker) ProcessRuntimeDeletion(name string) {
-	m.deleteRuntimeIfExeist(name)
+	for {
+		time.Sleep(time.Millisecond)
+		m.mu.RLock()
+		_, ok := m.runtimesToDelete[name]
+		m.mu.RUnlock()
+		if ok {
+			break
+		}
+	}
+	m.deleteRuntimeIfExist(name)
 }
 
-func (m *testingObjectTracker) deleteRuntimeIfExeist(name string) {
+func (m *testingObjectTracker) deleteRuntimeIfExist(name string) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	if _, ok := m.runtimesToDelete[name]; ok {
