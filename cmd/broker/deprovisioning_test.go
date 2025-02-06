@@ -3,12 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/common/runtime"
@@ -22,7 +20,7 @@ func TestReDeprovision(t *testing.T) {
 	// given
 	cfg := fixConfig()
 	cfg.EDP.Disabled = true // disable EDP to have all steps successful executed
-	cfg.Provisioner.CheckRuntimeResourceDeletionStepTimeout = 10 * time.Millisecond
+	//cfg.Provisioner.CheckRuntimeResourceDeletionStepTimeout = 10 * time.Millisecond
 	suite := NewBrokerSuiteTestWithConfig(t, cfg)
 	defer suite.TearDown()
 	iid := uuid.New().String()
