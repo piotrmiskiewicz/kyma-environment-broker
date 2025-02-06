@@ -101,8 +101,13 @@ func (s *UpdateRuntimeStep) Run(operation internal.Operation, log *slog.Logger) 
 		}
 	}
 
-	if len(operation.UpdatingParameters.RuntimeAdministrators) > 0 {
-		runtime.Spec.Security.Administrators = operation.UpdatingParameters.RuntimeAdministrators
+	// operation.ProvisioningParameters were calculated and joined across provisioning and all update operations
+	if len(operation.ProvisioningParameters.Parameters.RuntimeAdministrators) != 0 {
+		// prepare new admins list for existing runtime
+		newAdministrators := make([]string, 0, len(operation.ProvisioningParameters.Parameters.RuntimeAdministrators))
+		newAdministrators = append(newAdministrators, operation.ProvisioningParameters.Parameters.RuntimeAdministrators...)
+
+		runtime.Spec.Security.Administrators = newAdministrators
 	} else {
 		if operation.ProvisioningParameters.ErsContext.UserID != "" {
 			// get default admin (user_id from provisioning operation)

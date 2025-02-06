@@ -71,21 +71,17 @@ func TestUpdate(t *testing.T) {
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "id-ooo",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url.com",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: []string{"john.smith@email.com"},
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+
+	assert.Equal(t, "id-ooo", *oidc.ClientID)
+	assert.Equal(t, []string{"RS256"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://issuer.url.com", *oidc.IssuerURL)
+	assert.Equal(t, "groups", *oidc.GroupsClaim)
+	assert.Equal(t, "sub", *oidc.UsernameClaim)
+	assert.Equal(t, "-", *oidc.UsernamePrefix)
+	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
+
 	suite.AssertKymaResourceExists(opID)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
 		"kyma-project.io/region":          "eu-west-1",
@@ -269,21 +265,16 @@ func TestUpdate_SapConvergedCloud(t *testing.T) {
 
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "id-ooo",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url.com",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: []string{"john.smith@email.com"},
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, "id-ooo", *oidc.ClientID)
+	assert.Equal(t, []string{"RS256"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://issuer.url.com", *oidc.IssuerURL)
+	assert.Equal(t, "groups", *oidc.GroupsClaim)
+	assert.Equal(t, "sub", *oidc.UsernameClaim)
+	assert.Equal(t, "-", *oidc.UsernamePrefix)
+	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
+
 	suite.AssertKymaResourceExists(opID)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
 		"kyma-project.io/region":          "eu-de-1",
@@ -399,14 +390,15 @@ func TestUpdateWithNoOIDCParams(t *testing.T) {
 
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig:                    defaultOIDCConfig(),
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: []string{"john.smith@email.com"},
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, defaultOIDCValues().ClientID, *oidc.ClientID)
+	assert.Equal(t, defaultOIDCValues().SigningAlgs, oidc.SigningAlgs)
+	assert.Equal(t, defaultOIDCValues().IssuerURL, *oidc.IssuerURL)
+	assert.Equal(t, defaultOIDCValues().GroupsClaim, *oidc.GroupsClaim)
+	assert.Equal(t, defaultOIDCValues().UsernameClaim, *oidc.UsernameClaim)
+	assert.Equal(t, defaultOIDCValues().UsernamePrefix, *oidc.UsernamePrefix)
+	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
 
 	suite.AssertKymaResourceExists(opID)
 	suite.AssertKymaLabelsExist(opID, map[string]string{
@@ -471,21 +463,15 @@ func TestUpdateWithNoOidcOnUpdate(t *testing.T) {
 
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "id-ooo",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url.com",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: []string{"john.smith@email.com"},
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, "id-ooo", *oidc.ClientID)
+	assert.Equal(t, []string{"RS256"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://issuer.url.com", *oidc.IssuerURL)
+	assert.Equal(t, "groups", *oidc.GroupsClaim)
+	assert.Equal(t, "sub", *oidc.UsernameClaim)
+	assert.Equal(t, "-", *oidc.UsernamePrefix)
+	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
 }
 
 func TestUpdateContext(t *testing.T) {
@@ -889,21 +875,10 @@ func TestUpdateDefaultAdminNotChanged(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "client-id-oidc",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins,
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+
+	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
+
 }
 
 func TestUpdateDefaultAdminNotChangedWithCustomOIDC(t *testing.T) {
@@ -964,21 +939,16 @@ func TestUpdateDefaultAdminNotChangedWithCustomOIDC(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "id-ooo",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url.com",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins,
-	//})
+
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, "id-ooo", *oidc.ClientID)
+	assert.Equal(t, []string{"RS256"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://issuer.url.com", *oidc.IssuerURL)
+	assert.Equal(t, "groups", *oidc.GroupsClaim)
+	assert.Equal(t, "sub", *oidc.UsernameClaim)
+	assert.Equal(t, "-", *oidc.UsernamePrefix)
+	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
 }
 
 func TestUpdateDefaultAdminNotChangedWithOIDCUpdate(t *testing.T) {
@@ -1043,21 +1013,15 @@ func TestUpdateDefaultAdminNotChangedWithOIDCUpdate(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "id-ooo",
-	//			GroupsClaim:    "new-groups-claim",
-	//			IssuerURL:      "https://issuer.url.com",
-	//			SigningAlgs:    []string{"RS384"},
-	//			UsernameClaim:  "new-username-claim",
-	//			UsernamePrefix: "->",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins,
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, "id-ooo", *oidc.ClientID)
+	assert.Equal(t, []string{"RS384"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://issuer.url.com", *oidc.IssuerURL)
+	assert.Equal(t, "new-groups-claim", *oidc.GroupsClaim)
+	assert.Equal(t, "new-username-claim", *oidc.UsernameClaim)
+	assert.Equal(t, "->", *oidc.UsernamePrefix)
+	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
 }
 
 func TestUpdateDefaultAdminOverwritten(t *testing.T) {
@@ -1116,21 +1080,8 @@ func TestUpdateDefaultAdminOverwritten(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "client-id-oidc",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins,
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	assert.Equal(t, expectedAdmins, runtime.Spec.Security.Administrators)
 	suite.AssertInstanceRuntimeAdmins(id, expectedAdmins)
 }
 
@@ -1166,6 +1117,9 @@ func TestUpdateCustomAdminsNotChanged(t *testing.T) {
 	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
+	r := suite.GetRuntimeResourceByInstanceID(id)
+
+	fmt.Println("Runtime: ", r.Spec.Security.Administrators)
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id),
 		`{
@@ -1190,21 +1144,16 @@ func TestUpdateCustomAdminsNotChanged(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "client-id-oidc",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins,
-	//})
+	time.Sleep(time.Second)
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, "client-id-oidc", *oidc.ClientID)
+	assert.Equal(t, []string{"RS256"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://issuer.url", *oidc.IssuerURL)
+	assert.Equal(t, "groups", *oidc.GroupsClaim)
+	assert.Equal(t, "sub", *oidc.UsernameClaim)
+	assert.Equal(t, "-", *oidc.UsernamePrefix)
+	assert.Equal(t, expectedAdmins, runtime.Spec.Security.Administrators)
 	suite.AssertInstanceRuntimeAdmins(id, expectedAdmins)
 }
 
@@ -1268,21 +1217,16 @@ func TestUpdateCustomAdminsNotChangedWithOIDCUpdate(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "id-ooo",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://newissuer.url.com",
-	//			SigningAlgs:    []string{"ES256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins,
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, "id-ooo", *oidc.ClientID)
+	assert.Equal(t, []string{"ES256"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://newissuer.url.com", *oidc.IssuerURL)
+	assert.Equal(t, "groups", *oidc.GroupsClaim)
+	assert.Equal(t, "sub", *oidc.UsernameClaim)
+	assert.Equal(t, "-", *oidc.UsernamePrefix)
+	assert.Equal(t, expectedAdmins, runtime.Spec.Security.Administrators)
+
 	suite.AssertInstanceRuntimeAdmins(id, expectedAdmins)
 }
 
@@ -1343,21 +1287,17 @@ func TestUpdateCustomAdminsOverwritten(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "client-id-oidc",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins,
-	//})
+
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, "client-id-oidc", *oidc.ClientID)
+	assert.Equal(t, []string{"RS256"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://issuer.url", *oidc.IssuerURL)
+	assert.Equal(t, "groups", *oidc.GroupsClaim)
+	assert.Equal(t, "sub", *oidc.UsernameClaim)
+	assert.Equal(t, "-", *oidc.UsernamePrefix)
+	assert.Equal(t, expectedAdmins, runtime.Spec.Security.Administrators)
+
 	suite.AssertInstanceRuntimeAdmins(id, expectedAdmins)
 }
 
@@ -1422,21 +1362,16 @@ func TestUpdateCustomAdminsOverwrittenWithOIDCUpdate(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "id-ooo",
-	//			GroupsClaim:    "new-groups-claim",
-	//			IssuerURL:      "https://issuer.url.com",
-	//			SigningAlgs:    []string{"ES384"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins,
-	//})
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	oidc := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig
+	assert.Equal(t, "id-ooo", *oidc.ClientID)
+	assert.Equal(t, []string{"ES384"}, oidc.SigningAlgs)
+	assert.Equal(t, "https://issuer.url.com", *oidc.IssuerURL)
+	assert.Equal(t, "new-groups-claim", *oidc.GroupsClaim)
+	assert.Equal(t, "sub", *oidc.UsernameClaim)
+	assert.Equal(t, "-", *oidc.UsernamePrefix)
+	assert.Equal(t, expectedAdmins, runtime.Spec.Security.Administrators)
+
 	suite.AssertInstanceRuntimeAdmins(id, expectedAdmins)
 }
 
@@ -1498,21 +1433,10 @@ func TestUpdateCustomAdminsOverwrittenTwice(t *testing.T) {
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "client-id-oidc",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins1,
-	//})
+
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	assert.Equal(t, expectedAdmins1, runtime.Spec.Security.Administrators)
+
 	suite.AssertInstanceRuntimeAdmins(id, expectedAdmins1)
 
 	// when
@@ -1540,22 +1464,10 @@ func TestUpdateCustomAdminsOverwrittenTwice(t *testing.T) {
 	// when
 	upgradeOperationID = suite.DecodeOperationID(resp)
 	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
+	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
-	//disabled = false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "id-ooo",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://newissuer.url.com",
-	//			SigningAlgs:    []string{"PS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "->",
-	//		},
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: expectedAdmins2,
-	//})
+	runtime = suite.GetRuntimeResourceByInstanceID(id)
+	assert.Equal(t, expectedAdmins2, runtime.Spec.Security.Administrators)
 	suite.AssertInstanceRuntimeAdmins(id, expectedAdmins2)
 }
 
@@ -1638,25 +1550,6 @@ func TestUpdateAutoscalerParams(t *testing.T) {
 	}, runtime.Spec.Shoot.Kubernetes.KubeAPIServer.OidcConfig)
 
 	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
-
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "client-id-oidc",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		AutoScalerMin:                 &min,
-	//		AutoScalerMax:                 &max,
-	//		MaxSurge:                      &surge,
-	//		MaxUnavailable:                &unav,
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: []string{"john.smith@email.com"},
-	//})
 }
 
 func TestUpdateAutoscalerWrongParams(t *testing.T) {
@@ -1782,6 +1675,10 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 
 	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
+
+	runtime := suite.GetRuntimeResourceByInstanceID(id)
+	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
+	assert.Equal(t, 15, int(runtime.Spec.Shoot.Provider.Workers[0].Maximum))
 	//max := 15
 	//disabled := false
 	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
@@ -1837,6 +1734,9 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	//	Administrators: []string{"john.smith@email.com"},
 	//})
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
+	runtime = suite.GetRuntimeResourceByInstanceID(id)
+	assert.Equal(t, 14, int(runtime.Spec.Shoot.Provider.Workers[0].Minimum))
+
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
 {
