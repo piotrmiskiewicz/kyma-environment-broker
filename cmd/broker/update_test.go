@@ -1679,23 +1679,6 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	runtime := suite.GetRuntimeResourceByInstanceID(id)
 	assert.Equal(t, []string{"john.smith@email.com"}, runtime.Spec.Security.Administrators)
 	assert.Equal(t, 15, int(runtime.Spec.Shoot.Provider.Workers[0].Maximum))
-	//max := 15
-	//disabled := false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "client-id-oidc",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		AutoScalerMax:                 &max,
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: []string{"john.smith@email.com"},
-	//})
 
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
@@ -1716,23 +1699,6 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	upgradeOperationID = suite.DecodeOperationID(resp)
 	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
-	//min := 14
-	//disabled = false
-	//suite.AssertShootUpgrade(upgradeOperationID, gqlschema.UpgradeShootInput{
-	//	GardenerConfig: &gqlschema.GardenerUpgradeInput{
-	//		OidcConfig: &gqlschema.OIDCConfigInput{
-	//			ClientID:       "client-id-oidc",
-	//			GroupsClaim:    "groups",
-	//			IssuerURL:      "https://issuer.url",
-	//			SigningAlgs:    []string{"RS256"},
-	//			UsernameClaim:  "sub",
-	//			UsernamePrefix: "-",
-	//		},
-	//		AutoScalerMin:                 &min,
-	//		ShootNetworkingFilterDisabled: &disabled,
-	//	},
-	//	Administrators: []string{"john.smith@email.com"},
-	//})
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	runtime = suite.GetRuntimeResourceByInstanceID(id)
 	assert.Equal(t, 14, int(runtime.Spec.Shoot.Provider.Workers[0].Minimum))
@@ -1759,8 +1725,7 @@ func TestUpdateWhenBothErsContextAndUpdateParametersProvided(t *testing.T) {
 	// given
 	suite := NewBrokerSuiteTest(t)
 	defer suite.TearDown()
-	// uncomment to see graphql queries
-	//suite.EnableDumpingProvisionerRequests()
+
 	iid := uuid.New().String()
 
 	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", iid),
@@ -1813,7 +1778,6 @@ func TestUpdateWhenBothErsContextAndUpdateParametersProvided(t *testing.T) {
 	suspensionID := suite.WaitForLastOperation(iid, domain.InProgress)
 	suite.FinishDeprovisioningOperationByKIM(suspensionID)
 
-	//suite.FinishUpdatingOperationByKIM(suspensionOpID)
 	suite.WaitForLastOperation(iid, domain.Succeeded)
 
 	// THEN
