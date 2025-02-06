@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	corev1 "k8s.io/api/core/v1"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -990,10 +991,6 @@ func (s *BrokerSuiteTest) AssertNetworkFilteringDisabled(iid string, expected bo
 	assert.Equal(s.t, !expected, runtime.Spec.Security.Networking.Filter.Egress.Enabled)
 }
 
-func (s *BrokerSuiteTest) FinishUpdatingOperationByKIM(id string) {
-	// todo: implement me
-}
-
 func (s *BrokerSuiteTest) failRuntimeByKIM(iid string) {
 	s.poller.Invoke(func() (bool, error) {
 		var runtimes imv1.RuntimeList
@@ -1019,12 +1016,11 @@ func (s *BrokerSuiteTest) FinishDeprovisioningOperationByKIM(opID string) {
 	s.k8sDeletionObjectTracker.ProcessRuntimeDeletion(runtime.Name)
 }
 
-func (s *BrokerSuiteTest) FailDeprovisioningOperationByProvisioner(id string) {
-	// todo: remove me
-}
-
-func (s *BrokerSuiteTest) FailNextDeprovisionings() {
-	//s.k8sKcp.PrependReactor("update", "runtimes", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+func (s *BrokerSuiteTest) AssertBTPOperatorSecret() {
+	secret := &corev1.Secret{}
+	err := s.k8sSKR.Get(context.Background(), client.ObjectKey{Namespace: "kyma-installer", Name: "btp-operator"}, secret)
+	require.NoError(s.t, err)
+	assert.Equal(s.t, "btp-operator", secret.Name)
 }
 
 func assertResourcesAreRemoved(t *testing.T, gvk schema.GroupVersionKind, k8sClient client.Client) {

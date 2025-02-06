@@ -178,13 +178,11 @@ func TestMetrics(t *testing.T) {
 		assert.Nil(t, op10)
 
 		opID = deleteReq(instance6)
-		suite.FailDeprovisioningOperationByProvisioner(opID)
 		suite.WaitForOperationState(opID, domain.Failed)
 		op11 := suite.GetOperation(opID)
 		assert.NotNil(t, op11)
 
 		opID = deleteReq(instance3)
-		suite.FailDeprovisioningOperationByProvisioner(opID)
 		suite.WaitForOperationState(opID, domain.Failed)
 		op12 := suite.GetOperation(opID)
 		assert.NotNil(t, op12)

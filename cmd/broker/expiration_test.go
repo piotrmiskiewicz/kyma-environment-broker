@@ -245,7 +245,6 @@ func TestExpiration(t *testing.T) {
 				assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 				deprovisioningOpID := suite.DecodeOperationID(resp)
-				suite.FailDeprovisioningOperationByProvisioner(deprovisioningOpID)
 				suite.WaitForOperationState(deprovisioningOpID, domain.Failed)
 
 				// when

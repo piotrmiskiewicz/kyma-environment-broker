@@ -261,8 +261,6 @@ func TestUpdate_SapConvergedCloud(t *testing.T) {
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	upgradeOperationID := suite.DecodeOperationID(resp)
 
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
-
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
 	runtime := suite.GetRuntimeResourceByInstanceID(iid)
@@ -386,8 +384,6 @@ func TestUpdateWithNoOIDCParams(t *testing.T) {
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	upgradeOperationID := suite.DecodeOperationID(resp)
 
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
-
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
 	runtime := suite.GetRuntimeResourceByInstanceID(iid)
@@ -458,8 +454,6 @@ func TestUpdateWithNoOidcOnUpdate(t *testing.T) {
    }`)
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	upgradeOperationID := suite.DecodeOperationID(resp)
-
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
@@ -871,8 +865,6 @@ func TestUpdateDefaultAdminNotChanged(t *testing.T) {
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
 
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
-
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	runtime := suite.GetRuntimeResourceByInstanceID(id)
@@ -934,8 +926,6 @@ func TestUpdateDefaultAdminNotChangedWithCustomOIDC(t *testing.T) {
 	// when
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
-
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
@@ -1009,8 +999,6 @@ func TestUpdateDefaultAdminNotChangedWithOIDCUpdate(t *testing.T) {
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
 
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
-
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	runtime := suite.GetRuntimeResourceByInstanceID(id)
@@ -1076,8 +1064,6 @@ func TestUpdateDefaultAdminOverwritten(t *testing.T) {
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
 
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
-
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	runtime := suite.GetRuntimeResourceByInstanceID(id)
@@ -1139,8 +1125,6 @@ func TestUpdateCustomAdminsNotChanged(t *testing.T) {
 	// when
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
-
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
@@ -1213,8 +1197,6 @@ func TestUpdateCustomAdminsNotChangedWithOIDCUpdate(t *testing.T) {
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
 
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
-
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	runtime := suite.GetRuntimeResourceByInstanceID(id)
@@ -1282,8 +1264,6 @@ func TestUpdateCustomAdminsOverwritten(t *testing.T) {
 	// when
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
-
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
@@ -1358,7 +1338,6 @@ func TestUpdateCustomAdminsOverwrittenWithOIDCUpdate(t *testing.T) {
 
 	// when
 	upgradeOperationID := suite.DecodeOperationID(resp)
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
@@ -1429,8 +1408,6 @@ func TestUpdateCustomAdminsOverwrittenTwice(t *testing.T) {
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
 
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
-
 	// then
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
@@ -1463,7 +1440,6 @@ func TestUpdateCustomAdminsOverwrittenTwice(t *testing.T) {
 
 	// when
 	upgradeOperationID = suite.DecodeOperationID(resp)
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
 	runtime = suite.GetRuntimeResourceByInstanceID(id)
@@ -1528,7 +1504,6 @@ func TestUpdateAutoscalerParams(t *testing.T) {
 	// when
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 
 	min, max, surge, unav := 15, 25, 10, 7
 	// then
@@ -1673,7 +1648,6 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	upgradeOperationID := suite.DecodeOperationID(resp)
 	assert.NotEmpty(t, upgradeOperationID)
 
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 
 	runtime := suite.GetRuntimeResourceByInstanceID(id)
@@ -1698,7 +1672,6 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	upgradeOperationID = suite.DecodeOperationID(resp)
-	suite.FinishUpdatingOperationByKIM(upgradeOperationID)
 	suite.WaitForOperationState(upgradeOperationID, domain.Succeeded)
 	runtime = suite.GetRuntimeResourceByInstanceID(id)
 	assert.Equal(t, 14, int(runtime.Spec.Shoot.Provider.Workers[0].Minimum))
@@ -1832,69 +1805,12 @@ func TestUpdateMachineType(t *testing.T) {
 
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	updateOperationID := suite.DecodeOperationID(resp)
-	suite.FinishUpdatingOperationByKIM(updateOperationID)
 	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
 
 	runtime := suite.GetRuntimeResourceByInstanceID(id)
 	assert.Equal(t, "m5.2xlarge", runtime.Spec.Shoot.Provider.Workers[0].Machine.Type)
 
 }
-
-func TestUpdateBTPOperatorCredsSuccess(t *testing.T) {
-	// given
-	suite := NewBrokerSuiteTest(t)
-	defer suite.TearDown()
-	id := "InstanceID-BTPOperator"
-
-	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", id), `
-{
-	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
-	"context": {
-		"sm_operator_credentials": {
-			"clientid": "cid",
-			"clientsecret": "cs",
-			"url": "url",
-			"sm_url": "sm_url"
-		},
-		"globalaccount_id": "g-account-id",
-		"subaccount_id": "sub-id",
-		"user_id": "john.smith@email.com"
-	},
-	"parameters": {
-		"name": "testing-cluster"
-	}
-}`)
-
-	opID := suite.DecodeOperationID(resp)
-	suite.processKIMProvisioningByOperationID(opID)
-	suite.WaitForOperationState(opID, domain.Succeeded)
-
-	// when
-	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
-{
-	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"context": {
-		"globalaccount_id": "g-account-id",
-		"user_id": "john.smith@email.com",
-		"sm_operator_credentials": {
-			"clientid": "testClientID",
-			"clientsecret": "testClientSecret",
-			"sm_url": "https://service-manager.kyma.com",
-			"url": "https://test.auth.com",
-			"xsappname": "testXsappname"
-		}
-	}
-}`)
-
-	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
-	updateOperationID := suite.DecodeOperationID(resp)
-	suite.FinishUpdatingOperationByKIM(updateOperationID)
-	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
-
-	// todo: assert
-}
-
 func TestUpdateNetworkFilterPersisted(t *testing.T) {
 	// given
 	suite := NewBrokerSuiteTest(t, "2.0")
@@ -1957,7 +1873,6 @@ func TestUpdateNetworkFilterPersisted(t *testing.T) {
 	// then
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	updateOperationID := suite.DecodeOperationID(resp)
-	suite.FinishUpdatingOperationByKIM(updateOperationID)
 	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
 	updateOp, _ := suite.db.Operations().GetOperationByID(updateOperationID)
 	assert.NotNil(suite.t, updateOp.ProvisioningParameters.ErsContext.LicenseType)
@@ -2067,9 +1982,6 @@ func TestMultipleUpdateNetworkFilterPersisted(t *testing.T) {
 	instance := suite.GetInstance(id)
 
 	// then
-	//disabled := false
-	//suite.AssertDisabledNetworkFilterForProvisioning(&disabled)
-	//suite.AssertDisabledNetworkFilterRuntimeState(instance.RuntimeID, opID, &disabled)
 	suite.AssertNetworkFilteringDisabled(instance.InstanceID, false)
 	assert.Nil(suite.t, instance.Parameters.ErsContext.LicenseType)
 
@@ -2085,7 +1997,6 @@ func TestMultipleUpdateNetworkFilterPersisted(t *testing.T) {
 	// then
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	updateOperationID := suite.DecodeOperationID(resp)
-	suite.FinishUpdatingOperationByKIM(updateOperationID)
 	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
 	instance2 := suite.GetInstance(id)
 	assert.Equal(suite.t, "CUSTOMER", *instance2.Parameters.ErsContext.LicenseType)
@@ -2104,14 +2015,10 @@ func TestMultipleUpdateNetworkFilterPersisted(t *testing.T) {
 	// then
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	updateOperation2ID := suite.DecodeOperationID(resp)
-	suite.WaitForLastOperation(id, domain.InProgress)
-	suite.FinishUpdatingOperationByKIM(updateOperation2ID)
 	suite.WaitForOperationState(updateOperation2ID, domain.Succeeded)
 	instance3 := suite.GetInstance(id)
 	assert.Equal(suite.t, "CUSTOMER", *instance3.Parameters.ErsContext.LicenseType)
 	suite.AssertNetworkFilteringDisabled(instance.InstanceID, true)
-	//disabled = true
-	//suite.AssertDisabledNetworkFilterRuntimeState(instance.RuntimeID, updateOperation2ID, &disabled)
 }
 
 func TestUpdateOnlyErsContextForExpiredInstance(t *testing.T) {
