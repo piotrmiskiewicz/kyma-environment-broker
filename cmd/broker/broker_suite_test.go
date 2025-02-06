@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
 	"io"
 	"log/slog"
 	"net/http"
@@ -14,6 +13,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
 
 	"github.com/gardener/gardener/pkg/apis/core/v1beta1"
 
