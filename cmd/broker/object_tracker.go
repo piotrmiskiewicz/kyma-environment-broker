@@ -1,14 +1,15 @@
 package main
 
 import (
+	"sync"
+	"time"
+
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes/scheme"
 	k8stesting "k8s.io/client-go/testing"
-	"sync"
-	"time"
 )
 
 func NewTestingObjectTracker(sch *runtime.Scheme) *testingObjectTracker {
@@ -83,6 +84,6 @@ func (m *testingObjectTracker) deleteRuntimeIfExist(name string) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	if _, ok := m.runtimesToDelete[name]; ok {
-		m.target.Delete(imv1.GroupVersion.WithResource("runtimes"), "kyma-system", name)
+		_ = m.target.Delete(imv1.GroupVersion.WithResource("runtimes"), "kyma-system", name)
 	}
 }

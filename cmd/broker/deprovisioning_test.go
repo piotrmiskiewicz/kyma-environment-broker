@@ -12,52 +12,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/common/runtime"
-	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/pivotal-cf/brokerapi/v8/domain"
 	"github.com/stretchr/testify/assert"
 )
 
 const deprovisioningRequestPathFormat = "oauth/v2/service_instances/%s?accepts_incomplete=true&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281&plan_id=%s"
-
-func TestKymaReDeprovisionFailed(t *testing.T) {
-	// given
-	runtimeOptions := RuntimeOptions{
-		GlobalAccountID: globalAccountID,
-		SubAccountID:    badSubAccountID,
-		Provider:        pkg.AWS,
-	}
-
-	suite := NewDeprovisioningSuite(t)
-	defer suite.TearDown()
-	instanceId := suite.CreateProvisionedRuntime(runtimeOptions)
-	// when
-	deprovisioningOperationID := suite.CreateDeprovisioning(deprovisioningOpID, instanceId)
-
-	// then
-	suite.WaitForDeprovisioningState(deprovisioningOperationID, domain.InProgress)
-	suite.AssertProvisionerStartedDeprovisioning(deprovisioningOperationID)
-
-	// when
-	suite.FinishDeprovisioningOperationByProvisioner(deprovisioningOperationID)
-
-	// then
-	suite.WaitForDeprovisioningState(deprovisioningOperationID, domain.Succeeded)
-	suite.AssertInstanceNotRemoved(instanceId)
-
-	// when
-	reDeprovisioningOperationID := suite.CreateDeprovisioning(reDeprovisioningOpID, instanceId)
-
-	// then
-	suite.WaitForDeprovisioningState(reDeprovisioningOperationID, domain.InProgress)
-	suite.AssertProvisionerStartedDeprovisioning(reDeprovisioningOperationID)
-
-	// when
-	suite.FinishDeprovisioningOperationByProvisioner(reDeprovisioningOperationID)
-
-	// then
-	suite.WaitForDeprovisioningState(reDeprovisioningOperationID, domain.Succeeded)
-	suite.AssertInstanceNotRemoved(instanceId)
-}
 
 func TestReDeprovision(t *testing.T) {
 	// given

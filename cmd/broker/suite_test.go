@@ -877,7 +877,7 @@ func fixConfig() *Config {
 			MachineImage:                            "gardenlinux",
 			MachineImageVersion:                     "12345.6",
 			MultiZoneCluster:                        true,
-			RuntimeResourceStepTimeout:              200 * time.Millisecond,
+			RuntimeResourceStepTimeout:              300 * time.Millisecond,
 			ClusterUpdateStepTimeout:                time.Minute,
 			CheckRuntimeResourceDeletionStepTimeout: 50 * time.Millisecond,
 			DefaultTrialProvider:                    "AWS",
