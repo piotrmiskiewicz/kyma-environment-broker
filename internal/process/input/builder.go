@@ -88,6 +88,10 @@ func (f *InputBuilderFactory) GetPlanDefaults(planID string, platformProvider pk
 
 func (f *InputBuilderFactory) getHyperscalerProviderForPlanID(planID string, platformProvider pkg.CloudProvider, parametersProvider *pkg.CloudProvider) (HyperscalerInputProvider, error) {
 	var provider HyperscalerInputProvider
+	awsInput := &cloudProvider.AWSInput{
+		MultiZone:                    f.config.MultiZoneCluster,
+		ControlPlaneFailureTolerance: f.config.ControlPlaneFailureTolerance,
+	}
 	switch planID {
 	case broker.GCPPlanID:
 		provider = &cloudProvider.GcpInput{
@@ -112,13 +116,10 @@ func (f *InputBuilderFactory) getHyperscalerProviderForPlanID(planID string, pla
 		}
 	case broker.TrialPlanID:
 		provider = f.forTrialPlan(parametersProvider)
-
 	case broker.AWSPlanID:
+		provider = awsInput
 	case broker.BuildRuntimeAWSPlanID:
-		provider = &cloudProvider.AWSInput{
-			MultiZone:                    f.config.MultiZoneCluster,
-			ControlPlaneFailureTolerance: f.config.ControlPlaneFailureTolerance,
-		}
+		provider = awsInput
 	case broker.OwnClusterPlanID:
 		provider = &cloudProvider.NoHyperscalerInput{}
 		// insert cases for other providers like AWS or GCP
