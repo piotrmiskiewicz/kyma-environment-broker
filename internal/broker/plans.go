@@ -564,14 +564,15 @@ func Plans(plans PlansConfig, provider pkg.CloudProvider, includeAdditionalParam
 	}
 
 	outputPlans := map[string]domain.ServicePlan{
-		AWSPlanID:             awsServicePlan(AWSPlanID, AWSPlanName),
-		GCPPlanID:             defaultServicePlan(GCPPlanID, GCPPlanName, plans, gcpSchema, GCPSchema(gcpMachinesDisplay, gcpRegionsDisplay, gcpMachinesNames, includeAdditionalParamsInSchema, true, shootAndSeedFeatureFlag, assuredWorkloads, enableAdditionalWorkerNodePools, enableLoadCurrentConfig)),
-		AzurePlanID:           defaultServicePlan(AzurePlanID, AzurePlanName, plans, azureSchema, AzureSchema(azureMachinesDisplay, azureRegionsDisplay, azureMachinesNames, includeAdditionalParamsInSchema, true, euAccessRestricted, shootAndSeedFeatureFlag, enableAdditionalWorkerNodePools, enableLoadCurrentConfig)),
-		AzureLitePlanID:       defaultServicePlan(AzureLitePlanID, AzureLitePlanName, plans, azureLiteSchema, AzureLiteSchema(azureLiteMachinesDisplay, azureRegionsDisplay, azureLiteMachinesNames, includeAdditionalParamsInSchema, true, euAccessRestricted, shootAndSeedFeatureFlag, enableAdditionalWorkerNodePools, enableLoadCurrentConfig)),
-		FreemiumPlanID:        defaultServicePlan(FreemiumPlanID, FreemiumPlanName, plans, freemiumSchema, FreemiumSchema(provider, azureRegionsDisplay, includeAdditionalParamsInSchema, true, euAccessRestricted, enableLoadCurrentConfig)),
-		TrialPlanID:           defaultServicePlan(TrialPlanID, TrialPlanName, plans, trialSchema, TrialSchema(includeAdditionalParamsInSchema, true, enableLoadCurrentConfig)),
-		OwnClusterPlanID:      defaultServicePlan(OwnClusterPlanID, OwnClusterPlanName, plans, ownClusterSchema, OwnClusterSchema(true)),
-		PreviewPlanID:         defaultServicePlan(PreviewPlanID, PreviewPlanName, plans, previewCatalogSchema, PreviewSchema(awsMachinesDisplay, awsRegionsDisplay, awsMachineNames, includeAdditionalParamsInSchema, true, euAccessRestricted, enableAdditionalWorkerNodePools, enableLoadCurrentConfig)),
+		AWSPlanID:        awsServicePlan(AWSPlanID, AWSPlanName),
+		GCPPlanID:        defaultServicePlan(GCPPlanID, GCPPlanName, plans, gcpSchema, GCPSchema(gcpMachinesDisplay, gcpRegionsDisplay, gcpMachinesNames, includeAdditionalParamsInSchema, true, shootAndSeedFeatureFlag, assuredWorkloads, enableAdditionalWorkerNodePools, enableLoadCurrentConfig)),
+		AzurePlanID:      defaultServicePlan(AzurePlanID, AzurePlanName, plans, azureSchema, AzureSchema(azureMachinesDisplay, azureRegionsDisplay, azureMachinesNames, includeAdditionalParamsInSchema, true, euAccessRestricted, shootAndSeedFeatureFlag, enableAdditionalWorkerNodePools, enableLoadCurrentConfig)),
+		AzureLitePlanID:  defaultServicePlan(AzureLitePlanID, AzureLitePlanName, plans, azureLiteSchema, AzureLiteSchema(azureLiteMachinesDisplay, azureRegionsDisplay, azureLiteMachinesNames, includeAdditionalParamsInSchema, true, euAccessRestricted, shootAndSeedFeatureFlag, enableAdditionalWorkerNodePools, enableLoadCurrentConfig)),
+		FreemiumPlanID:   defaultServicePlan(FreemiumPlanID, FreemiumPlanName, plans, freemiumSchema, FreemiumSchema(provider, azureRegionsDisplay, includeAdditionalParamsInSchema, true, euAccessRestricted, enableLoadCurrentConfig)),
+		TrialPlanID:      defaultServicePlan(TrialPlanID, TrialPlanName, plans, trialSchema, TrialSchema(includeAdditionalParamsInSchema, true, enableLoadCurrentConfig)),
+		OwnClusterPlanID: defaultServicePlan(OwnClusterPlanID, OwnClusterPlanName, plans, ownClusterSchema, OwnClusterSchema(true)),
+		PreviewPlanID:    defaultServicePlan(PreviewPlanID, PreviewPlanName, plans, previewCatalogSchema, PreviewSchema(awsMachinesDisplay, awsRegionsDisplay, awsMachineNames, includeAdditionalParamsInSchema, true, euAccessRestricted, enableAdditionalWorkerNodePools, enableLoadCurrentConfig)),
+
 		BuildRuntimeAWSPlanID: awsServicePlan(BuildRuntimeAWSPlanID, BuildRuntimeAWSPlanName),
 	}
 
