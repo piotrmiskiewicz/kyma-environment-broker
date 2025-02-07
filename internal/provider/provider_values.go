@@ -24,6 +24,7 @@ func GetPlanSpecificValues(
 	var p Provider
 	switch operation.ProvisioningParameters.PlanID {
 	case broker.AWSPlanID:
+	case broker.BuildRuntimeAWSPlanID:
 		p = &AWSInputProvider{
 			Purpose:                defaultPurpose,
 			MultiZone:              multiZoneCluster,

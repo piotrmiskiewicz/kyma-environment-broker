@@ -36,7 +36,7 @@ const (
 
 func TestCatalog(t *testing.T) {
 	// this test is used for human-testing the catalog response
-	t.Skip()
+	//t.Skip()
 	catalogTestFile := "catalog-test.json"
 	catalogTestFilePerm := os.FileMode.Perm(0666)
 	outputToFile := false
@@ -130,6 +130,38 @@ func TestProvisioningWithKIM(t *testing.T) {
 	opID := suite.DecodeOperationID(resp)
 
 	suite.processProvisioningByOperationID(opID)
+
+	// then
+	suite.WaitForOperationState(opID, domain.Succeeded)
+}
+
+// 6aae0ff3-89f7-4f12-86de-51466145422e
+func TestProvisioningBuildRuntime(t *testing.T) {
+	cfg := fixConfig()
+	cfg.Broker.KimConfig.Enabled = true
+
+	suite := NewBrokerSuiteTestWithConfig(t, cfg)
+	defer suite.TearDown()
+	iid := uuid.New().String()
+	// when
+	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu21/v2/service_instances/%s?accepts_incomplete=true", iid),
+		`{
+					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+					"plan_id": "6aae0ff3-89f7-4f12-86de-51466145422e",
+					"context": {
+						"globalaccount_id": "g-account-id",
+						"subaccount_id": "sub-id",
+						"user_id": "john.smith@email.com"
+					},
+					"parameters": {
+						"name": "testing-cluster",
+						"region": "eu-central-1"
+					}
+		}`)
+
+	opID := suite.DecodeOperationID(resp)
+
+	suite.processKIMOnlyProvisioningByOperationID(opID)
 
 	// then
 	suite.WaitForOperationState(opID, domain.Succeeded)
