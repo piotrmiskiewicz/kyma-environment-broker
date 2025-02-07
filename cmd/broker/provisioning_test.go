@@ -180,71 +180,38 @@ func TestProvisioning_HappyPathAWS(t *testing.T) {
 	suite.AssertKymaLabelNotExists(opID, "kyma-project.io/platform-region")
 }
 
-//
-//func TestProvisioning_SeedAndShootSameRegion_Disabled(t *testing.T) {
-//	// given
-//	suite := NewBrokerSuiteTest(t)
-//	defer suite.TearDown()
-//	iid := uuid.New().String()
-//
-//	// when
-//	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
-//		`{
-//					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-//					"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
-//					"context": {
-//						"globalaccount_id": "g-account-id",
-//						"subaccount_id": "sub-id",
-//						"user_id": "john.smith@email.com"
-//					},
-//					"parameters": {
-//						"name": "testing-cluster",
-//						"region": "eu-central-1",
-//						"shootAndSeedSameRegion": true
-//					}
-//		}`)
-//	opID := suite.DecodeOperationID(resp)
-//
-//	suite.processKIMProvisioningByOperationID(opID)
-//
-//	// then
-//	suite.WaitForOperationState(opID, domain.Succeeded)
-//	assert.False(t, suite.provisionerClient.IsSeedAndRegionValidationEnabled())
-//}
+func TestProvisioning_SeedAndShootSameRegion(t *testing.T) {
+	// given
+	suite := NewBrokerSuiteTest(t)
+	defer suite.TearDown()
+	iid := uuid.New().String()
 
-//func TestProvisioning_SeedAndShootSameRegion_Enabled(t *testing.T) {
-//	// given
-//	cfg := fixConfig()
-//	cfg.Broker.EnableShootAndSeedSameRegion = true
-//	cfg.Provisioner.EnableShootAndSeedSameRegion = true
-//	suite := NewBrokerSuiteTestWithConfig(t, cfg)
-//	defer suite.TearDown()
-//	iid := uuid.New().String()
-//
-//	// when
-//	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
-//		`{
-//					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-//					"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
-//					"context": {
-//						"globalaccount_id": "g-account-id",
-//						"subaccount_id": "sub-id",
-//						"user_id": "john.smith@email.com"
-//					},
-//					"parameters": {
-//						"name": "testing-cluster",
-//						"region": "eu-central-1",
-//						"shootAndSeedSameRegion": true
-//					}
-//		}`)
-//	opID := suite.DecodeOperationID(resp)
-//
-//	suite.processKIMProvisioningByOperationID(opID)
-//
-//	// then
-//	suite.WaitForOperationState(opID, domain.Succeeded)
-//	assert.True(t, suite.provisionerClient.IsSeedAndRegionValidationEnabled())
-//}
+	// when
+	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/v2/service_instances/%s?accepts_incomplete=true", iid),
+		`{
+					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+					"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
+					"context": {
+						"globalaccount_id": "g-account-id",
+						"subaccount_id": "sub-id",
+						"user_id": "john.smith@email.com"
+					},
+					"parameters": {
+						"name": "testing-cluster",
+						"region": "eu-central-1",
+						"shootAndSeedSameRegion": false
+					}
+		}`)
+	opID := suite.DecodeOperationID(resp)
+
+	suite.processKIMProvisioningByOperationID(opID)
+
+	// then
+	suite.WaitForOperationState(opID, domain.Succeeded)
+
+	runtime := suite.GetRuntimeResourceByInstanceID(iid)
+	assert.False(t, *runtime.Spec.Shoot.EnforceSeedLocation)
+}
 
 func TestProvisioning_HappyPathSapConvergedCloud(t *testing.T) {
 	// given

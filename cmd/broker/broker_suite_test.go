@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	corev1 "k8s.io/api/core/v1"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -14,6 +13,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
 
@@ -252,7 +253,7 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 
 		k8sDeletionObjectTracker: ot,
 	}
-	ts.poller = &broker.TimerPoller{PollInterval: 8 * time.Millisecond, PollTimeout: 800 * time.Millisecond, Log: ts.t.Log}
+	ts.poller = &broker.TimerPoller{PollInterval: 3 * time.Millisecond, PollTimeout: 800 * time.Millisecond, Log: ts.t.Log}
 
 	ts.CreateAPI(inputFactory, cfg, db, provisioningQueue, deprovisioningQueue, updateQueue, log, k8sClientProvider, gardener.NewFakeClient(), eventBroker)
 
@@ -992,7 +993,7 @@ func (s *BrokerSuiteTest) AssertNetworkFilteringDisabled(iid string, expected bo
 }
 
 func (s *BrokerSuiteTest) failRuntimeByKIM(iid string) {
-	s.poller.Invoke(func() (bool, error) {
+	err := s.poller.Invoke(func() (bool, error) {
 		var runtimes imv1.RuntimeList
 		err := s.k8sKcp.List(context.Background(), &runtimes, client.MatchingLabels{"kyma-project.io/instance-id": iid})
 		require.NoError(s.t, err)
@@ -1006,6 +1007,7 @@ func (s *BrokerSuiteTest) failRuntimeByKIM(iid string) {
 		err = s.k8sKcp.Update(context.Background(), &runtime)
 		return true, nil
 	})
+	require.NoError(s.t, err)
 }
 
 func (s *BrokerSuiteTest) FinishDeprovisioningOperationByKIM(opID string) {
