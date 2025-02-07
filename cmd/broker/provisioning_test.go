@@ -1066,10 +1066,6 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			//suite := NewProvisioningSuite(t, tc.multiZone, tc.controlPlaneFailureTolerance, tc.useSmallerMachineTypes)
-			//defer suite.TearDown()
-
-			// given
 			cfg := fixConfig()
 			if tc.useSmallerMachineTypes {
 				cfg.Broker.UseSmallerMachineTypes = true
@@ -1119,10 +1115,12 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 			if tc.expectedZonesCount != nil {
 				assert.Equal(t, *tc.expectedZonesCount, len(runtimeCR.Spec.Shoot.Provider.Workers[0].Zones))
 			}
+			if tc.controlPlaneFailureTolerance != "" {
+				assert.Equal(t, tc.controlPlaneFailureTolerance, string(runtimeCR.Spec.Shoot.ControlPlane.HighAvailability.FailureTolerance.Type))
+			}
 			//assert.Equal(t, tc.controlPlaneFailureTolerance, runtimeCR.Spec.Shoot.ControlPlane.HighAvailability.FailureTolerance)
 
 			suite.AssertSubscription(iid, tc.expectedSharedSubscription, tc.expectedSubscriptionHyperscalerType)
-
 		})
 
 	}

@@ -253,6 +253,7 @@ func fixConfig() *Config {
 			ClusterUpdateStepTimeout:                time.Minute,
 			CheckRuntimeResourceDeletionStepTimeout: 50 * time.Millisecond,
 			DefaultTrialProvider:                    "AWS",
+			ControlPlaneFailureTolerance:            "zone",
 		},
 		Database: storage.Config{
 			SecretKey: dbSecretKey,

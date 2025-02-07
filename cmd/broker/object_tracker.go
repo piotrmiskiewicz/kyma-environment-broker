@@ -33,57 +33,57 @@ type Deleter interface {
 var _ k8stesting.ObjectTracker = &testingObjectTracker{}
 var _ Deleter = &testingObjectTracker{}
 
-func (m *testingObjectTracker) Add(obj runtime.Object) error {
-	return m.target.Add(obj)
+func (ot *testingObjectTracker) Add(obj runtime.Object) error {
+	return ot.target.Add(obj)
 }
 
-func (m *testingObjectTracker) Get(gvr schema.GroupVersionResource, ns, name string) (runtime.Object, error) {
-	return m.target.Get(gvr, ns, name)
+func (ot *testingObjectTracker) Get(gvr schema.GroupVersionResource, ns, name string) (runtime.Object, error) {
+	return ot.target.Get(gvr, ns, name)
 }
 
-func (m *testingObjectTracker) Create(gvr schema.GroupVersionResource, obj runtime.Object, ns string) error {
-	return m.target.Create(gvr, obj, ns)
+func (ot *testingObjectTracker) Create(gvr schema.GroupVersionResource, obj runtime.Object, ns string) error {
+	return ot.target.Create(gvr, obj, ns)
 }
 
-func (m *testingObjectTracker) Update(gvr schema.GroupVersionResource, obj runtime.Object, ns string) error {
-	return m.target.Update(gvr, obj, ns)
+func (ot *testingObjectTracker) Update(gvr schema.GroupVersionResource, obj runtime.Object, ns string) error {
+	return ot.target.Update(gvr, obj, ns)
 }
 
-func (m *testingObjectTracker) List(gvr schema.GroupVersionResource, gvk schema.GroupVersionKind, ns string) (runtime.Object, error) {
-	return m.target.List(gvr, gvk, ns)
+func (ot *testingObjectTracker) List(gvr schema.GroupVersionResource, gvk schema.GroupVersionKind, ns string) (runtime.Object, error) {
+	return ot.target.List(gvr, gvk, ns)
 }
 
-func (m *testingObjectTracker) Delete(gvr schema.GroupVersionResource, ns, name string) error {
+func (ot *testingObjectTracker) Delete(gvr schema.GroupVersionResource, ns, name string) error {
 	if gvr.Resource == "runtimes" {
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		m.runtimesToDelete[name] = struct{}{}
+		ot.mu.Lock()
+		defer ot.mu.Unlock()
+		ot.runtimesToDelete[name] = struct{}{}
 		return nil
 	}
-	return m.target.Delete(gvr, ns, name)
+	return ot.target.Delete(gvr, ns, name)
 }
 
-func (m *testingObjectTracker) Watch(gvr schema.GroupVersionResource, ns string) (watch.Interface, error) {
-	return m.target.Watch(gvr, ns)
+func (ot *testingObjectTracker) Watch(gvr schema.GroupVersionResource, ns string) (watch.Interface, error) {
+	return ot.target.Watch(gvr, ns)
 }
 
-func (m *testingObjectTracker) ProcessRuntimeDeletion(name string) {
+func (ot *testingObjectTracker) ProcessRuntimeDeletion(name string) {
 	for {
 		time.Sleep(time.Millisecond)
-		m.mu.RLock()
-		_, ok := m.runtimesToDelete[name]
-		m.mu.RUnlock()
+		ot.mu.RLock()
+		_, ok := ot.runtimesToDelete[name]
+		ot.mu.RUnlock()
 		if ok {
 			break
 		}
 	}
-	m.deleteRuntimeIfExist(name)
+	ot.deleteRuntimeIfExist(name)
 }
 
-func (m *testingObjectTracker) deleteRuntimeIfExist(name string) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	if _, ok := m.runtimesToDelete[name]; ok {
-		_ = m.target.Delete(imv1.GroupVersion.WithResource("runtimes"), "kyma-system", name)
+func (ot *testingObjectTracker) deleteRuntimeIfExist(name string) {
+	ot.mu.RLock()
+	defer ot.mu.RUnlock()
+	if _, ok := ot.runtimesToDelete[name]; ok {
+		_ = ot.target.Delete(imv1.GroupVersion.WithResource("runtimes"), "kyma-system", name)
 	}
 }

@@ -336,11 +336,11 @@ func (s *BrokerSuiteTest) ProcessInfrastructureManagerProvisioningGardenerCluste
 	assert.NoError(s.t, err)
 }
 
-func (s *BrokerSuiteTest) ProcessInfrastructureManagerProvisioningRuntimeResource(runtimeID string) {
+func (s *BrokerSuiteTest) SetRuntimeResourceStateReady(runtimeID string) {
 	s.processInfrastructureManagerProvisioningRuntimeResource(runtimeID, "Ready")
 }
 
-func (s *BrokerSuiteTest) FailInfrastructureManagerRuntimeResource(runtimeID string) {
+func (s *BrokerSuiteTest) SetRuntimeResourceFailed(runtimeID string) {
 	s.processInfrastructureManagerProvisioningRuntimeResource(runtimeID, "Failed")
 }
 
@@ -519,7 +519,7 @@ func (s *BrokerSuiteTest) FinishProvisioningOperationByInfrastructureManager(ope
 	})
 	assert.NoError(s.t, err, "timeout waiting for the operation with runtimeID. The existing operation %+v", op)
 
-	s.ProcessInfrastructureManagerProvisioningRuntimeResource(op.RuntimeID)
+	s.SetRuntimeResourceStateReady(op.RuntimeID)
 }
 
 func (s *BrokerSuiteTest) waitForRuntimeAndMakeItReady(id string) {
@@ -717,7 +717,7 @@ func (s *BrokerSuiteTest) processKIMProvisioningByInstanceID(iid string) {
 	})
 	assert.NoError(s.t, err, "timeout waiting for the runtimeID to be created.")
 
-	s.ProcessInfrastructureManagerProvisioningRuntimeResource(runtimeID)
+	s.SetRuntimeResourceStateReady(runtimeID)
 }
 
 func (s *BrokerSuiteTest) fixGardenerShootForOperationID(opID string) *unstructured.Unstructured {

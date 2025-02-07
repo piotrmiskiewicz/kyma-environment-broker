@@ -179,7 +179,8 @@ func TestUpdateFailedInstance(t *testing.T) {
 				}
    }`)
 	opID := suite.DecodeOperationID(resp)
-	suite.failRuntimeByKIM(opID)
+	suite.failRuntimeByKIM(iid)
+	suite.WaitForOperationState(opID, domain.Failed)
 
 	// when
 	// OSB update:

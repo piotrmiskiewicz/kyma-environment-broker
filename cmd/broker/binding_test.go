@@ -244,7 +244,7 @@ func TestFailedProvisioning(t *testing.T) {
 		}`)
 	opID := suite.DecodeOperationID(response)
 	suite.WaitForOperationState(opID, domain.InProgress)
-	suite.failRuntimeByKIM(opID)
+	suite.failRuntimeByKIM(iid)
 	suite.WaitForOperationState(opID, domain.Failed)
 
 	// when we create binding

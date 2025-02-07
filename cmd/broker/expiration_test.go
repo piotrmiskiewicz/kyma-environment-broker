@@ -202,7 +202,7 @@ func TestExpiration(t *testing.T) {
 				assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 				provisioningOpID := suite.DecodeOperationID(resp)
-				suite.failRuntimeByKIM(provisioningOpID)
+				suite.failRuntimeByKIM(instanceID)
 				suite.WaitForOperationState(provisioningOpID, domain.Failed)
 
 				// when
