@@ -36,7 +36,7 @@ const (
 
 func TestCatalog(t *testing.T) {
 	// this test is used for human-testing the catalog response
-	//t.Skip()
+	t.Skip()
 	catalogTestFile := "catalog-test.json"
 	catalogTestFilePerm := os.FileMode.Perm(0666)
 	outputToFile := false
@@ -135,7 +135,6 @@ func TestProvisioningWithKIM(t *testing.T) {
 	suite.WaitForOperationState(opID, domain.Succeeded)
 }
 
-// 6aae0ff3-89f7-4f12-86de-51466145422e
 func TestProvisioningBuildRuntime(t *testing.T) {
 	cfg := fixConfig()
 	cfg.Broker.KimConfig.Enabled = true
