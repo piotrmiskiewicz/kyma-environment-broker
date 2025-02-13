@@ -55,6 +55,10 @@ func (s *instances) ListWithoutDecryption(dbmodel.InstanceFilter) ([]internal.In
 	return nil, 0, 0, errors.New("not implemented")
 }
 
+func (s *instances) UpdateInstanceLastOperation(instanceID, operationID string) error {
+	return nil
+}
+
 func (s *instances) FindAllJoinedWithOperations(prct ...predicate.Predicate) ([]internal.InstanceWithOperation, error) {
 	var instances []internal.InstanceWithOperation
 

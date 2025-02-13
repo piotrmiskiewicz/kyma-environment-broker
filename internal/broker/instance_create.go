@@ -231,6 +231,12 @@ func (b *ProvisionEndpoint) Provision(ctx context.Context, instanceID string, de
 		return domain.ProvisionedServiceSpec{}, fmt.Errorf("cannot save instance")
 	}
 
+	err = b.instanceStorage.UpdateInstanceLastOperation(instanceID, operationID)
+	if err != nil {
+		logger.Error(fmt.Sprintf("cannot save instance in storage: %s", err))
+		return domain.ProvisionedServiceSpec{}, fmt.Errorf("cannot save instance")
+	}
+
 	logger.Info("Adding operation to provisioning queue")
 	b.queue.Add(operation.ID)
 

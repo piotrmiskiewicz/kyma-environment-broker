@@ -222,6 +222,25 @@ func (r readSession) GetLastOperation(instanceID string, types []internal.Operat
 	return operation, nil
 }
 
+func (r readSession) GetLastOperationByLastOperationID(instanceID string, types []internal.OperationType) (dbmodel.OperationDTO, dberr.Error) {
+	inst := dbr.Eq("instance_id", instanceID)
+	state := dbr.Neq("state", []string{orchestration.Pending, orchestration.Canceled})
+	condition := dbr.And(inst, state)
+	if len(types) > 0 {
+		condition = dbr.And(condition, dbr.Expr("type IN ?", types))
+	}
+	operation, err := r.getLastOperation(condition)
+	if err != nil {
+		switch {
+		case dberr.IsNotFound(err):
+			return dbmodel.OperationDTO{}, dberr.NotFound("for instance ID: %s %s", instanceID, err)
+		default:
+			return dbmodel.OperationDTO{}, err
+		}
+	}
+	return operation, nil
+}
+
 func (r readSession) GetOperationByInstanceID(instanceId string) (dbmodel.OperationDTO, dberr.Error) {
 	condition := dbr.Eq("instance_id", instanceId)
 	operation, err := r.getOperation(condition)
@@ -752,6 +771,42 @@ func (r readSession) GetNumberOfInstancesForGlobalAccountID(globalAccountID stri
 	return res.Total, err
 }
 
+func (r readSession) ListInstancesUsingLastOperationID(filter dbmodel.InstanceFilter) ([]dbmodel.InstanceWithExtendedOperationDTO, int, int, error) {
+	var instances []dbmodel.InstanceWithExtendedOperationDTO
+
+	// select an instance with a last operation
+	stmt := r.session.Select("o.data", "o.state", "o.type", fmt.Sprintf("%s.*", InstancesTableName)).
+		From(InstancesTableName).
+		Join(dbr.I(OperationTableName).As("o"), fmt.Sprintf("%s.last_operation_id = o.id", InstancesTableName)).
+		OrderBy(fmt.Sprintf("%s.%s", InstancesTableName, CreatedAtField))
+
+	if len(filter.States) > 0 || filter.Suspended != nil {
+		stateFilters := buildInstanceStateFilters("o", filter)
+		stmt.Where(stateFilters)
+	}
+
+	// Add pagination
+	if filter.Page > 0 && filter.PageSize > 0 {
+		stmt = stmt.Paginate(uint64(filter.Page), uint64(filter.PageSize))
+	}
+
+	_, err := stmt.Load(&instances)
+	if err != nil {
+		return nil, -1, -1, fmt.Errorf("while fetching instances: %w", err)
+	}
+
+	totalCount, err := r.getInstanceCountByLastOperationID(filter)
+	if err != nil {
+		return nil, -1, -1, err
+	}
+
+	return instances,
+		len(instances),
+		totalCount,
+		nil
+}
+
+// deprecated, use ListInstancesUsingLastOperationID
 func (r readSession) ListInstances(filter dbmodel.InstanceFilter) ([]dbmodel.InstanceWithExtendedOperationDTO, int, int, error) {
 	var instances []dbmodel.InstanceWithExtendedOperationDTO
 
@@ -799,6 +854,7 @@ func (r readSession) ListInstances(filter dbmodel.InstanceFilter) ([]dbmodel.Ins
 		nil
 }
 
+// todo: refactor after migration to ListInstancesUsingLastOperationID
 func (r readSession) ListInstancesWithSubaccountStates(filter dbmodel.InstanceFilter) ([]dbmodel.InstanceWithSubaccountStateDTO, int, int, error) {
 	var instances []dbmodel.InstanceWithSubaccountStateDTO
 
@@ -860,6 +916,27 @@ func (r readSession) ListEvents(filter events.EventFilter) ([]events.EventDTO, e
 	stmt.OrderBy("created_at")
 	_, err := stmt.Load(&events)
 	return events, err
+}
+
+func (r readSession) getInstanceCountByLastOperationID(filter dbmodel.InstanceFilter) (int, error) {
+	var res struct {
+		Total int
+	}
+	var stmt *dbr.SelectStmt
+	stmt = r.session.
+		Select("count(*) as total").
+		From(InstancesTableName).
+		Join(dbr.I(OperationTableName).As("o"), fmt.Sprintf("%s.last_operation_id = o.id", InstancesTableName))
+
+	if len(filter.States) > 0 || filter.Suspended != nil {
+		stateFilters := buildInstanceStateFilters("o1", filter)
+		stmt.Where(stateFilters)
+	}
+
+	addInstanceFilters(stmt, filter)
+	err := stmt.LoadOne(&res)
+
+	return res.Total, err
 }
 
 func (r readSession) getInstanceCount(filter dbmodel.InstanceFilter) (int, error) {
