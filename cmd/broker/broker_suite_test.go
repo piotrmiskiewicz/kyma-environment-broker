@@ -567,8 +567,7 @@ func (s *BrokerSuiteTest) DecodeErrorResponse(resp *http.Response) apiresponses.
 
 func (s *BrokerSuiteTest) ReadResponse(resp *http.Response) []byte {
 	m, err := io.ReadAll(resp.Body)
-	msg := string(m)
-	s.Log(msg)
+	s.Log(string(m))
 	require.NoError(s.t, err)
 	return m
 }
