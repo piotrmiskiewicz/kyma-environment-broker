@@ -795,7 +795,7 @@ func (r readSession) ListInstancesUsingLastOperationID(filter dbmodel.InstanceFi
 		return nil, -1, -1, fmt.Errorf("while fetching instances: %w", err)
 	}
 
-	totalCount, err := r.getInstanceCountByLastOpoerationID(filter)
+	totalCount, err := r.getInstanceCountByLastOperationID(filter)
 	if err != nil {
 		return nil, -1, -1, err
 	}
