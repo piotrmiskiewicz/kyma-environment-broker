@@ -46,7 +46,7 @@ func NewFromConfig(cfg Config, evcfg events.Config, cipher postgres.Cipher) (Bro
 
 	fact := postsql.NewFactory(connection)
 
-	operation := postgres.NewOperation(fact, cipher)
+	operation := postgres.NewOperation(fact, cipher, cfg.UseLastOperationID)
 	return storage{
 		instance:          postgres.NewInstance(fact, operation, cipher, cfg.UseLastOperationID),
 		operation:         operation,
