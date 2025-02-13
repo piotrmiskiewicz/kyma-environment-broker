@@ -2,6 +2,7 @@ package postsql_test
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 	"math/rand"
 	"sort"
 	"testing"
@@ -1053,6 +1054,87 @@ func TestInstance(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 1, suspended)
 	})
+}
+
+func TestInstanceStorage_ListInstances(t *testing.T) {
+	// given
+	cfg := brokerStorageDatabaseTestConfig()
+	cfg.UseLastOperationID = false
+	storageCleanup, brokerStorage, err := storage.GetStorageForTest(cfg)
+	require.NoError(t, err)
+	require.NotNil(t, brokerStorage)
+	defer func() {
+		err := storageCleanup()
+		assert.NoError(t, err)
+	}()
+	instanceStorage := brokerStorage.Instances()
+	operationStorage := brokerStorage.Operations()
+
+	// first instance, one provisioning, one update
+	instance0 := fixInstance(instanceData{val: "inst1"})
+	instanceStorage.Insert(*instance0)
+	operation0_0 := fixProvisionOperation(instance0.InstanceID)
+	operation0_1 := fixture.FixUpdatingOperation("op0_1", instance0.InstanceID).Operation
+	operation0_1.State = domain.InProgress
+
+	operationStorage.InsertOperation(operation0_0)
+	operationStorage.InsertOperation(operation0_1)
+	instanceStorage.UpdateInstanceLastOperation(instance0.InstanceID, operation0_1.ID)
+
+	// second instance, one provisioning, 1 update
+	instance1 := fixInstance(instanceData{val: fmt.Sprintf("inst2")})
+	instanceStorage.Insert(*instance1)
+
+	operation1_0 := fixProvisionOperation(instance1.InstanceID)
+
+	operationStorage.InsertOperation(operation1_0)
+
+	op := fixture.FixUpdatingOperation(fmt.Sprintf("op1__%s", instance1.InstanceID), instance1.InstanceID).Operation
+	op.CreatedAt = time.Now().Add(-3 * time.Second)
+	op.State = domain.Succeeded
+	operationStorage.InsertOperation(op)
+
+	operation1_1 := fixture.FixUpdatingOperation("op1_1", instance1.InstanceID).Operation
+	operation1_1.State = domain.InProgress
+	operationStorage.InsertOperation(operation1_1)
+	instanceStorage.UpdateInstanceLastOperation(instance1.InstanceID, operation1_1.ID)
+
+	// third instance, one provisioning, one deprovisioning
+	instance2 := fixInstance(instanceData{val: "inst3"})
+	instanceStorage.Insert(*instance2)
+
+	operation2_0 := fixProvisionOperation(instance2.InstanceID)
+	operation2_1 := fixDeprovisionOperation(instance2.InstanceID).Operation
+	operation2_1.State = domain.InProgress
+
+	operationStorage.InsertOperation(operation2_0)
+	operationStorage.InsertOperation(operation2_1)
+	instanceStorage.UpdateInstanceLastOperation(instance2.InstanceID, operation2_1.ID)
+
+	// when
+	got, _, _, err := instanceStorage.List(dbmodel.InstanceFilter{
+		States:   []dbmodel.InstanceState{dbmodel.InstanceUpdating},
+		PageSize: 10,
+		Page:     1,
+	})
+	assert.Equal(t, 2, len(got))
+
+	got, _, _, err = instanceStorage.List(dbmodel.InstanceFilter{
+		States:   []dbmodel.InstanceState{dbmodel.InstanceUpdating},
+		PageSize: 1,
+		Page:     1,
+	})
+	assert.Equal(t, 1, len(got))
+
+	// when
+	got, _, _, err = instanceStorage.List(dbmodel.InstanceFilter{
+		States:   []dbmodel.InstanceState{dbmodel.InstanceDeprovisioning},
+		PageSize: 10,
+		Page:     1,
+	})
+	assert.Equal(t, 1, len(got))
+	assert.Equal(t, instance2.InstanceID, got[0].InstanceID)
+
 }
 
 func assertInstanceByIgnoreTime(t *testing.T, want, got internal.Instance) {

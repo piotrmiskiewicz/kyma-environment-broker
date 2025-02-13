@@ -20,8 +20,9 @@ import (
 
 type Instance struct {
 	postsql.Factory
-	operations *operations
-	cipher     Cipher
+	operations         *operations
+	cipher             Cipher
+	UseLastOperationID bool
 }
 
 func (s *Instance) GetDistinctSubAccounts() ([]string, error) {
@@ -44,11 +45,12 @@ func (s *Instance) GetDistinctSubAccounts() ([]string, error) {
 	return subAccounts, nil
 }
 
-func NewInstance(sess postsql.Factory, operations *operations, cipher Cipher) *Instance {
+func NewInstance(sess postsql.Factory, operations *operations, cipher Cipher, useLastInsdtanceID bool) *Instance {
 	return &Instance{
-		Factory:    sess,
-		operations: operations,
-		cipher:     cipher,
+		Factory:            sess,
+		operations:         operations,
+		cipher:             cipher,
+		UseLastOperationID: useLastInsdtanceID,
 	}
 }
 
@@ -577,7 +579,15 @@ func (s *Instance) GetERSContextStats() (internal.ERSContextStats, error) {
 }
 
 func (s *Instance) List(filter dbmodel.InstanceFilter) ([]internal.Instance, int, int, error) {
-	dtos, count, totalCount, err := s.NewReadSession().ListInstances(filter)
+	var totalCount, count int
+	var err error
+	var dtos []dbmodel.InstanceWithExtendedOperationDTO
+	if s.UseLastOperationID {
+		dtos, count, totalCount, err = s.NewReadSession().ListInstancesUsingLastOperationID(filter)
+	} else {
+		dtos, count, totalCount, err = s.NewReadSession().ListInstances(filter)
+	}
+
 	if err != nil {
 		return []internal.Instance{}, 0, 0, err
 	}
@@ -603,6 +613,11 @@ func (s *Instance) List(filter dbmodel.InstanceFilter) ([]internal.Instance, int
 		instances = append(instances, instance)
 	}
 	return instances, count, totalCount, err
+}
+
+func (s *Instance) UpdateInstanceLastOperation(instanceID, operationID string) error {
+	sess := s.NewWriteSession()
+	return sess.UpdateInstanceLastOperation(instanceID, operationID)
 }
 
 func (s *Instance) ListWithSubaccountState(filter dbmodel.InstanceFilter) ([]internal.InstanceWithSubaccountState, int, int, error) {

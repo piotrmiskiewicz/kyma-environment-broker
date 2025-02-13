@@ -31,6 +31,8 @@ type Instances interface {
 	ListDeletedInstanceIDs(int) ([]string, error)
 
 	DeletedInstancesStatistics() (internal.DeletedStats, error)
+
+	UpdateInstanceLastOperation(instanceID, operationID string) error
 }
 
 type InstancesArchived interface {
