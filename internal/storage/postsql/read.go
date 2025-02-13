@@ -918,7 +918,7 @@ func (r readSession) ListEvents(filter events.EventFilter) ([]events.EventDTO, e
 	return events, err
 }
 
-func (r readSession) getInstanceCountByLastOpoerationID(filter dbmodel.InstanceFilter) (int, error) {
+func (r readSession) getInstanceCountByLastOperationID(filter dbmodel.InstanceFilter) (int, error) {
 	var res struct {
 		Total int
 	}
