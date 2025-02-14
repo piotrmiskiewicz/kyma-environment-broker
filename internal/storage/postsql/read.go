@@ -929,7 +929,7 @@ func (r readSession) ListInstancesWithSubaccountStatesWithUseLastOperationID(fil
 		OrderBy(fmt.Sprintf("%s.%s", InstancesTableName, CreatedAtField))
 
 	if len(filter.States) > 0 || filter.Suspended != nil {
-		stateFilters := buildInstanceStateFilters("o1", filter)
+		stateFilters := buildInstanceStateFilters("o", filter)
 		stmt.Where(stateFilters)
 	}
 
