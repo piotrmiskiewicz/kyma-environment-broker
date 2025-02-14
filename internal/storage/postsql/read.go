@@ -946,7 +946,7 @@ func (r readSession) ListInstancesWithSubaccountStatesWithUseLastOperationID(fil
 	}
 
 	// getInstanceCount is appropriate for this query because we added only left join without any additional selection/filtering
-	totalCount, err := r.getInstanceCount(filter)
+	totalCount, err := r.getInstanceCountByLastOperationID(filter)
 	if err != nil {
 		return nil, -1, -1, err
 	}
