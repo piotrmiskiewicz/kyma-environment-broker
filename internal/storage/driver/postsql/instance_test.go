@@ -1113,14 +1113,14 @@ func TestInstanceStorage_ListInstances(t *testing.T) {
 	_ = instanceStorage.UpdateInstanceLastOperation(instance2.InstanceID, operation2_1.ID)
 
 	// when
-	got, _, _, err := instanceStorage.List(dbmodel.InstanceFilter{
+	got, _, _, err := instanceStorage.ListWithSubaccountState(dbmodel.InstanceFilter{
 		States:   []dbmodel.InstanceState{dbmodel.InstanceUpdating},
 		PageSize: 10,
 		Page:     1,
 	})
 	assert.Equal(t, 2, len(got))
 
-	got, _, _, err = instanceStorage.List(dbmodel.InstanceFilter{
+	got, _, _, err = instanceStorage.ListWithSubaccountState(dbmodel.InstanceFilter{
 		States:   []dbmodel.InstanceState{dbmodel.InstanceUpdating},
 		PageSize: 1,
 		Page:     1,
@@ -1128,7 +1128,7 @@ func TestInstanceStorage_ListInstances(t *testing.T) {
 	assert.Equal(t, 1, len(got))
 
 	// when
-	got, _, _, err = instanceStorage.List(dbmodel.InstanceFilter{
+	got, _, _, err = instanceStorage.ListWithSubaccountState(dbmodel.InstanceFilter{
 		States:   []dbmodel.InstanceState{dbmodel.InstanceDeprovisioning},
 		PageSize: 10,
 		Page:     1,
