@@ -3,6 +3,7 @@ package postsql
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -774,6 +775,8 @@ func (r readSession) GetNumberOfInstancesForGlobalAccountID(globalAccountID stri
 func (r readSession) ListInstancesUsingLastOperationID(filter dbmodel.InstanceFilter) ([]dbmodel.InstanceWithExtendedOperationDTO, int, int, error) {
 	var instances []dbmodel.InstanceWithExtendedOperationDTO
 
+	slog.Info("List instances - ListInstancesUsingLastOperationID", "filter", filter)
+
 	// select an instance with a last operation
 	stmt := r.session.Select("o.data", "o.state", "o.type", fmt.Sprintf("%s.*", InstancesTableName)).
 		From(InstancesTableName).
@@ -809,6 +812,8 @@ func (r readSession) ListInstancesUsingLastOperationID(filter dbmodel.InstanceFi
 // deprecated, use ListInstancesUsingLastOperationID
 func (r readSession) ListInstances(filter dbmodel.InstanceFilter) ([]dbmodel.InstanceWithExtendedOperationDTO, int, int, error) {
 	var instances []dbmodel.InstanceWithExtendedOperationDTO
+
+	slog.Info("List instances - ListInstances", "filter", filter)
 
 	// Base select and order by created at
 	var stmt *dbr.SelectStmt
