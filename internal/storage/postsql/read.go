@@ -865,6 +865,8 @@ func (r readSession) ListInstances(filter dbmodel.InstanceFilter) ([]dbmodel.Ins
 func (r readSession) ListInstancesWithSubaccountStates(filter dbmodel.InstanceFilter) ([]dbmodel.InstanceWithSubaccountStateDTO, int, int, error) {
 	var instances []dbmodel.InstanceWithSubaccountStateDTO
 
+	slog.Info("Calling ListInstancesWithSubaccountStates")
+
 	// Base select and order by created at
 	var stmt *dbr.SelectStmt
 	// Find and join the last operation for each instance matching the state filter(s).
@@ -880,6 +882,50 @@ func (r readSession) ListInstancesWithSubaccountStates(filter dbmodel.InstanceFi
 		LeftJoin(dbr.I(SubaccountStatesTableName).As("ss"), fmt.Sprintf("%s.sub_account_id = ss.id", InstancesTableName)).
 		Where("o2.created_at IS NULL").
 		Where(fmt.Sprintf("o1.state NOT IN ('%s', '%s')", orchestration.Pending, orchestration.Canceled)).
+		OrderBy(fmt.Sprintf("%s.%s", InstancesTableName, CreatedAtField))
+
+	if len(filter.States) > 0 || filter.Suspended != nil {
+		stateFilters := buildInstanceStateFilters("o1", filter)
+		stmt.Where(stateFilters)
+	}
+
+	// Add pagination
+	if filter.Page > 0 && filter.PageSize > 0 {
+		stmt = stmt.Paginate(uint64(filter.Page), uint64(filter.PageSize))
+	}
+
+	addInstanceFilters(stmt, filter)
+
+	_, err := stmt.Load(&instances)
+	if err != nil {
+		return nil, -1, -1, fmt.Errorf("while fetching instances: %w", err)
+	}
+
+	// getInstanceCount is appropriate for this query because we added only left join without any additional selection/filtering
+	totalCount, err := r.getInstanceCount(filter)
+	if err != nil {
+		return nil, -1, -1, err
+	}
+
+	return instances,
+		len(instances),
+		totalCount,
+		nil
+}
+
+func (r readSession) ListInstancesWithSubaccountStatesWithUseLastOperationID(filter dbmodel.InstanceFilter) ([]dbmodel.InstanceWithSubaccountStateDTO, int, int, error) {
+	var instances []dbmodel.InstanceWithSubaccountStateDTO
+
+	slog.Info("Calling ListInstancesWithSubaccountStatesWithUseLastOperationID")
+
+	// Base select and order by created at
+	var stmt *dbr.SelectStmt
+
+	// select an instance with a last operation
+	stmt = r.session.Select("o.data", "o.state", "o.type", fmt.Sprintf("%s.*", InstancesTableName), "ss.beta_enabled", "ss.used_for_production").
+		From(InstancesTableName).
+		Join(dbr.I(OperationTableName).As("o"), fmt.Sprintf("%s.last_operation_id = o.id", InstancesTableName)).
+		LeftJoin(dbr.I(SubaccountStatesTableName).As("ss"), fmt.Sprintf("%s.sub_account_id = ss.id", InstancesTableName)).
 		OrderBy(fmt.Sprintf("%s.%s", InstancesTableName, CreatedAtField))
 
 	if len(filter.States) > 0 || filter.Suspended != nil {
