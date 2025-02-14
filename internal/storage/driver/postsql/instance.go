@@ -625,7 +625,7 @@ func (s *Instance) ListWithSubaccountState(filter dbmodel.InstanceFilter) ([]int
 	var dtos []dbmodel.InstanceWithSubaccountStateDTO
 	var err error
 	if s.UseLastOperationID {
-		dtos, count, totalCount, err = s.NewReadSession().ListInstancesWithSubaccountStates(filter)
+		dtos, count, totalCount, err = s.NewReadSession().ListInstancesWithSubaccountStatesWithUseLastOperationID(filter)
 	} else {
 		dtos, count, totalCount, err = s.NewReadSession().ListInstancesWithSubaccountStates(filter)
 	}
