@@ -982,7 +982,7 @@ func (r readSession) getInstanceCountByLastOperationID(filter dbmodel.InstanceFi
 		Join(dbr.I(OperationTableName).As("o"), fmt.Sprintf("%s.last_operation_id = o.id", InstancesTableName))
 
 	if len(filter.States) > 0 || filter.Suspended != nil {
-		stateFilters := buildInstanceStateFilters("o1", filter)
+		stateFilters := buildInstanceStateFilters("o", filter)
 		stmt.Where(stateFilters)
 	}
 
