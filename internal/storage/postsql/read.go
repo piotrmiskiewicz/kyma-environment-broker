@@ -798,8 +798,6 @@ func (r readSession) ListInstancesUsingLastOperationID(filter dbmodel.InstanceFi
 		return nil, -1, -1, fmt.Errorf("while fetching instances: %w", err)
 	}
 
-	slog.Info(fmt.Sprintf("Got %d instances", len(instances)))
-
 	totalCount, err := r.getInstanceCountByLastOperationID(filter)
 	if err != nil {
 		return nil, -1, -1, err
@@ -814,8 +812,6 @@ func (r readSession) ListInstancesUsingLastOperationID(filter dbmodel.InstanceFi
 // deprecated, use ListInstancesUsingLastOperationID
 func (r readSession) ListInstances(filter dbmodel.InstanceFilter) ([]dbmodel.InstanceWithExtendedOperationDTO, int, int, error) {
 	var instances []dbmodel.InstanceWithExtendedOperationDTO
-
-	slog.Info("List instances - ListInstances", "filter", filter)
 
 	// Base select and order by created at
 	var stmt *dbr.SelectStmt
@@ -946,7 +942,7 @@ func (r readSession) ListInstancesWithSubaccountStatesWithUseLastOperationID(fil
 	}
 
 	// getInstanceCount is appropriate for this query because we added only left join without any additional selection/filtering
-	totalCount, err := r.getInstanceCount(filter)
+	totalCount, err := r.getInstanceCountByLastOperationID(filter)
 	if err != nil {
 		return nil, -1, -1, err
 	}
@@ -982,7 +978,7 @@ func (r readSession) getInstanceCountByLastOperationID(filter dbmodel.InstanceFi
 		Join(dbr.I(OperationTableName).As("o"), fmt.Sprintf("%s.last_operation_id = o.id", InstancesTableName))
 
 	if len(filter.States) > 0 || filter.Suspended != nil {
-		stateFilters := buildInstanceStateFilters("o1", filter)
+		stateFilters := buildInstanceStateFilters("o", filter)
 		stmt.Where(stateFilters)
 	}
 
