@@ -3,7 +3,6 @@ package memory
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"sort"
 	"sync"
@@ -43,16 +42,6 @@ func (s *instances) GetDistinctSubAccounts() ([]string, error) {
 		subAccounts = append(subAccounts, k)
 	}
 	return subAccounts, nil
-}
-
-func (s *instances) InsertWithoutEncryption(instance internal.Instance) error {
-	return errors.New("not implemented")
-}
-func (s *instances) UpdateWithoutEncryption(instance internal.Instance) (*internal.Instance, error) {
-	return nil, errors.New("not implemented")
-}
-func (s *instances) ListWithoutDecryption(dbmodel.InstanceFilter) ([]internal.Instance, int, int, error) {
-	return nil, 0, 0, errors.New("not implemented")
 }
 
 func (s *instances) UpdateInstanceLastOperation(instanceID, operationID string) error {
