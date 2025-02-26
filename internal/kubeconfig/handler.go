@@ -2,10 +2,11 @@ package kubeconfig
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal"
 	"log/slog"
 	"net/http"
 	"strings"
+
+	"github.com/kyma-project/kyma-environment-broker/internal"
 
 	"github.com/kennygrant/sanitize"
 
