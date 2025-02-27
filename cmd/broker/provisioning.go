@@ -27,7 +27,6 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 		fatalOnError(err, logs)
 	}
 
-	const postActionsStageName = "post_actions"
 	provisionManager.DefineStages([]string{startStageName, createRuntimeStageName,
 		checkKymaStageName, createKymaResourceStageName})
 	/*
@@ -88,8 +87,9 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 		},
 		// postcondition: operation.KymaResourceName, operation.RuntimeResourceName is set
 		{
-			stage: createRuntimeStageName,
-			step:  provisioning.NewCreateRuntimeResourceStep(db.Operations(), db.Instances(), cli, cfg.Broker.KimConfig, cfg.Provisioner, trialRegionsMapping, cfg.Broker.UseSmallerMachineTypes, defaultOIDC),
+			stage:     createRuntimeStageName,
+			step:      provisioning.NewCreateRuntimeResourceStep(db.Operations(), db.Instances(), cli, cfg.Provisioner, trialRegionsMapping, cfg.Broker.UseSmallerMachineTypes, defaultOIDC),
+			condition: provisioning.SkipForOwnClusterPlan,
 		},
 		{
 			stage: createRuntimeStageName,
