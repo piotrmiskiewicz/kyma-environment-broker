@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"log/slog"
+	"time"
 
+	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
@@ -16,6 +18,8 @@ import (
 	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const resourceStateRetryInterval = 10 * time.Second
 
 func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *process.StagedManager, workersAmount int, cfg *Config,
 	db storage.BrokerStorage, inputFactory input.CreatorForPlan,
@@ -92,8 +96,9 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 			condition: provisioning.SkipForOwnClusterPlan,
 		},
 		{
-			stage: createRuntimeStageName,
-			step:  steps.NewCheckRuntimeResourceStep(db.Operations(), cli, cfg.Broker.KimConfig, cfg.Provisioner.RuntimeResourceStepTimeout),
+			stage:     createRuntimeStageName,
+			step:      steps.NewCheckRuntimeResourceStep(db.Operations(), cli, internal.RetryTuple{Timeout: cfg.Provisioner.RuntimeResourceStepTimeout, Interval: resourceStateRetryInterval}),
+			condition: provisioning.SkipForOwnClusterPlan,
 		},
 		{ // TODO: this step must be removed when kubeconfig is created by IM and own_cluster plan is permanently removed
 			disabled:  cfg.LifecycleManagerIntegrationDisabled,
@@ -101,7 +106,7 @@ func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *proce
 			step:      steps.SyncKubeconfig(db.Operations(), cli),
 			condition: provisioning.DoForOwnClusterPlanOnly,
 		},
-		{ // must be run after the secret with kubeconfig is created ("syncKubeconfig" or "checkGardenerCluster")
+		{ // must be run after the secret with kubeconfig is created ("syncKubeconfig")
 			condition: provisioning.WhenBTPOperatorCredentialsProvided,
 			stage:     createRuntimeStageName,
 			step:      provisioning.NewInjectBTPOperatorCredentialsStep(db.Operations(), k8sClientProvider),
