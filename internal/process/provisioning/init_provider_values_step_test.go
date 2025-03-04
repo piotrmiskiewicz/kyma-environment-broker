@@ -1,7 +1,6 @@
 package provisioning
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
 	"github.com/kyma-project/kyma-environment-broker/internal/process/input"
@@ -18,7 +17,6 @@ func TestInitProviderValuesStep_Run(t *testing.T) {
 
 	operation := fixture.FixProvisioningOperation("op-id", "i-id")
 	// to be sure Provider ProviderValues is empty
-	operation.ProviderValues = &internal.ProviderValues{}
 	operation.ProvisioningParameters.PlanID = broker.AWSPlanID
 	operation.ProvisioningParameters.Parameters.Region = ptr.String("eu-central-1")
 
@@ -40,10 +38,10 @@ func TestInitProviderValuesStep_Run(t *testing.T) {
 
 	// then
 	assert.Zero(t, repeat)
-	assert.Equal(t, gotOperation.ProviderValues.ProviderType, "aws")
-	assert.Equal(t, gotOperation.ProviderValues.Region, "eu-central-1")
-	assert.Equal(t, gotOperation.ProviderValues.Purpose, "production")
-	assert.Equal(t, gotOperation.ProviderValues.FailureTolerance, ptr.String("node"))
+	assert.Equal(t, "aws", gotOperation.ProviderValues.ProviderType)
+	assert.Equal(t, "eu-central-1", gotOperation.ProviderValues.Region)
+	assert.Equal(t, "production", gotOperation.ProviderValues.Purpose)
+	assert.Equal(t, ptr.String("node"), gotOperation.ProviderValues.FailureTolerance)
 
 	storedOperation, err := memoryStorage.Operations().GetProvisioningOperationByID(operation.ID)
 	require.NoError(t, err)
