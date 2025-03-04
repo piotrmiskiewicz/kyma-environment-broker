@@ -43,6 +43,9 @@ func TestResolveCredentialsStepHappyPath_Run(t *testing.T) {
 	memoryStorage := storage.NewMemoryStorage()
 
 	operation := fixOperationRuntimeStatus(broker.GCPPlanID, pkg.GCP)
+	operation.ProviderValues = &internal.ProviderValues{
+		ProviderType: "gcp",
+	}
 	err := memoryStorage.Operations().InsertOperation(operation)
 	assert.NoError(t, err)
 
