@@ -2,6 +2,7 @@ package provisioning
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -217,6 +218,9 @@ func TestResolveCredentials_IntegrationAWS(t *testing.T) {
 	accountProvider := hyperscaler.NewAccountProvider(hyperscaler.NewAccountPool(gc, namespace), hyperscaler.NewSharedGardenerAccountPool(gc, namespace))
 
 	op := fixOperationWithPlatformRegion("cf-us10", pkg.AWS)
+	op.ProviderValues = &internal.ProviderValues{
+		ProviderType: "aws",
+	}
 	err := memoryStorage.Operations().InsertOperation(op)
 	assert.NoError(t, err)
 	step := NewResolveCredentialsStep(memoryStorage.Operations(), accountProvider, &rules.RulesService{})
@@ -241,6 +245,9 @@ func TestResolveCredentials_IntegrationAWSEuAccess(t *testing.T) {
 	accountProvider := hyperscaler.NewAccountProvider(hyperscaler.NewAccountPool(gc, namespace), hyperscaler.NewSharedGardenerAccountPool(gc, namespace))
 
 	op := fixOperationWithPlatformRegion("cf-eu11", pkg.AWS)
+	op.ProviderValues = &internal.ProviderValues{
+		ProviderType: "aws",
+	}
 	err := memoryStorage.Operations().InsertOperation(op)
 	assert.NoError(t, err)
 	step := NewResolveCredentialsStep(memoryStorage.Operations(), accountProvider, &rules.RulesService{})
@@ -263,6 +270,9 @@ func TestResolveCredentials_IntegrationAzure(t *testing.T) {
 	accountProvider := hyperscaler.NewAccountProvider(hyperscaler.NewAccountPool(gc, namespace), hyperscaler.NewSharedGardenerAccountPool(gc, namespace))
 
 	op := fixOperationWithPlatformRegion("cf-eu21", pkg.Azure)
+	op.ProviderValues = &internal.ProviderValues{
+		ProviderType: "azure",
+	}
 	err := memoryStorage.Operations().InsertOperation(op)
 	assert.NoError(t, err)
 	step := NewResolveCredentialsStep(memoryStorage.Operations(), accountProvider, &rules.RulesService{})
@@ -287,6 +297,9 @@ func TestResolveCredentials_IntegrationAzureEuAccess(t *testing.T) {
 	accountProvider := hyperscaler.NewAccountProvider(hyperscaler.NewAccountPool(gc, namespace), hyperscaler.NewSharedGardenerAccountPool(gc, namespace))
 
 	op := fixOperationWithPlatformRegion("cf-ch20", pkg.Azure)
+	op.ProviderValues = &internal.ProviderValues{
+		ProviderType: "azure",
+	}
 	err := memoryStorage.Operations().InsertOperation(op)
 	assert.NoError(t, err)
 	step := NewResolveCredentialsStep(memoryStorage.Operations(), accountProvider, &rules.RulesService{})
@@ -344,6 +357,9 @@ func fixOperationRuntimeStatus(planId string, provider pkg.CloudProvider) intern
 	provisioningOperation.InstanceDetails.RuntimeID = runtimeID
 	provisioningOperation.ProvisioningParameters.PlanID = planId
 	provisioningOperation.ProvisioningParameters.ErsContext.GlobalAccountID = statusGlobalAccountID
+	provisioningOperation.ProviderValues = &internal.ProviderValues{
+		ProviderType: strings.ToLower(string(provider)),
+	}
 
 	return provisioningOperation
 }
@@ -355,6 +371,8 @@ func fixOperationRuntimeStatusWithProvider(planId string, provider pkg.CloudProv
 	provisioningOperation.ProvisioningParameters.PlanID = planId
 	provisioningOperation.ProvisioningParameters.ErsContext.GlobalAccountID = statusGlobalAccountID
 	provisioningOperation.ProvisioningParameters.Parameters.Provider = &provider
-
+	provisioningOperation.ProviderValues = &internal.ProviderValues{
+		ProviderType: strings.ToLower(string(provider)),
+	}
 	return provisioningOperation
 }
