@@ -2,9 +2,10 @@ package provisioning
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"log/slog"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 
 	kebError "github.com/kyma-project/kyma-environment-broker/internal/error"
 
