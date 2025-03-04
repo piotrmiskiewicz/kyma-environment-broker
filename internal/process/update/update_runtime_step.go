@@ -3,9 +3,10 @@ package update
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 	"log/slog"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 
 	gardener "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 
