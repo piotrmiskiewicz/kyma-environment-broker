@@ -2,8 +2,9 @@ package steps
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"strings"
+
+	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/customresources"
 

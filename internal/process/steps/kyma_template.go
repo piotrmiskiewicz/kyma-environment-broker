@@ -2,10 +2,11 @@ package steps
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
-	"github.com/kyma-project/kyma-environment-broker/internal/process/input"
 	"log/slog"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/broker"
+	"github.com/kyma-project/kyma-environment-broker/internal/process/input"
 
 	kebError "github.com/kyma-project/kyma-environment-broker/internal/error"
 
