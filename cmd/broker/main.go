@@ -43,7 +43,6 @@ import (
 	"github.com/kyma-project/kyma-environment-broker/internal/httputil"
 	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
 	"github.com/kyma-project/kyma-environment-broker/internal/notification"
-	"github.com/kyma-project/kyma-environment-broker/internal/orchestration"
 	"github.com/kyma-project/kyma-environment-broker/internal/process"
 	"github.com/kyma-project/kyma-environment-broker/internal/process/input"
 	"github.com/kyma-project/kyma-environment-broker/internal/provider"
@@ -113,8 +112,6 @@ type Config struct {
 	Notification notification.Config
 
 	KymaDashboardConfig dashboard.Config
-
-	OrchestrationConfig orchestration.Config
 
 	TrialRegionMappingFilePath string
 
@@ -234,7 +231,6 @@ func main() {
 		logLevel.Set(cfg.getLogLevel())
 	}
 
-	cfg.OrchestrationConfig.KubernetesVersion = cfg.Provisioner.KubernetesVersion
 	// create logger
 	logger := lager.NewLogger("kyma-env-broker")
 
