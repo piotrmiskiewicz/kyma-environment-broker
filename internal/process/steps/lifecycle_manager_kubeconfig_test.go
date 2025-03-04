@@ -2,6 +2,7 @@ package steps
 
 import (
 	"context"
+	"github.com/kyma-project/kyma-environment-broker/internal"
 	"log/slog"
 	"os"
 	"testing"
@@ -20,6 +21,9 @@ func TestCheckKymaKubeconfigCreated(t *testing.T) {
 	// Given
 	operation := fixture.FixProvisioningOperation("op", "instance")
 	operation.KymaResourceNamespace = "kyma-system"
+	operation.ProviderValues = &internal.ProviderValues{
+		ProviderType: "aws",
+	}
 
 	k8sClient := fake.NewClientBuilder().Build()
 
@@ -44,6 +48,9 @@ func TestCheckKymaKubeconfigDeleted(t *testing.T) {
 	// Given
 	operation := fixture.FixDeprovisioningOperationAsOperation("op", "instance")
 	operation.KymaResourceNamespace = "kyma-system"
+	operation.ProviderValues = &internal.ProviderValues{
+		ProviderType: "aws",
+	}
 
 	k8sClient := fake.NewClientBuilder().Build()
 	err := k8sClient.Create(context.Background(), &v1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: "kyma-system", Name: "kubeconfig-runtime-instance"}})
@@ -70,6 +77,9 @@ func TestCheckKymaKubeconfigDeleted(t *testing.T) {
 func TestCheckKymaKubeconfigDeleteSkipped(t *testing.T) {
 	// Given
 	operation := fixture.FixDeprovisioningOperationAsOperation("op", "instance")
+	operation.ProviderValues = &internal.ProviderValues{
+		ProviderType: "aws",
+	}
 
 	k8sClient := fake.NewClientBuilder().Build()
 
