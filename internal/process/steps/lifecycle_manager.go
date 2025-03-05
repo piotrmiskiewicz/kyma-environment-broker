@@ -17,7 +17,6 @@ func ApplyLabelsAndAnnotationsForLM(object client.Object, operation internal.Ope
 
 	cloudProvider := runtime.CloudProviderFromString(operation.ProviderValues.ProviderType)
 	l := object.GetLabels()
-	fmt.Println(cloudProvider)
 	l = SetCommonLabels(l, operation)
 
 	l[customresources.RegionLabel] = operation.Region
