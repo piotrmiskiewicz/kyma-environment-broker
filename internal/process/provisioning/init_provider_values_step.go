@@ -23,6 +23,8 @@ type InitProviderValuesStep struct {
 	config                     input.Config
 	trialPlatformRegionMapping map[string]string
 	useSmallerMachineTypes     bool
+
+	instanceStorage storage.Instances
 }
 
 var _ process.Step = &InitProviderValuesStep{}
@@ -51,10 +53,29 @@ func (s *InitProviderValuesStep) Run(operation internal.Operation, logger *slog.
 		return s.operationManager.OperationFailed(operation, fmt.Sprintf("while calculating plan specific values : %s", err), err, logger)
 	}
 
+	err = s.updateInstance(operation.InstanceID, runtime.CloudProviderFromString(values.ProviderType))
+	if err != nil {
+		return s.operationManager.RetryOperation(operation, fmt.Sprintf("while updating instance with provider: %s", err.Error()), err, kcpRetryInterval, kcpRetryTimeout, logger)
+	}
+
 	logger.Debug(fmt.Sprintf("Saving plan specific values: provider=%s, region=%s, purpose=%s, failureTolerance=%v", values.ProviderType, values.Region, values.Purpose, values.FailureTolerance))
 
 	return s.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
 		op.ProviderValues = &values
 		op.CloudProvider = string(runtime.CloudProviderFromString(values.ProviderType))
 	}, logger)
+}
+
+func (s *InitProviderValuesStep) updateInstance(id string, provider pkg.CloudProvider) error {
+	instance, err := s.instanceStorage.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("while getting instance: %w", err)
+	}
+	instance.Provider = provider
+	_, err = s.instanceStorage.Update(*instance)
+	if err != nil {
+		return fmt.Errorf("while updating instance: %w", err)
+	}
+
+	return nil
 }
