@@ -27,7 +27,7 @@ func TestInitProviderValuesStep_Run(t *testing.T) {
 	instance.Provider = ""
 	err := memoryStorage.Instances().Insert(instance)
 	require.NoError(t, err)
-	err := memoryStorage.Operations().InsertOperation(operation)
+	err = memoryStorage.Operations().InsertOperation(operation)
 	assert.NoError(t, err)
 
 	step := NewInitProviderValuesStep(memoryStorage.Operations(), memoryStorage.Instances(), input.Config{
