@@ -25,7 +25,8 @@ func TestInitProviderValuesStep_Run(t *testing.T) {
 
 	instance := fixture.FixInstance("i-id")
 	instance.Provider = ""
-	memoryStorage.Instances().Insert(instance)
+	err := memoryStorage.Instances().Insert(instance)
+	require.NoError(t, err)
 	err := memoryStorage.Operations().InsertOperation(operation)
 	assert.NoError(t, err)
 
