@@ -66,7 +66,7 @@ func (s *InitProviderValuesStep) Run(operation internal.Operation, logger *slog.
 	}, logger)
 }
 
-func (s *InitProviderValuesStep) updateInstance(id string, provider pkg.CloudProvider) error {
+func (s *InitProviderValuesStep) updateInstance(id string, provider runtime.CloudProvider) error {
 	instance, err := s.instanceStorage.GetByID(id)
 	if err != nil {
 		return fmt.Errorf("while getting instance: %w", err)
