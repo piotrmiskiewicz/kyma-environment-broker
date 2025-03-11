@@ -29,12 +29,13 @@ type InitProviderValuesStep struct {
 
 var _ process.Step = &InitProviderValuesStep{}
 
-func NewInitProviderValuesStep(os storage.Operations, cfg input.Config, trialPlatformRegionMapping map[string]string, useSmallerMachineTypes bool) *InitProviderValuesStep {
+func NewInitProviderValuesStep(os storage.Operations, is storage.Instances, cfg input.Config, trialPlatformRegionMapping map[string]string, useSmallerMachineTypes bool) *InitProviderValuesStep {
 	return &InitProviderValuesStep{
 		operationManager:           process.NewOperationManager(os, "InitProviderValuesStep", kebError.KEBDependency),
 		config:                     cfg,
 		trialPlatformRegionMapping: trialPlatformRegionMapping,
 		useSmallerMachineTypes:     useSmallerMachineTypes,
+		instanceStorage:            is,
 	}
 }
 
