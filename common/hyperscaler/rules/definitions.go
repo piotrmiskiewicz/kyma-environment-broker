@@ -138,7 +138,7 @@ func setShared(r *Rule, value string) (*Rule, error) {
 	return r, nil
 }
 
-func setPlatoformRegionSuffix(r *Rule, value string) (*Rule, error) {
+func setPlatformRegionSuffix(r *Rule, value string) (*Rule, error) {
 	if r.PlatformRegionSuffix {
 		return nil, fmt.Errorf("PlatformRegionSuffix already set")
 	}
