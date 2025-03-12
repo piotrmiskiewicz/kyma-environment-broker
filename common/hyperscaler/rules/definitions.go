@@ -88,7 +88,7 @@ var OutputAttributes = []Attribute{
 	{
 		Name:        PR_SUFFIX_ATTR_NAME,
 		Description: "Platform Region suffix",
-		Setter:      setPlatoformRegionSuffix,
+		Setter:      setPlatformRegionSuffix,
 		Getter:      func(r *Rule) string { return strconv.FormatBool(r.PlatformRegionSuffix) },
 		input:       false,
 		output:      true,
