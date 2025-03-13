@@ -255,6 +255,13 @@ func (r *Rule) MirroredSignature() string {
 	return r.SignatureWithSymbols(ATTRIBUTE_WITH_VALUE, ASTERISK)
 }
 
+// SignatureWithSymbols returns the signature of the rule with the given symbols with a format similar to the input:
+//
+//	plan(attr1=*,attr2=*,...)
+//
+// for example:
+//
+//	aws(PR=*,HR=west-us1)
 func (r *Rule) SignatureWithSymbols(positiveKey, mirroredKey string) string {
 	signatureKey := r.Plan + L_PAREN
 
