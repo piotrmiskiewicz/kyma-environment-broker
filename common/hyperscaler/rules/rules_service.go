@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 )
 
@@ -92,33 +91,18 @@ func (rs *RulesService) parse(rulesConfig *RulesConfig) *ParsingResults {
 	return results
 }
 
-func (rs *RulesService) Match(data *ProvisioningAttributes) map[uuid.UUID]*MatchingResult {
-	var matchingResults map[uuid.UUID]*MatchingResult = make(map[uuid.UUID]*MatchingResult)
-
-	var lastMatch *MatchingResult = nil
-	for _, result := range rs.Parsed.Results {
-		if !result.HasParsingErrors() {
-			matchingResult := &MatchingResult{
-				ParsingResultID:        result.ID,
-				OriginalRule:           result.OriginalRule,
-				Rule:                   *result.Rule,
-				ProvisioningAttributes: data,
-			}
-
-			matchingResult.Matched = result.Rule.Matched(data)
-			if matchingResult.Matched {
-				lastMatch = matchingResult
-			}
-
-			matchingResults[result.ID] = matchingResult
+// Match finds the matching rule for the given provisioning attributes and provide the set of labels, which must be used to find proper secret binding.
+func (rs *RulesService) Match(provisioningAttributes *ProvisioningAttributes) (Result, bool) {
+	var result Result
+	found := false
+	for _, parsingResult := range rs.Parsed.Results {
+		if !parsingResult.HasParsingErrors() && parsingResult.Rule.Matched(provisioningAttributes) {
+			result = parsingResult.Rule.Labels(provisioningAttributes)
+			found = true
 		}
 	}
 
-	if lastMatch != nil {
-		lastMatch.FinalMatch = true
-	}
-
-	return matchingResults
+	return result, found
 }
 
 func (rs *RulesService) FailOnParsingErrors() error {
