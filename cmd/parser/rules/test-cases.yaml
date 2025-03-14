@@ -60,18 +60,6 @@ cases:
     hyperscalerType: aws                     
     There are errors in your rule
     configuration. Fix above errors in your rule configuration and try again.
-- name: Simple Asterix Rule
-  rule:
-  - aws
-  - aws(PR=*)
-  expected: |
-    -> Error   aws(PR=*)
-     - Duplicated rule with previously defined rule:
-    'aws'
-    ->     OK  aws                                                # hyperscalerType:
-    aws                            
-    There are errors in your rule configuration.
-    Fix above errors in your rule configuration and try again.
 - name: Duplicated Rules
   rule:
   - aws(HR=aa, PR=cf)
@@ -92,10 +80,10 @@ cases:
     configuration. Fix above errors in your rule configuration and try again.
 - name: Duplicated Rules - No 2
   rule:
-  - aws(PR=*, HR=test1)
-  - aws(PR=test2, HR=*)
-  - aws(PR=*, HR=t)
-  - aws(PR=*, HR=*)
+  - aws(HR=test1)
+  - aws(PR=test2)
+  - aws(HR=t)
+  - aws
   - aws
   - aws(PR=test2, HR=test1)
   expected: |
@@ -120,8 +108,7 @@ cases:
 - name: Unresolved Rule - No 2
   rule:
   - aws
-  - aws(PR=*)
-  - aws(HR=*)
+  - aws
   expected: |
     ->  Error   aws(HR=*)
      - Duplicated rule with previously defined rule:
@@ -159,10 +146,10 @@ cases:
                           # hyperscalerType: aws
 - name: Resolved Rule - No 3
   rule:
-  - aws(PR=*)
+  - aws
   - aws(PR=cf-eu11, HR=eastus)
   expected: |
-    ->     OK  aws(PR=*)                                          # hyperscalerType:
+    ->     OK  aws                                                # hyperscalerType:
     aws                          
     ->     OK  aws(PR=cf-eu11, HR=eastus)                         #
     hyperscalerType: aws
@@ -181,15 +168,15 @@ cases:
 - name: ""
   rule:
   - aws
-  - aws(PR=cf-eu11, HR=*)
+  - aws(PR=cf-eu11)
   - aws(PR=*, HR=eastus)
   - aws(PR=cf-eu11, HR=eastus)
   expected: |
     ->     OK  aws                                                # hyperscalerType:
     aws                            
-    ->     OK  aws(PR=cf-eu11, HR=*)                              #
+    ->     OK  aws(PR=cf-eu11)                              #
     hyperscalerType: aws                  
-    ->     OK  aws(PR=*, HR=eastus)
+    ->     OK  aws(HR=eastus)
                                 # hyperscalerType: aws                   
     ->     OK  aws(PR=cf-eu11, HR=eastus)                         # hyperscalerType:
     aws             

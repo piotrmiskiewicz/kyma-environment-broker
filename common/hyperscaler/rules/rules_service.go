@@ -114,7 +114,7 @@ func (rs *RulesService) MatchProvisioningAttributes(provisioningAttributes *Prov
 	var result Result
 	found := false
 	for _, parsingResult := range rs.Parsed.Results {
-		if !parsingResult.HasParsingErrors() && parsingResult.Rule.Matched(provisioningAttributes) {
+		if parsingResult.Rule.Matched(provisioningAttributes) {
 			result = parsingResult.Rule.Labels(provisioningAttributes)
 			found = true
 		}
