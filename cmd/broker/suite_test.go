@@ -395,25 +395,4 @@ func fixAccountProvider(t *testing.T, gc *fake.FakeDynamicClient) hyperscaler.Ac
 	accountProvider := hyperscaler.NewAccountProvider(hyperscaler.NewAccountPool(gc, "kyma"), hyperscaler.NewSharedGardenerAccountPool(gc, "kyma"))
 
 	return accountProvider
-
-	//accountProvider := hyperscalerautomock.AccountProvider{}
-	//
-	//accountProvider.On("GardenerSecretName", mock.Anything, mock.Anything, mock.Anything).Return(
-	//	func(ht hyperscaler.Type, tn string, euaccess bool) string { return regularSubscription(ht) }, nil)
-	//
-	//accountProvider.On("GardenerSharedSecretName", hyperscaler.Azure(), mock.Anything).Return(
-	//	func(ht hyperscaler.Type, euaccess bool) string { return sharedSubscription(ht) }, nil)
-	//
-	//accountProvider.On("GardenerSharedSecretName", hyperscaler.AWS(), mock.Anything).Return(
-	//	func(ht hyperscaler.Type, euaccess bool) string { return sharedSubscription(ht) }, nil)
-	//
-	//accountProvider.On("GardenerSharedSecretName", hyperscaler.SapConvergedCloud("eu-de-2"), mock.Anything).Return(
-	//	func(ht hyperscaler.Type, euaccess bool) string { return sharedSubscription(ht) }, nil)
-	//
-	//accountProvider.On("GardenerSharedSecretName", hyperscaler.SapConvergedCloud("eu-de-1"), mock.Anything).Return(
-	//	func(ht hyperscaler.Type, euaccess bool) string { return sharedSubscription(ht) }, nil)
-	//
-	//accountProvider.On("MarkUnusedGardenerSecretBindingAsDirty", hyperscaler.Azure(), mock.Anything, mock.Anything).Return(nil)
-	//accountProvider.On("MarkUnusedGardenerSecretBindingAsDirty", hyperscaler.AWS(), mock.Anything, mock.Anything).Return(nil)
-	//return &accountProvider
 }

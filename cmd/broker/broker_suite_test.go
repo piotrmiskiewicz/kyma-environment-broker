@@ -16,7 +16,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
 
 	"github.com/gardener/gardener/pkg/apis/core/v1beta1"
@@ -461,16 +460,6 @@ func (s *BrokerSuiteTest) WaitForInstanceRemoval(iid string) {
 		return dberr.IsNotFound(err), nil
 	})
 	assert.NoError(s.t, err, "timeout waiting for the instance %s to be removed", iid)
-}
-
-func (s *BrokerSuiteTest) AssertSubscription(iid string, shared bool, ht hyperscaler.Type) {
-	//runtime := s.GetRuntimeResourceByInstanceID(iid)
-	//secretName := runtime.Spec.Shoot.SecretBindingName
-	//if shared {
-	//	assert.Equal(s.t, sharedSubscription(ht), secretName)
-	//} else {
-	//	assert.Equal(s.t, regularSubscription(ht), secretName)
-	//}
 }
 
 func (s *BrokerSuiteTest) AssertBindingRemoval(iid string, bindingID string) {
