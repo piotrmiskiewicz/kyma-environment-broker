@@ -10,6 +10,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
+var SecretBindingGVK = schema.GroupVersionKind{Group: "core.gardener.cloud", Version: "v1beta1", Kind: "SecretBinding"}
+
 func NewDynamicFakeClient(objects ...runtime.Object) *dynamicFake.FakeDynamicClient {
 	// dynamic fake client requirement https://github.com/kubernetes/client-go/issues/949#issuecomment-811192420
 	extendScheme()
@@ -28,6 +30,6 @@ func NewFakeClient(objects ...runtime.Object) client.Client {
 func extendScheme() {
 	scheme.Scheme.AddKnownTypeWithName(schema.GroupVersionKind{Group: "core.gardener.cloud", Version: "v1beta1", Kind: "Shoot"}, &unstructured.Unstructured{})
 	scheme.Scheme.AddKnownTypeWithName(schema.GroupVersionKind{Group: "core.gardener.cloud", Version: "v1beta1", Kind: "ShootList"}, &unstructured.UnstructuredList{})
-	scheme.Scheme.AddKnownTypeWithName(schema.GroupVersionKind{Group: "core.gardener.cloud", Version: "v1beta1", Kind: "SecretBinding"}, &unstructured.Unstructured{})
+	scheme.Scheme.AddKnownTypeWithName(SecretBindingGVK, &unstructured.Unstructured{})
 	scheme.Scheme.AddKnownTypeWithName(schema.GroupVersionKind{Group: "core.gardener.cloud", Version: "v1beta1", Kind: "SecretBindingList"}, &unstructured.UnstructuredList{})
 }
