@@ -34,8 +34,8 @@ func TestCatalog(t *testing.T) {
 	t.Skip()
 	catalogTestFile := "catalog-test.json"
 	catalogTestFilePerm := os.FileMode.Perm(0666)
-	outputToFile := false
-	prettyJson := false
+	outputToFile := true
+	prettyJson := true
 	prettify := func(content []byte) *bytes.Buffer {
 		var prettyJSON bytes.Buffer
 		err := json.Indent(&prettyJSON, content, "", "    ")
@@ -302,7 +302,7 @@ func TestProvisioning_HappyPathSapConvergedCloud(t *testing.T) {
 					}
 		}`)
 		parsedResponse := suite.ReadResponse(resp)
-		assert.Contains(t, string(parsedResponse), "while validating input parameters: region: region must be one of the following")
+		assert.Contains(t, string(parsedResponse), "while validating input parameters: at '/region': value must be")
 	})
 
 }
