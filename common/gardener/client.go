@@ -23,10 +23,6 @@ func (b *SecretBinding) GetSecretRefName() string {
 	return str
 }
 
-func (b *SecretBinding) SetSecretRefName(val string) {
-	unstructured.SetNestedField(b.Unstructured.Object, val, "secretRef", "name")
-}
-
 func (b *SecretBinding) GetSecretRefNamespace() string {
 	str, _, err := unstructured.NestedString(b.Unstructured.Object, "secretRef", "namespace")
 	if err != nil {
@@ -34,6 +30,10 @@ func (b *SecretBinding) GetSecretRefNamespace() string {
 		panic(fmt.Sprintf("SecretBinding missing field '.secretRef.namespace': %v", err))
 	}
 	return str
+}
+
+func (b *SecretBinding) SetSecretRefName(val string) {
+	_ = unstructured.SetNestedField(b.Unstructured.Object, val, "secretRef", "name")
 }
 
 type Shoot struct {
