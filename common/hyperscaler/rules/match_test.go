@@ -50,7 +50,7 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 
 	for tn, tc := range map[string]struct {
 		given    ProvisioningAttributes
-		expected map[string]string
+		expected Result
 	}{
 		"azure eu": {
 			given: ProvisioningAttributes{
@@ -59,9 +59,10 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 				HyperscalerRegion: "switzerlandnorth",
 				Hyperscaler:       "azure",
 			},
-			expected: map[string]string{
-				"hyperscalerType": "azure",
-				"euAccess":        "true",
+			expected: Result{
+				HyperscalerType: "azure",
+				EUAccess:        true,
+				Shared:          false,
 			},
 		},
 		"aws eu": {
@@ -71,9 +72,10 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 				HyperscalerRegion: "eu-central1",
 				Hyperscaler:       "aws",
 			},
-			expected: map[string]string{
-				"hyperscalerType": "aws",
-				"euAccess":        "true",
+			expected: Result{
+				HyperscalerType: "aws",
+				EUAccess:        true,
+				Shared:          false,
 			},
 		},
 		"free": {
@@ -83,8 +85,10 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 				HyperscalerRegion: "westeurope",
 				Hyperscaler:       "azure",
 			},
-			expected: map[string]string{
-				"hyperscalerType": "azure",
+			expected: Result{
+				HyperscalerType: "azure",
+				EUAccess:        false,
+				Shared:          false,
 			},
 		},
 		"gcp with PR and HR in labels": {
@@ -94,10 +98,13 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 				HyperscalerRegion: "ksa",
 				Hyperscaler:       "gcp",
 			},
-			expected: map[string]string{
-				"hyperscalerType": "gcp_cf-sa30_ksa",
+			expected: Result{
+				HyperscalerType: "gcp_cf-sa30_ksa",
+				EUAccess:        false,
+				Shared:          false,
 			},
 		},
+		// second check to verify idempotence
 		"gcp with PR and HR in labels2": {
 			given: ProvisioningAttributes{
 				Plan:              "gcp",
@@ -105,8 +112,10 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 				HyperscalerRegion: "ksa",
 				Hyperscaler:       "gcp",
 			},
-			expected: map[string]string{
-				"hyperscalerType": "gcp_cf-sa30_ksa",
+			expected: Result{
+				HyperscalerType: "gcp_cf-sa30_ksa",
+				EUAccess:        false,
+				Shared:          false,
 			},
 		},
 		"trial": {
@@ -116,9 +125,10 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 				HyperscalerRegion: "us-west",
 				Hyperscaler:       "aws",
 			},
-			expected: map[string]string{
-				"hyperscalerType": "aws",
-				"shared":          "true",
+			expected: Result{
+				HyperscalerType: "aws",
+				EUAccess:        false,
+				Shared:          true,
 			},
 		},
 		"trial eu": {
@@ -128,10 +138,10 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 				HyperscalerRegion: "us-west",
 				Hyperscaler:       "aws",
 			},
-			expected: map[string]string{
-				"hyperscalerType": "aws",
-				"shared":          "true",
-				"euAccess":        "true",
+			expected: Result{
+				HyperscalerType: "aws",
+				EUAccess:        true,
+				Shared:          true,
 			},
 		},
 	} {
@@ -139,7 +149,7 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 
 			result, found := svc.MatchProvisioningAttributes(&tc.given)
 			assert.True(t, found)
-			assert.Equal(t, tc.expected, map[string]string(result))
+			assert.Equal(t, tc.expected, result)
 		})
 	}
 

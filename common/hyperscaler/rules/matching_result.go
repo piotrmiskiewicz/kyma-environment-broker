@@ -16,11 +16,10 @@ type MatchingResult struct {
 	ProvisioningAttributes *ProvisioningAttributes
 }
 
-type Result map[string]string
-
-func (r Result) IsShared() bool {
-	value, found := r[SHARED_LABEL]
-	return found && value == "true"
+type Result struct {
+	HyperscalerType string
+	EUAccess        bool
+	Shared          bool
 }
 
 func (m *MatchingResult) Labels() map[string]string {

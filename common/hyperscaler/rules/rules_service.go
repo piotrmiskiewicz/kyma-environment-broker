@@ -109,13 +109,13 @@ func (rs *RulesService) parse(rulesConfig *RulesConfig) *ParsingResults {
 	return results
 }
 
-// Match finds the matching rule for the given provisioning attributes and provide the set of labels, which must be used to find proper secret binding.
+// MatchProvisioningAttributes finds the matching rule for the given provisioning attributes and provide values needed to create labels, which must be used to find proper secret binding.
 func (rs *RulesService) MatchProvisioningAttributes(provisioningAttributes *ProvisioningAttributes) (Result, bool) {
 	var result Result
 	found := false
 	for _, parsingResult := range rs.Parsed.Results {
 		if parsingResult.Rule.Matched(provisioningAttributes) {
-			result = parsingResult.Rule.Labels(provisioningAttributes)
+			result = parsingResult.Rule.ProvideResult(provisioningAttributes)
 			found = true
 		}
 	}

@@ -62,28 +62,20 @@ func (r *Rule) calculateLabels(hyperscalerName string, provisioningAttributes *P
 	return labels
 }
 
-func (r *Rule) LabelsNew(provisioningAttributes *ProvisioningAttributes) map[string]string {
-	labels := map[string]string{
-		HYPERSCALER_LABEL: r.hyperscalerNameMappingFunction(r.Plan),
-	}
-
-	if r.EuAccess {
-		labels[EUACCESS_LABEL] = "true"
-	}
-
-	if r.Shared {
-		labels[SHARED_LABEL] = "true"
-	}
-
+func (r *Rule) ProvideResult(provisioningAttributes *ProvisioningAttributes) Result {
+	hyperscalerType := provisioningAttributes.Hyperscaler
 	if r.PlatformRegionSuffix {
-		labels[HYPERSCALER_LABEL] += "_" + provisioningAttributes.PlatformRegion
+		hyperscalerType += "_" + provisioningAttributes.PlatformRegion
 	}
-
 	if r.HyperscalerRegionSuffix {
-		labels[HYPERSCALER_LABEL] += "_" + provisioningAttributes.HyperscalerRegion
+		hyperscalerType += "_" + provisioningAttributes.HyperscalerRegion
 	}
 
-	return labels
+	return Result{
+		HyperscalerType: hyperscalerType,
+		EUAccess:        r.EuAccess,
+		Shared:          r.Shared,
+	}
 }
 
 func getHyperscalerName(plan string) (result string) {
