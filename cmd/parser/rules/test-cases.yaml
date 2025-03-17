@@ -22,29 +22,17 @@ cases:
   - preview
   - free
   expected: |
-    ->     OK  aws                                                # hyperscalerType:
-    aws                            
-    ->     OK  aws(PR=cf-eu11)-> EU                               #
-    euAccess: true, hyperscalerType: aws    
-    ->     OK  azure                                              #
-    hyperscalerType: azure                          
-    ->     OK  azure(PR=cf-ch20)->
-    EU                             # euAccess: true, hyperscalerType: azure
-   
-    ->     OK  azure_lite                                         # hyperscalerType:
-    azure_lite                     
-    ->     OK  free                                               #
-    hyperscalerType: aws/azure                      
-    ->     OK  gcp                                                #
-    hyperscalerType: gcp                            
-    ->     OK  gcp(PR=cf-sa30) -> PR                              #
-    hyperscalerType: gcp_<PR>                    
-    ->     OK  preview                                            #
-    hyperscalerType: aws                            
-    ->     OK  sap-converged-cloud -> S, HR
-                           # hyperscalerType: openstack_<HR>, shared: true      
-    ->     OK  trial-> S                                          # hyperscalerType:
-    aws, shared: true              
+    ->     OK  aws                                                # hyperscalerType: aws                            
+    ->     OK  aws(PR=cf-eu11)-> EU                               # euAccess: true, hyperscalerType: aws            
+    ->     OK  azure                                              # hyperscalerType: azure                          
+    ->     OK  azure(PR=cf-ch20)-> EU                             # euAccess: true, hyperscalerType: azure          
+    ->     OK  azure_lite                                         # hyperscalerType: azure_lite                     
+    ->     OK  free                                               # hyperscalerType: aws/azure                      
+    ->     OK  gcp                                                # hyperscalerType: gcp                            
+    ->     OK  gcp(PR=cf-sa30)-> PR                               # hyperscalerType: gcp_<PR>                       
+    ->     OK  preview                                            # hyperscalerType: aws                            
+    ->     OK  sap-converged-cloud-> S, HR                        # hyperscalerType: openstack_<HR>, shared: true   
+    ->     OK  trial-> S                                          # hyperscalerType: aws, shared: true
 - name: Duplicated Rule
   rule:
   - aws

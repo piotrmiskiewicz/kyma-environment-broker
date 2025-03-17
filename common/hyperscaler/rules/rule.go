@@ -232,7 +232,7 @@ func (r *Rule) SignatureWithValues() string {
 }
 
 func (r *Rule) MirroredSignature() string {
-	return r.SignatureWithSymbols(ATTRIBUTE_WITH_VALUE, "")
+	return r.SignatureWithSymbols(ATTRIBUTE_WITH_VALUE, "*")
 }
 
 // SignatureWithSymbols returns the signature of the rule with the given symbols with a format similar to the input:
