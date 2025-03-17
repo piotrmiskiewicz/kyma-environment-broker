@@ -108,6 +108,20 @@ func (rs *RulesService) parse(rulesConfig *RulesConfig) *ParsingResults {
 	return results
 }
 
+// MatchProvisioningAttributes finds the matching rule for the given provisioning attributes and provide values needed to create labels, which must be used to find proper secret binding.
+func (rs *RulesService) MatchProvisioningAttributes(provisioningAttributes *ProvisioningAttributes) (Result, bool) {
+	var result Result
+	found := false
+	for _, parsingResult := range rs.Parsed.Results {
+		if parsingResult.Rule.Matched(provisioningAttributes) {
+			result = parsingResult.Rule.ProvideResult(provisioningAttributes)
+			found = true
+		}
+	}
+
+	return result, found
+}
+
 func (rs *RulesService) Match(data *ProvisioningAttributes) map[uuid.UUID]*MatchingResult {
 	var matchingResults map[uuid.UUID]*MatchingResult = make(map[uuid.UUID]*MatchingResult)
 

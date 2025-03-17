@@ -19,3 +19,9 @@ type MatchingResult struct {
 func (m *MatchingResult) Labels() map[string]string {
 	return m.Rule.Labels(m.ProvisioningAttributes)
 }
+
+type Result struct {
+	HyperscalerType string
+	EUAccess        bool
+	Shared          bool
+}
