@@ -52,7 +52,6 @@ type Config struct {
 	AllowUpdateExpiredInstanceWithContext   bool          `envconfig:"default=false"`
 
 	Binding                BindingConfig
-	KimConfig              KimConfig
 	UseSmallerMachineTypes bool `envconfig:"default=false"`
 
 	DisableSapConvergedCloud bool `envconfig:"default=false"`
@@ -62,6 +61,8 @@ type Config struct {
 
 	WorkerHealthCheckInterval     time.Duration `envconfig:"default=10m"`
 	WorkerHealthCheckWarnInterval time.Duration `envconfig:"default=10m"`
+
+	UseAdditionalOIDCSchema bool `envconfig:"default=false"`
 }
 
 type ServicesConfig map[string]Service

@@ -36,8 +36,8 @@ func TestCatalog(t *testing.T) {
 	t.Skip()
 	catalogTestFile := "catalog-test.json"
 	catalogTestFilePerm := os.FileMode.Perm(0666)
-	outputToFile := false
-	prettyJson := false
+	outputToFile := true
+	prettyJson := true
 	prettify := func(content []byte) *bytes.Buffer {
 		var prettyJSON bytes.Buffer
 		err := json.Indent(&prettyJSON, content, "", "    ")
@@ -76,9 +76,6 @@ func TestCatalog(t *testing.T) {
 func TestProvisioningWithKIMOnlyForTrial(t *testing.T) {
 
 	cfg := fixConfig()
-	cfg.Broker.KimConfig.Enabled = true
-	cfg.Broker.KimConfig.Plans = []string{"trial"}
-	cfg.Broker.KimConfig.KimOnlyPlans = []string{"trial"}
 
 	cfg.Provisioner.DefaultTrialProvider = pkg.AWS
 
@@ -113,9 +110,6 @@ func TestProvisioningWithKIMOnlyForTrial(t *testing.T) {
 func TestProvisioningWithKIMOnlyForAWS(t *testing.T) {
 
 	cfg := fixConfig()
-	cfg.Broker.KimConfig.Enabled = true
-	cfg.Broker.KimConfig.Plans = []string{"aws"}
-	cfg.Broker.KimConfig.KimOnlyPlans = []string{"aws"}
 
 	suite := NewBrokerSuiteTestWithConfig(t, cfg)
 	defer suite.TearDown()
@@ -304,7 +298,7 @@ func TestProvisioning_HappyPathSapConvergedCloud(t *testing.T) {
 					}
 		}`)
 		parsedResponse := suite.ReadResponse(resp)
-		assert.Contains(t, string(parsedResponse), "while validating input parameters: region: region must be one of the following")
+		assert.Contains(t, string(parsedResponse), "while validating input parameters: at '/region': value must be")
 	})
 
 }
@@ -1911,9 +1905,6 @@ func TestProvisioning_Modules(t *testing.T) {
 func TestProvisioningWithAdditionalWorkerNodePools(t *testing.T) {
 	// given
 	cfg := fixConfig()
-	cfg.Broker.KimConfig.Enabled = true
-	cfg.Broker.KimConfig.Plans = []string{"aws"}
-	cfg.Broker.KimConfig.KimOnlyPlans = []string{"aws"}
 
 	suite := NewBrokerSuiteTestWithConfig(t, cfg)
 	defer suite.TearDown()

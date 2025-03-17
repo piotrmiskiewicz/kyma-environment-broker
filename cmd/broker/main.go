@@ -301,7 +301,11 @@ func main() {
 	rulesService, err := rules.NewRulesServiceFromFile(cfg.HapRuleFilePath, &cfg.Broker.EnablePlans, true, true, true)
 	fatalOnError(err, log)
 	err = rulesService.FailOnParsingErrors()
-	fatalOnError(err, log)
+	if err != nil {
+		log.Error(fmt.Sprintf("Error: %s", err))
+	}
+	//TODO fail on error when we are ready with HAP parsing
+	//fatalOnError(err, log)
 
 	// run queues
 	provisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Provisioning, log.With("provisioning", "manager"))
@@ -309,12 +313,11 @@ func main() {
 		edpClient, accountProvider, skrK8sClientProvider, kcpK8sClient, oidcDefaultValues, log, rulesService)
 
 	deprovisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Deprovisioning, log.With("deprovisioning", "manager"))
-	deprovisionQueue := NewDeprovisioningProcessingQueue(ctx, cfg.Deprovisioning.WorkersAmount, deprovisionManager, &cfg, db, eventBroker, edpClient, accountProvider,
+	deprovisionQueue := NewDeprovisioningProcessingQueue(ctx, cfg.Deprovisioning.WorkersAmount, deprovisionManager, &cfg, db, edpClient, accountProvider,
 		skrK8sClientProvider, kcpK8sClient, configProvider, log)
 
 	updateManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Update, log.With("update", "manager"))
-	updateQueue := NewUpdateProcessingQueue(ctx, updateManager, cfg.Update.WorkersAmount, db, inputFactory, eventBroker,
-		cfg, skrK8sClientProvider, kcpK8sClient, log)
+	updateQueue := NewUpdateProcessingQueue(ctx, updateManager, cfg.Update.WorkersAmount, db, cfg, kcpK8sClient, log)
 	/***/
 	servicesConfig, err := broker.NewServicesConfigFromFile(cfg.CatalogFilePath)
 	fatalOnError(err, log)
@@ -357,7 +360,6 @@ func main() {
 	runtimeHandler := runtime.NewHandler(db, cfg.MaxPaginationPage,
 		cfg.DefaultRequestRegion,
 		kcpK8sClient,
-		cfg.Broker.KimConfig,
 		log)
 	runtimeHandler.AttachRoutes(router)
 
@@ -383,12 +385,6 @@ func logConfiguration(logs *slog.Logger, cfg Config) {
 	logs.Info(fmt.Sprintf("InfrastructureManagerIntegrationDisabled: %v", cfg.InfrastructureManagerIntegrationDisabled))
 	logs.Info(fmt.Sprintf("Archiving enabled: %v, dry run: %v", cfg.ArchiveEnabled, cfg.ArchiveDryRun))
 	logs.Info(fmt.Sprintf("Cleaning enabled: %v, dry run: %v", cfg.CleaningEnabled, cfg.CleaningDryRun))
-	logs.Info(fmt.Sprintf("KIM enabled: %t, dry run: %t, view only CR: %t, plans: %s, KIM only plans: %s",
-		cfg.Broker.KimConfig.Enabled,
-		cfg.Broker.KimConfig.DryRun,
-		cfg.Broker.KimConfig.ViewOnly,
-		cfg.Broker.KimConfig.Plans,
-		cfg.Broker.KimConfig.KimOnlyPlans))
 	logs.Info(fmt.Sprintf("Is SubaccountMovementEnabled: %t", cfg.Broker.SubaccountMovementEnabled))
 	logs.Info(fmt.Sprintf("Is UpdateCustomResourcesLabelsOnAccountMove enabled: %t", cfg.Broker.UpdateCustomResourcesLabelsOnAccountMove))
 }
@@ -423,7 +419,7 @@ func createAPI(router *httputil.Router, servicesConfig broker.ServicesConfig, pl
 
 	// create KymaEnvironmentBroker endpoints
 	kymaEnvBroker := &broker.KymaEnvironmentBroker{
-		ServicesEndpoint: broker.NewServices(cfg.Broker, servicesConfig, logs, convergedCloudRegionProvider),
+		ServicesEndpoint: broker.NewServices(cfg.Broker, servicesConfig, logs, convergedCloudRegionProvider, planValidator.GetDefaultOIDC()),
 		ProvisionEndpoint: broker.NewProvision(cfg.Broker, cfg.Gardener, db.Operations(), db.Instances(), db.InstancesArchived(),
 			provisionQueue, planValidator, defaultPlansConfig,
 			planDefaults, logs, cfg.KymaDashboardConfig, kcBuilder, freemiumGlobalAccountIds, convergedCloudRegionProvider, regionsSupportingMachine,
