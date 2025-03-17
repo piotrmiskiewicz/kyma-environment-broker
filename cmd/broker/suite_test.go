@@ -341,6 +341,10 @@ func fixAccountProvider(t *testing.T, gc *fake.FakeDynamicClient) hyperscaler.Ac
 			"hyperscalerType": "aws",
 			"shared":          "true",
 		},
+		"sb-azure-shared": {
+			"hyperscalerType": "azure",
+			"shared":          "true",
+		},
 		"sb-aws-eu-access": {
 			"hyperscalerType": "aws",
 			"euAccess":        "true",
