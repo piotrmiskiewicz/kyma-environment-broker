@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/require"
-	"k8s.io/client-go/dynamic/fake"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+	"k8s.io/client-go/dynamic/fake"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/metricsv2"
 
@@ -342,7 +343,6 @@ func fixConfig() *Config {
 }
 
 func fixAccountProvider(t *testing.T, gc *fake.FakeDynamicClient) hyperscaler.AccountProvider {
-
 	for sbName, labels := range map[string]map[string]string{
 		"sb-azure": {
 			"hyperscalerType": "azure",
