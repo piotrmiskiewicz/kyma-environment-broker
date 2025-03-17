@@ -74,9 +74,6 @@ func TestCatalog(t *testing.T) {
 func TestProvisioningWithKIMOnlyForTrial(t *testing.T) {
 
 	cfg := fixConfig()
-	cfg.Broker.KimConfig.Enabled = true
-	cfg.Broker.KimConfig.Plans = []string{"trial"}
-	cfg.Broker.KimConfig.KimOnlyPlans = []string{"trial"}
 
 	cfg.Provisioner.DefaultTrialProvider = pkg.AWS
 
@@ -111,9 +108,6 @@ func TestProvisioningWithKIMOnlyForTrial(t *testing.T) {
 func TestProvisioningWithKIMOnlyForAWS(t *testing.T) {
 
 	cfg := fixConfig()
-	cfg.Broker.KimConfig.Enabled = true
-	cfg.Broker.KimConfig.Plans = []string{"aws"}
-	cfg.Broker.KimConfig.KimOnlyPlans = []string{"aws"}
 
 	suite := NewBrokerSuiteTestWithConfig(t, cfg)
 	defer suite.TearDown()
@@ -1924,9 +1918,6 @@ func TestProvisioning_Modules(t *testing.T) {
 func TestProvisioningWithAdditionalWorkerNodePools(t *testing.T) {
 	// given
 	cfg := fixConfig()
-	cfg.Broker.KimConfig.Enabled = true
-	cfg.Broker.KimConfig.Plans = []string{"aws"}
-	cfg.Broker.KimConfig.KimOnlyPlans = []string{"aws"}
 
 	suite := NewBrokerSuiteTestWithConfig(t, cfg)
 	defer suite.TearDown()
