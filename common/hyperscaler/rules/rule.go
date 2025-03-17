@@ -228,23 +228,11 @@ func (r *Rule) Combine(rule Rule) *Rule {
 }
 
 func (r *Rule) SignatureWithValues() string {
-	signature := r.Plan + L_PAREN
-
-	for i, attr := range InputAttributes {
-		signature += attr.Name + EQUAL
-		checkValue := attr.Getter(r)
-		signature += getAttrValueSymbol(checkValue, ASTERISK, checkValue)
-		if i < len(InputAttributes)-1 {
-			signature += COMMA
-		}
-	}
-	signature = signature + R_PAREN
-
-	return signature
+	return fmt.Sprintf("%s(PR=%s,HR=%s)", r.Plan, r.PlatformRegion, r.HyperscalerRegion)
 }
 
 func (r *Rule) MirroredSignature() string {
-	return r.SignatureWithSymbols(ATTRIBUTE_WITH_VALUE, ASTERISK)
+	return r.SignatureWithSymbols(ATTRIBUTE_WITH_VALUE, "")
 }
 
 // SignatureWithSymbols returns the signature of the rule with the given symbols with a format similar to the input:
