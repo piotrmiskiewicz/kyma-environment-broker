@@ -199,7 +199,7 @@ func (r *Rule) IsResolved() bool {
 
 func (r *Rule) Combine(rule Rule) *Rule {
 	newRule := NewRule()
-	_, err := newRule.SetPlanNoValidation(r.Plan)
+	_, err := newRule.SetPlan(r.Plan)
 	if err != nil {
 		log.Panicf("unexpected error while setting a plan : %v", err)
 	}

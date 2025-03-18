@@ -169,10 +169,6 @@ func setEuAccess(r *Rule, value string) (*Rule, error) {
 }
 
 func (r *Rule) SetPlan(value string) (*Rule, error) {
-	return r.SetPlanNoValidation(value)
-}
-
-func (r *Rule) SetPlanNoValidation(value string) (*Rule, error) {
 	if value == "" {
 		return nil, fmt.Errorf("plan is empty")
 	}
