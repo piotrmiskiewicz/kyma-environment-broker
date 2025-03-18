@@ -3,8 +3,6 @@ package rules
 import (
 	"fmt"
 	"strconv"
-
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 )
 
 const (
@@ -170,13 +168,7 @@ func setEuAccess(r *Rule, value string) (*Rule, error) {
 	return r, nil
 }
 
-func (r *Rule) SetPlan(value string, enabledPlans *broker.EnablePlans) (*Rule, error) {
-	// validate that the plan is supported
-	ok := enabledPlans.Contains(value)
-	if !ok {
-		return nil, fmt.Errorf("plan %s is not supported", value)
-	}
-
+func (r *Rule) SetPlan(value string) (*Rule, error) {
 	return r.SetPlanNoValidation(value)
 }
 

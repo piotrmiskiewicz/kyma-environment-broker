@@ -16,7 +16,6 @@ const (
 )
 
 type SimpleParser struct {
-	enabledPlans *broker.EnablePlans
 }
 
 func (g *SimpleParser) Parse(ruleEntry string) (*Rule, error) {
@@ -52,7 +51,10 @@ func (g *SimpleParser) Parse(ruleEntry string) (*Rule, error) {
 		return nil, fmt.Errorf("rule has unclosed parentheses")
 	}
 
-	_, err := outputRule.SetPlan(planAndInputAttr[0], g.enabledPlans)
+	if _, found := broker.PlanIDsMapping[planAndInputAttr[0]]; !found {
+		return nil, fmt.Errorf("unknown plan %s", planAndInputAttr[0])
+	}
+	_, err := outputRule.SetPlan(planAndInputAttr[0])
 	if err != nil {
 		return nil, err
 	}

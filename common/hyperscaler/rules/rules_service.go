@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 )
 
 type RulesService struct {
@@ -15,7 +14,7 @@ type RulesService struct {
 	Parsed *ParsingResults
 }
 
-func NewRulesServiceFromFile(rulesFilePath string, enabledPlans *broker.EnablePlans) (*RulesService, error) {
+func NewRulesServiceFromFile(rulesFilePath string) (*RulesService, error) {
 
 	if rulesFilePath == "" {
 		return nil, fmt.Errorf("No HAP rules file path provided")
@@ -27,11 +26,11 @@ func NewRulesServiceFromFile(rulesFilePath string, enabledPlans *broker.EnablePl
 		return nil, fmt.Errorf("failed to open file: %s", err)
 	}
 
-	rs, err := NewRulesService(file, enabledPlans)
+	rs, err := NewRulesService(file)
 	return rs, err
 }
 
-func NewRulesService(file *os.File, enabledPlans *broker.EnablePlans) (*RulesService, error) {
+func NewRulesService(file *os.File) (*RulesService, error) {
 	rulesConfig := &RulesConfig{}
 
 	if file == nil {
@@ -44,16 +43,14 @@ func NewRulesService(file *os.File, enabledPlans *broker.EnablePlans) (*RulesSer
 	}
 
 	rs := &RulesService{
-		parser: &SimpleParser{
-			enabledPlans: enabledPlans,
-		},
+		parser: &SimpleParser{},
 	}
 
 	rs.Parsed = rs.parse(rulesConfig)
 	return rs, err
 }
 
-func NewRulesServiceFromString(rules string, enabledPlans *broker.EnablePlans) (*RulesService, error) {
+func NewRulesServiceFromString(rules string) (*RulesService, error) {
 	entries := strings.Split(rules, ";")
 
 	rulesConfig := &RulesConfig{
@@ -61,9 +58,7 @@ func NewRulesServiceFromString(rules string, enabledPlans *broker.EnablePlans) (
 	}
 
 	rs := &RulesService{
-		parser: &SimpleParser{
-			enabledPlans: enabledPlans,
-		},
+		parser: &SimpleParser{},
 	}
 
 	rs.Parsed = rs.parse(rulesConfig)
@@ -148,4 +143,26 @@ func (rs *RulesService) FirstParsingError() error {
 	}
 
 	return nil
+}
+
+func (rs *RulesService) ParsingErrors() []error {
+	var errors []error
+	for _, result := range rs.Parsed.Results {
+		if result.HasParsingErrors() {
+			errors = append(errors, result.ParsingErrors...)
+		}
+	}
+
+	return errors
+}
+
+func (rs *RulesService) ProcessingErrors() []error {
+	var errors []error
+	for _, result := range rs.Parsed.Results {
+		if result.HasProcessingErrors() {
+			errors = append(errors, result.ProcessingErrors...)
+		}
+	}
+
+	return errors
 }

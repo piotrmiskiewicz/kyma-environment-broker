@@ -298,8 +298,16 @@ func main() {
 	// metrics collectors
 	_ = metricsv2.Register(ctx, eventBroker, db, cfg.MetricsV2, log)
 
-	rulesService, err := rules.NewRulesServiceFromFile(cfg.HapRuleFilePath, &cfg.Broker.EnablePlans)
+	rulesService, err := rules.NewRulesServiceFromFile(cfg.HapRuleFilePath)
 	fatalOnError(err, log)
+	processingErrors := rulesService.ProcessingErrors()
+	parsingErrors := rulesService.ParsingErrors()
+	for _, err := range processingErrors {
+		log.Error(fmt.Sprintf("HAP parser processing Error: %s", err))
+	}
+	for _, err := range parsingErrors {
+		log.Error(fmt.Sprintf("HAP parser parsing Error: %s", err))
+	}
 	err = rulesService.FirstParsingError()
 	if err != nil {
 		log.Error(fmt.Sprintf("Error: %s", err))
