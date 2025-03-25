@@ -27,10 +27,22 @@ type Result struct {
 	RawData         RawData
 }
 
-func (r *Result) Rule() string {
+func (r Result) Hyperscaler() string {
+	return r.HyperscalerType
+}
+
+func (r Result) IsShared() bool {
+	return r.Shared
+}
+
+func (r Result) IsEUAccess() bool {
+	return r.EUAccess
+}
+
+func (r Result) Rule() string {
 	return r.RawData.Rule
 }
 
-func (r *Result) NumberedRule() string {
+func (r Result) NumberedRule() string {
 	return r.RawData.NumberedRule()
 }
