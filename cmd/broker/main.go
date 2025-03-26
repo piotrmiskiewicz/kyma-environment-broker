@@ -93,10 +93,11 @@ type Config struct {
 	Port       string `envconfig:"default=8080"`
 	StatusPort string `envconfig:"default=8071"`
 
-	Provisioner input.Config
-	Database    storage.Config
-	Gardener    gardener.Config
-	Kubeconfig  kubeconfig.Config
+	Provisioner  input.Config
+	Database     storage.Config
+	Gardener     gardener.Config
+	Kubeconfig   kubeconfig.Config
+	StepTimeouts StepTimeoutsConfig
 
 	SkrOidcDefaultValuesYAMLFilePath         string
 	SkrDnsProvidersValuesYAMLFilePath        string
@@ -161,6 +162,11 @@ type ProfilerConfig struct {
 	Path     string        `envconfig:"default=/tmp/profiler"`
 	Sampling time.Duration `envconfig:"default=1s"`
 	Memory   bool
+}
+
+type StepTimeoutsConfig struct {
+	checkRuntimeResourceCreate time.Duration `envconfig:"default=60m"`
+	checkRuntimeResourceUpdate time.Duration `envconfig:"default=180m"`
 }
 
 type K8sClientProvider interface {
@@ -279,7 +285,7 @@ func main() {
 	gardenerAccountPool := hyperscaler.NewAccountPool(dynamicGardener, gardenerNamespace)
 	gardenerSharedPool := hyperscaler.NewSharedGardenerAccountPool(dynamicGardener, gardenerNamespace)
 	accountProvider := hyperscaler.NewAccountProvider(gardenerAccountPool, gardenerSharedPool)
-	gardenetClient := gardener.NewClient(dynamicGardener, gardenerNamespace)
+	gardenerClient := gardener.NewClient(dynamicGardener, gardenerNamespace)
 
 	regions, err := provider.ReadPlatformRegionMappingFromFile(cfg.TrialRegionMappingFilePath)
 	fatalOnError(err, log)
@@ -310,7 +316,7 @@ func main() {
 	// run queues
 	provisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Provisioning, log.With("provisioning", "manager"))
 	provisionQueue := NewProvisioningProcessingQueue(ctx, provisionManager, cfg.Provisioning.WorkersAmount, &cfg, db, configProvider,
-		edpClient, accountProvider, skrK8sClientProvider, kcpK8sClient, gardenetClient, oidcDefaultValues, log, rulesService)
+		edpClient, accountProvider, skrK8sClientProvider, kcpK8sClient, gardenerClient, oidcDefaultValues, log, rulesService)
 
 	deprovisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Deprovisioning, log.With("deprovisioning", "manager"))
 	deprovisionQueue := NewDeprovisioningProcessingQueue(ctx, cfg.Deprovisioning.WorkersAmount, deprovisionManager, &cfg, db, edpClient, accountProvider,
@@ -387,6 +393,7 @@ func logConfiguration(logs *slog.Logger, cfg Config) {
 	logs.Info(fmt.Sprintf("Cleaning enabled: %v, dry run: %v", cfg.CleaningEnabled, cfg.CleaningDryRun))
 	logs.Info(fmt.Sprintf("Is SubaccountMovementEnabled: %t", cfg.Broker.SubaccountMovementEnabled))
 	logs.Info(fmt.Sprintf("Is UpdateCustomResourcesLabelsOnAccountMove enabled: %t", cfg.Broker.UpdateCustomResourcesLabelsOnAccountMove))
+	logs.Info(fmt.Sprintf("StepTimeouts: checkRuntimeResourceCreate=%s, checkRuntimeResourceUpdate=%s", cfg.StepTimeouts.checkRuntimeResourceCreate, cfg.StepTimeouts.checkRuntimeResourceUpdate))
 	logs.Info(fmt.Sprintf("ResolveSubscriptionSecretStepDisabled: %v", cfg.ResolveSubscriptionSecretStepDisabled))
 }
 
