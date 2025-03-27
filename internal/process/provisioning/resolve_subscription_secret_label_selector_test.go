@@ -1,6 +1,11 @@
 package provisioning
 
 import (
+	"os"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
@@ -17,10 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	k8sTesting "k8s.io/client-go/testing"
-	"os"
-	"strings"
-	"testing"
-	"time"
 )
 
 func TestSecretBindingLabelSelector(t *testing.T) {
@@ -251,7 +252,8 @@ func fixNewResolveStep(t *testing.T, selector *string, operation internal.Operat
 	gardenerK8sClient.PrependReactor("list",
 		gardener.SecretBindingResource.Resource,
 		savingLabelSelectorReactor(selector))
-	return NewResolveSubscriptionSecretStep(memoryStorage.Operations(), gardener.NewClient(gardenerK8sClient, namespace), rulesService(t), internal.RetryTuple{time.Millisecond, time.Millisecond})
+	return NewResolveSubscriptionSecretStep(memoryStorage.Operations(), gardener.NewClient(gardenerK8sClient, namespace), rulesService(t),
+		internal.RetryTuple{Timeout: time.Millisecond, Interval: time.Millisecond})
 }
 
 func rulesService(t *testing.T) *rules.RulesService {
