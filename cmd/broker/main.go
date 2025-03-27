@@ -306,7 +306,7 @@ func main() {
 	// metrics collectors
 	_ = metricsv2.Register(ctx, eventBroker, db, cfg.MetricsV2, log)
 
-	rulesService, err := rules.NewRulesServiceFromFile(cfg.HapRuleFilePath, sets.New(maps.Keys(broker.PlanNamesMapping)...), sets.New([]string(cfg.Broker.EnablePlans)...))
+	rulesService, err := rules.NewRulesServiceFromFile(cfg.HapRuleFilePath, sets.New(maps.Keys(broker.PlanIDsMapping)...), sets.New([]string(cfg.Broker.EnablePlans)...))
 	fatalOnError(err, log)
 	err = rulesService.FirstParsingError()
 	if err != nil {

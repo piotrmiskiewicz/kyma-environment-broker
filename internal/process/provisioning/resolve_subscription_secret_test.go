@@ -1,6 +1,8 @@
 package provisioning
 
 import (
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"log/slog"
 	"os"
 	"strings"
@@ -363,8 +365,7 @@ func createRulesService(t *testing.T) *rules.RulesService {
 	require.NoError(t, err)
 	defer os.Remove(tmpfile)
 
-	enabledPlans := &broker.EnablePlans{"aws", "azure", "gcp", "trial"}
-	rs, err := rules.NewRulesServiceFromFile(tmpfile, enabledPlans)
+	rs, err := rules.NewRulesServiceFromFile(tmpfile, sets.New(maps.Keys(broker.PlanIDsMapping)...), sets.New("aws", "azure", "gcp", "trial"))
 	require.NoError(t, err)
 
 	return rs
