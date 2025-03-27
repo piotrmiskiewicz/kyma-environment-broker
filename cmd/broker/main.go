@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"log/slog"
 	"net/http"
 	"os"
@@ -304,14 +306,17 @@ func main() {
 	// metrics collectors
 	_ = metricsv2.Register(ctx, eventBroker, db, cfg.MetricsV2, log)
 
-	rulesService, err := rules.NewRulesServiceFromFile(cfg.HapRuleFilePath, &cfg.Broker.EnablePlans)
+	rulesService, err := rules.NewRulesServiceFromFile(cfg.HapRuleFilePath, sets.New(maps.Keys(broker.PlanNamesMapping)...))
 	fatalOnError(err, log)
 	err = rulesService.FirstParsingError()
 	if err != nil {
 		log.Error(fmt.Sprintf("Error: %s", err))
+
+		// when he ruleservice is used (the step is not disabled) - the configuration must be valid
+		if !cfg.ResolveSubscriptionSecretStepDisabled {
+			fatalOnError(err, log)
+		}
 	}
-	// TODO fail on error when we are ready with HAP parsing
-	// fatalOnError(err, log)
 
 	// run queues
 	provisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Provisioning, log.With("provisioning", "manager"))

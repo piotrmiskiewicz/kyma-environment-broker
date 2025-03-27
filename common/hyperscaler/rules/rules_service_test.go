@@ -1,10 +1,10 @@
 package rules
 
 import (
+	"k8s.io/apimachinery/pkg/util/sets"
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -22,8 +22,7 @@ func TestNewRulesServiceFromFile(t *testing.T) {
 		defer os.Remove(tmpfile)
 
 		// when
-		enabledPlans := &broker.EnablePlans{"rule1", "rule2"}
-		service, err := NewRulesServiceFromFile(tmpfile, enabledPlans)
+		service, err := NewRulesServiceFromFile(tmpfile, sets.New("rule1", "rule2"), sets.New("rule1", "rule2"))
 
 		// then
 		require.NoError(t, err)
@@ -37,7 +36,7 @@ func TestNewRulesServiceFromFile(t *testing.T) {
 
 	t.Run("should return error when file path is empty", func(t *testing.T) {
 		// when
-		service, err := NewRulesServiceFromFile("", &broker.EnablePlans{})
+		service, err := NewRulesServiceFromFile("", sets.New[string](), sets.New[string]())
 
 		// then
 		require.Error(t, err)
@@ -47,7 +46,7 @@ func TestNewRulesServiceFromFile(t *testing.T) {
 
 	t.Run("should return error when file does not exist", func(t *testing.T) {
 		// when
-		service, err := NewRulesServiceFromFile("nonexistent.yaml", &broker.EnablePlans{})
+		service, err := NewRulesServiceFromFile("nonexistent.yaml", sets.New[string](), sets.New[string]())
 
 		// then
 		require.Error(t, err)
@@ -63,7 +62,7 @@ func TestNewRulesServiceFromFile(t *testing.T) {
 		defer os.Remove(tmpfile)
 
 		// when
-		service, err := NewRulesServiceFromFile(tmpfile, &broker.EnablePlans{})
+		service, err := NewRulesServiceFromFile(tmpfile, sets.New[string](), sets.New[string]())
 
 		// then
 		require.Error(t, err)
@@ -271,15 +270,56 @@ func TestValidRuleset_CheckAmbiguity(t *testing.T) {
 	}
 }
 
+func TestRulesService_CheckPlans(t *testing.T) {
+	for tn, tc := range map[string]struct {
+		ruleset         []string
+		allowedPlans    sets.Set[string]
+		requiredPlans   sets.Set[string]
+		plansErrorCount int
+	}{
+		"all good": {
+			ruleset:         []string{"aws", "azure"},
+			allowedPlans:    sets.New("aws", "azure", "gcp"),
+			requiredPlans:   sets.New("aws", "azure"),
+			plansErrorCount: 0,
+		},
+		"missing required plan": {
+			ruleset:         []string{"aws", "azure"},
+			allowedPlans:    sets.New("aws", "azure", "gcp"),
+			requiredPlans:   sets.New("aws", "gcp"),
+			plansErrorCount: 1,
+		},
+		"not known plan": {
+			ruleset:         []string{"aws", "azure"},
+			allowedPlans:    sets.New("aws"),
+			requiredPlans:   sets.New("aws"),
+			plansErrorCount: 1,
+		},
+	} {
+		t.Run(tn, func(t *testing.T) {
+			//given
+			rulesService := fixRulesService()
+			rulesService.requiredPlans = tc.requiredPlans
+			rulesService.allowedPlans = tc.allowedPlans
+			validRules, _ := rulesService.postParse(&RulesConfig{
+				Rules: tc.ruleset,
+			})
+
+			//when
+			ok, planErrors := validRules.checkPlans(tc.allowedPlans, tc.requiredPlans)
+
+			//then
+			assert.Equal(t, tc.plansErrorCount, len(planErrors))
+			assert.Equal(t, len(planErrors) == 0, ok)
+
+		})
+	}
+}
+
 func fixRulesService() *RulesService {
 
-	enabledPlans := append(broker.EnablePlans{}, "aws")
-	enabledPlans = append(enabledPlans, "azure")
-
 	rs := &RulesService{
-		parser: &SimpleParser{
-			enabledPlans: &enabledPlans,
-		},
+		parser: &SimpleParser{},
 	}
 
 	return rs
