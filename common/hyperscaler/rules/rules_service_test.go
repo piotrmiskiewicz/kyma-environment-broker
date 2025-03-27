@@ -1,9 +1,10 @@
 package rules
 
 import (
-	"k8s.io/apimachinery/pkg/util/sets"
 	"os"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -2,9 +2,10 @@ package rules
 
 import (
 	"fmt"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"os"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/stretchr/testify/assert"
 
