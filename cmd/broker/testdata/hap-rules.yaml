@@ -1,10 +1,16 @@
  rule: 
   - aws                             # pool: hyperscalerType: aws
-  - aws(PR=cf-eu11) -> EU           # pool: hyperscalerType: aws_cf-eu11; euAccess: true 
+  - build-runtime-aws
+  - aws(PR=cf-eu11) -> EU           # pool: hyperscalerType: aws_cf-eu11; euAccess: true
+  - build-runtime-aws(PR=cf-eu11) -> EU
   - azure                           # pool: hyperscalerType: azure
-  - azure(PR=cf-ch20) -> EU         # pool: hyperscalerType: azure_cf-ch20; euAccess: true 
+  - build-runtime-azure
+  - azure(PR=cf-ch20) -> EU         # pool: hyperscalerType: azure_cf-ch20; euAccess: true
+  - build-runtime-azure(PR=cf-ch20) -> EU
   - gcp                             # pool: hyperscalerType: gcp
+  - build-runtime-gcp
   - gcp(PR=cf-sa30) -> PR           # pool: hyperscalerType: gcp_cf-sa30
+  - build-runtime-gcp(PR=cf-sa30) -> PR
   - trial -> S                      # pool: hyperscalerType: azure; shared: true - TRIAL POOL
                                     # pool: hyperscalerType: aws; shared: true - TRIAL POOL 
   - sap-converged-cloud -> HR,S     # pool: hyperscalerType: openstack_<HYPERSCALER_REGION>; shared: true

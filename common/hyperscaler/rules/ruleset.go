@@ -33,6 +33,10 @@ type ValidationErrors struct {
 	PlanErrors      []error
 }
 
+func (ve *ValidationErrors) All() []error {
+	return append(append(append(ve.ParsingErrors, ve.DuplicateErrors...), ve.AmbiguityErrors...), ve.PlanErrors...)
+}
+
 func (vr *ValidRule) Rule() string {
 	return vr.RawData.Rule
 }
@@ -102,6 +106,7 @@ func NewValidationErrors() *ValidationErrors {
 		ParsingErrors:   make([]error, 0),
 		DuplicateErrors: make([]error, 0),
 		AmbiguityErrors: make([]error, 0),
+		PlanErrors:      make([]error, 0),
 	}
 }
 
