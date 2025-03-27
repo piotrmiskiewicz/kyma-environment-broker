@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"golang.org/x/exp/maps"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"log"
 	"strings"
+
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"

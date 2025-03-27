@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"golang.org/x/exp/maps"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,6 +11,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/regionssupportingmachine"
 
