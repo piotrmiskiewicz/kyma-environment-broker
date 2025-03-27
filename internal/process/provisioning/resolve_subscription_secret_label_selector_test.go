@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/exp/maps"
+
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
@@ -279,8 +281,7 @@ func rulesService(t *testing.T) *rules.RulesService {
 	require.NoError(t, err)
 	defer os.Remove(tmpfile)
 
-	enabledPlans := &broker.EnablePlans{"aws", "azure", "gcp", "trial", "build-runtime-aws", "build-runtime-azure", "build-runtime-gcp", "sap-converged-cloud", "azure_lite", "free", "preview"}
-	rs, err := rules.NewRulesServiceFromFile(tmpfile, enabledPlans)
+	rs, err := rules.NewRulesServiceFromFile(tmpfile, sets.New(maps.Keys(broker.PlanIDsMapping)...), sets.New("aws", "azure", "gcp", "trial", "build-runtime-aws", "build-runtime-azure", "build-runtime-gcp", "sap-converged-cloud", "azure_lite", "free", "preview"))
 	require.NoError(t, err)
 
 	return rs

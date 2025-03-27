@@ -5,9 +5,10 @@ import (
 	"os"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/util/sets"
+
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,7 +39,7 @@ func TestMatchDifferentArtificialScenarios(t *testing.T) {
 
 	defer os.Remove(tmpfile)
 
-	svc, err := NewRulesServiceFromFile(tmpfile, &broker.EnablePlans{"azure", "gcp", "trial", "aws", "free"})
+	svc, err := NewRulesServiceFromFile(tmpfile, sets.New[string]("azure", "gcp", "trial", "aws", "free"), sets.New[string]("azure", "gcp", "trial", "aws", "free"))
 	require.NoError(t, err)
 
 	for _, result := range svc.ParsedRuleset.Results {
@@ -182,7 +183,7 @@ func TestMatch_UseValidRuleset(t *testing.T) {
 
 	defer os.Remove(tmpfile)
 
-	svc, err := NewRulesServiceFromFile(tmpfile, &broker.EnablePlans{"azure", "gcp", "trial", "aws", "free"})
+	svc, err := NewRulesServiceFromFile(tmpfile, sets.New[string]("azure", "gcp", "trial", "aws", "free"), sets.New[string]("azure", "gcp", "trial", "aws", "free"))
 	require.NoError(t, err)
 
 	require.NotNil(t, svc.ValidRules)

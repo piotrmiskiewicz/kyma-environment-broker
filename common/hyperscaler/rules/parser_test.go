@@ -3,14 +3,13 @@ package rules
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/stretchr/testify/require"
 )
 
 func TestParserHappyPath(t *testing.T) {
 
 	t.Run("with plan", func(t *testing.T) {
-		parser := &SimpleParser{&broker.EnablePlans{"azure"}}
+		parser := &SimpleParser{}
 
 		rule, err := parser.Parse("azure")
 		require.NoError(t, err)
@@ -25,7 +24,7 @@ func TestParserHappyPath(t *testing.T) {
 	})
 
 	t.Run("with plan and single input attribute", func(t *testing.T) {
-		parser := &SimpleParser{&broker.EnablePlans{"azure"}}
+		parser := &SimpleParser{}
 		rule, err := parser.Parse("azure(PR=westeurope)")
 		require.NoError(t, err)
 
@@ -50,7 +49,7 @@ func TestParserHappyPath(t *testing.T) {
 	})
 
 	t.Run("with plan all output attributes - different positions", func(t *testing.T) {
-		parser := &SimpleParser{&broker.EnablePlans{"azure"}}
+		parser := &SimpleParser{}
 		rule, err := parser.Parse("azure(PR=easteurope,HR=westeurope)")
 		require.NoError(t, err)
 
@@ -75,7 +74,7 @@ func TestParserHappyPath(t *testing.T) {
 	})
 
 	t.Run("with plan and single output attribute", func(t *testing.T) {
-		parser := &SimpleParser{&broker.EnablePlans{"azure"}}
+		parser := &SimpleParser{}
 		rule, err := parser.Parse("azure->S")
 		require.NoError(t, err)
 
@@ -100,7 +99,7 @@ func TestParserHappyPath(t *testing.T) {
 	})
 
 	t.Run("with plan and all output attributes - different positions", func(t *testing.T) {
-		parser := &SimpleParser{&broker.EnablePlans{"azure"}}
+		parser := &SimpleParser{}
 		rule, err := parser.Parse("azure->S,EU")
 		require.NoError(t, err)
 
@@ -125,7 +124,7 @@ func TestParserHappyPath(t *testing.T) {
 	})
 
 	t.Run("with plan and single output/input attributes", func(t *testing.T) {
-		parser := &SimpleParser{&broker.EnablePlans{"azure"}}
+		parser := &SimpleParser{}
 		rule, err := parser.Parse("azure(PR=westeurope)->EU")
 		require.NoError(t, err)
 
@@ -139,7 +138,7 @@ func TestParserHappyPath(t *testing.T) {
 	})
 
 	t.Run("with plan and all input/output attributes", func(t *testing.T) {
-		parser := &SimpleParser{&broker.EnablePlans{"azure"}}
+		parser := &SimpleParser{}
 		rule, err := parser.Parse("azure(PR=westeurope, HR=easteurope)->EU,S")
 		require.NoError(t, err)
 
@@ -155,7 +154,7 @@ func TestParserHappyPath(t *testing.T) {
 
 func TestParserValidation(t *testing.T) {
 
-	parser := &SimpleParser{&broker.EnablePlans{"azure"}}
+	parser := &SimpleParser{}
 
 	t.Run("with paranthesis only, no attributes", func(t *testing.T) {
 		rule, err := parser.Parse("()")
@@ -180,36 +179,6 @@ func TestParserValidation(t *testing.T) {
 		require.Nil(t, rule)
 		require.Error(t, err)
 
-	})
-
-	t.Run("with invalid equal sign", func(t *testing.T) {
-		rule, err := parser.Parse("=")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("==")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("===")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("=azure=")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("azure==")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("azure=(PR=westeu, HR=easteu)=")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("azure=(PR=westeu, HR=easteu=wsteu)")
-		require.Nil(t, rule)
-		require.Error(t, err)
 	})
 
 	t.Run("with duplicated or unclosed parantheses", func(t *testing.T) {
@@ -364,20 +333,6 @@ func TestParserValidation(t *testing.T) {
 		require.Error(t, err)
 
 		rule, err = parser.Parse("azure(PR=valid-key)->AA")
-		require.Nil(t, rule)
-		require.Error(t, err)
-	})
-
-	t.Run("with unsupported plan", func(t *testing.T) {
-		rule, err := parser.Parse("azuree")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("azurrre(PR=valid-key)->S")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("not-existing-plan(PR=valid-key)->EU")
 		require.Nil(t, rule)
 		require.Error(t, err)
 	})

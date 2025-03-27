@@ -3,7 +3,6 @@ package rules
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +14,7 @@ func TestSignatureSet_Mirrored(t *testing.T) {
 
 		signatureSet := NewSignatureSet([]*ParsingResult{})
 
-		_, err := rule1.SetPlan("aws", &broker.EnablePlans{"aws"})
+		_, err := rule1.SetPlan("aws")
 		require.NoError(t, err)
 		mirroredResults := signatureSet.Mirrored(rule1)
 

@@ -14,6 +14,9 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/util/sets"
+
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
@@ -218,8 +221,11 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 	k8sClientProvider := kubeconfig.NewFakeK8sClientProvider(fakeK8sSKRClient)
 	provisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Provisioning, log.With("provisioning", "manager"))
 
-	rulesService, err := rules.NewRulesServiceFromFile("testdata/hap-rules.yaml", &cfg.Broker.EnablePlans)
+	rulesService, err := rules.NewRulesServiceFromFile("testdata/hap-rules.yaml", sets.New(maps.Keys(broker.PlanIDsMapping)...), sets.New([]string(cfg.Broker.EnablePlans)...).Delete("own_cluster"))
 	require.NoError(t, err)
+	if rulesService.ValidationInfo != nil {
+		require.Empty(t, rulesService.ValidationInfo.PlanErrors)
+	}
 
 	provisioningQueue := NewProvisioningProcessingQueue(context.Background(), provisionManager, workersAmount, cfg, db, configProvider,
 		edpClient, accountProvider, k8sClientProvider, cli, gardenerClientWithNamespace, defaultOIDCValues(), log, rulesService)

@@ -5,6 +5,9 @@ import (
 	"log"
 	"strings"
 
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/util/sets"
+
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
@@ -87,9 +90,9 @@ func (cmd *ParseCommand) Run() {
 	var err error
 	if cmd.ruleFilePath != "" {
 		cmd.cobraCmd.Printf("Parsing rules from file: %s\n", cmd.ruleFilePath)
-		rulesService, err = rules.NewRulesServiceFromFile(cmd.ruleFilePath, &enabledPlans)
+		rulesService, err = rules.NewRulesServiceFromFile(cmd.ruleFilePath, sets.New(maps.Keys(broker.PlanIDsMapping)...), sets.New[string]())
 	} else {
-		rulesService, err = rules.NewRulesServiceFromSlice(strings.Split(cmd.rule, ";"), &enabledPlans)
+		rulesService, err = rules.NewRulesServiceFromSlice(strings.Split(cmd.rule, ";"), sets.New(maps.Keys(broker.PlanIDsMapping)...), sets.New[string]())
 	}
 
 	if err != nil {

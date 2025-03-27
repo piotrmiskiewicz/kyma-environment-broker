@@ -1,6 +1,10 @@
 package rules
 
-import "fmt"
+import (
+	"fmt"
+
+	"k8s.io/apimachinery/pkg/util/sets"
+)
 
 type PatternAttribute struct {
 	matchAny bool
@@ -27,6 +31,11 @@ type ValidationErrors struct {
 	ParsingErrors   []error
 	DuplicateErrors []error
 	AmbiguityErrors []error
+	PlanErrors      []error
+}
+
+func (ve *ValidationErrors) All() []error {
+	return append(append(append(ve.ParsingErrors, ve.DuplicateErrors...), ve.AmbiguityErrors...), ve.PlanErrors...)
 }
 
 func (vr *ValidRule) Rule() string {
@@ -98,6 +107,7 @@ func NewValidationErrors() *ValidationErrors {
 		ParsingErrors:   make([]error, 0),
 		DuplicateErrors: make([]error, 0),
 		AmbiguityErrors: make([]error, 0),
+		PlanErrors:      make([]error, 0),
 	}
 }
 
@@ -156,4 +166,20 @@ func (vr *ValidRuleset) checkUnambiguity() (bool, []error) {
 	}
 
 	return len(ambiguityErrors) == 0, ambiguityErrors
+}
+
+func (vr *ValidRuleset) checkPlans(allowed sets.Set[string], required sets.Set[string]) (bool, []error) {
+	requiredPlans := required.Clone()
+	planErrors := make([]error, 0)
+
+	for _, rule := range vr.Rules {
+		requiredPlans.Delete(rule.Plan.literal)
+		if !allowed.Has(rule.Plan.literal) {
+			planErrors = append(planErrors, fmt.Errorf("plan %s is not supported", rule.Plan.literal))
+		}
+	}
+	if requiredPlans.Len() > 0 {
+		planErrors = append(planErrors, fmt.Errorf("required plans %v are not covered by rules", requiredPlans))
+	}
+	return len(planErrors) == 0, planErrors
 }

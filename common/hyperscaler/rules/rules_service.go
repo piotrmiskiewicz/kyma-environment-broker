@@ -6,8 +6,9 @@ import (
 	"os"
 	"slices"
 
+	"k8s.io/apimachinery/pkg/util/sets"
+
 	"github.com/google/uuid"
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 )
 
 type RulesService struct {
@@ -15,9 +16,11 @@ type RulesService struct {
 	ParsedRuleset  *ParsingResults
 	ValidRules     *ValidRuleset
 	ValidationInfo *ValidationErrors
+	requiredPlans  sets.Set[string]
+	allowedPlans   sets.Set[string]
 }
 
-func NewRulesServiceFromFile(rulesFilePath string, enabledPlans *broker.EnablePlans) (*RulesService, error) {
+func NewRulesServiceFromFile(rulesFilePath string, allowedPlans sets.Set[string], requiredPlans sets.Set[string]) (*RulesService, error) {
 
 	if rulesFilePath == "" {
 		return nil, fmt.Errorf("No HAP rules file path provided")
@@ -29,11 +32,11 @@ func NewRulesServiceFromFile(rulesFilePath string, enabledPlans *broker.EnablePl
 		return nil, fmt.Errorf("failed to open file: %s", err)
 	}
 
-	rs, err := NewRulesService(file, enabledPlans)
+	rs, err := NewRulesService(file, allowedPlans, requiredPlans)
 	return rs, err
 }
 
-func NewRulesService(file *os.File, enabledPlans *broker.EnablePlans) (*RulesService, error) {
+func NewRulesService(file *os.File, allowedPlans sets.Set[string], requiredPlans sets.Set[string]) (*RulesService, error) {
 	rulesConfig := &RulesConfig{}
 
 	if file == nil {
@@ -46,9 +49,9 @@ func NewRulesService(file *os.File, enabledPlans *broker.EnablePlans) (*RulesSer
 	}
 
 	rs := &RulesService{
-		parser: &SimpleParser{
-			enabledPlans: enabledPlans,
-		},
+		parser:        &SimpleParser{},
+		requiredPlans: requiredPlans,
+		allowedPlans:  allowedPlans,
 	}
 
 	rs.ParsedRuleset = rs.process(rulesConfig)
@@ -56,20 +59,20 @@ func NewRulesService(file *os.File, enabledPlans *broker.EnablePlans) (*RulesSer
 	return rs, err
 }
 
-func NewRulesServiceFromSlice(rules []string, enabledPlans *broker.EnablePlans) (*RulesService, error) {
+func NewRulesServiceFromSlice(rules []string, allowedPlans sets.Set[string], requiredPlans sets.Set[string]) (*RulesService, error) {
 
 	rulesConfig := &RulesConfig{
 		Rules: rules,
 	}
 
 	rs := &RulesService{
-		parser: &SimpleParser{
-			enabledPlans: enabledPlans,
-		},
+		parser: &SimpleParser{},
 	}
 
 	rs.ParsedRuleset = rs.process(rulesConfig)
 	rs.ValidRules, rs.ValidationInfo = rs.processAndValidate(rulesConfig)
+	rs.requiredPlans = requiredPlans
+	rs.allowedPlans = allowedPlans
 	return rs, nil
 }
 
@@ -91,6 +94,13 @@ func (rs *RulesService) processAndValidate(rulesConfig *RulesConfig) (*ValidRule
 		validationErrors.AmbiguityErrors = append(validationErrors.AmbiguityErrors, ambiguityErrors...)
 		return nil, validationErrors
 	}
+
+	ok, planErrors := validRuleset.checkPlans(rs.allowedPlans, rs.requiredPlans)
+	if !ok {
+		validationErrors.PlanErrors = append(validationErrors.PlanErrors, planErrors...)
+		return nil, validationErrors
+	}
+
 	return validRuleset, nil
 }
 
