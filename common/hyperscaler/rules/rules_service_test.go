@@ -85,7 +85,7 @@ func TestPostParse(t *testing.T) {
 		},
 		{
 			name:               "simple parsing error",
-			inputRuleset:       []string{"aws+"},
+			inputRuleset:       []string{"aws("},
 			expectedErrorCount: 1,
 		},
 		//TODO cover more cases
