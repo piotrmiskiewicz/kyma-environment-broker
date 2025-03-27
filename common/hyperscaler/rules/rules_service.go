@@ -2,10 +2,11 @@ package rules
 
 import (
 	"fmt"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"log/slog"
 	"os"
 	"slices"
+
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/google/uuid"
 )
