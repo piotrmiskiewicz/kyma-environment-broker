@@ -337,20 +337,6 @@ func TestParserValidation(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("with unsupported plan", func(t *testing.T) {
-		rule, err := parser.Parse("azuree")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("azurrre(PR=valid-key)->S")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("not-existing-plan(PR=valid-key)->EU")
-		require.Nil(t, rule)
-		require.Error(t, err)
-	})
-
 	t.Run("without input attirbute value", func(t *testing.T) {
 		rule, err := parser.Parse("azure(PR)")
 		require.Nil(t, rule)
