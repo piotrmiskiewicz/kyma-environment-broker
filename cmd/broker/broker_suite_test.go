@@ -5,9 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/exp/maps"
 	"io"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -15,6 +13,9 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	corev1 "k8s.io/api/core/v1"
 
