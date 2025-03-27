@@ -1,13 +1,14 @@
 package provisioning
 
 import (
-	"golang.org/x/exp/maps"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"log/slog"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"golang.org/x/exp/maps"
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
