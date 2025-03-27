@@ -1,11 +1,12 @@
 package provisioning
 
 import (
-	"golang.org/x/exp/maps"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"golang.org/x/exp/maps"
 
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
