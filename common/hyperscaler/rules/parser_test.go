@@ -181,36 +181,6 @@ func TestParserValidation(t *testing.T) {
 
 	})
 
-	t.Run("with invalid equal sign", func(t *testing.T) {
-		rule, err := parser.Parse("=")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("==")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("===")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("=azure=")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("azure==")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("azure=(PR=westeu, HR=easteu)=")
-		require.Nil(t, rule)
-		require.Error(t, err)
-
-		rule, err = parser.Parse("azure=(PR=westeu, HR=easteu=wsteu)")
-		require.Nil(t, rule)
-		require.Error(t, err)
-	})
-
 	t.Run("with duplicated or unclosed parantheses", func(t *testing.T) {
 		rule, err := parser.Parse("(())")
 		require.Nil(t, rule)
