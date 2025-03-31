@@ -80,6 +80,7 @@ func (s *ResolveSubscriptionSecretStep) Run(operation internal.Operation, log *s
 	if targetSecretName == "" {
 		return s.operationManager.OperationFailed(operation, "failed to determine secret name", fmt.Errorf("target secret name is empty"), log)
 	}
+	log.Info(fmt.Sprintf("resolved secret name: %s", targetSecretName))
 
 	return s.operationManager.UpdateOperation(operation, func(op *internal.Operation) {
 		op.ProvisioningParameters.Parameters.TargetSecret = &targetSecretName
