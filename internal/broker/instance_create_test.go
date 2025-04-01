@@ -13,13 +13,11 @@ import (
 
 	"github.com/pivotal-cf/brokerapi/v12/domain/apiresponses"
 
-	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker/automock"
-	"github.com/kyma-project/kyma-environment-broker/internal/dashboard"
 	"github.com/kyma-project/kyma-environment-broker/internal/fixture"
 	kcMock "github.com/kyma-project/kyma-environment-broker/internal/kubeconfig/automock"
 	"github.com/kyma-project/kyma-environment-broker/internal/middleware"
@@ -51,8 +49,6 @@ const (
 	shootDomain          = "kyma-dev.shoot.canary.k8s-hana.ondemand.com"
 )
 
-var dashboardConfig = dashboard.Config{LandscapeURL: "https://dashboard.example.com"}
-
 func TestProvision_Provision(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
@@ -68,9 +64,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 		// #create provisioner endpoint
@@ -85,15 +78,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -144,9 +136,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.OwnClusterPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		// #create provisioner endpoint
 		provisionEndpoint := broker.NewProvision(
@@ -160,15 +149,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -224,9 +212,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.OwnClusterPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		// #create provisioner endpoint
 		provisionEndpoint := broker.NewProvision(
@@ -240,15 +225,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -275,9 +259,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.OwnClusterPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		// #create provisioner endpoint
 		provisionEndpoint := broker.NewProvision(
@@ -291,15 +272,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when shootDomain is missing
@@ -350,9 +330,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 		// #create provisioner endpoint
@@ -367,15 +344,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -429,9 +405,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", mock.AnythingOfType("string")).Return("", fmt.Errorf("error"))
 		// #create provisioner endpoint
@@ -445,15 +418,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			nil,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -486,9 +458,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.TrialPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite", broker.TrialPlanName}, OnlySingleTrialPerGA: true},
@@ -497,15 +466,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			nil,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -539,9 +507,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.TrialPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite", broker.TrialPlanName}, OnlySingleTrialPerGA: false},
@@ -550,15 +515,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -606,9 +570,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.TrialPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "trial"}, OnlySingleTrialPerGA: true},
@@ -617,15 +578,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -673,9 +633,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.TrialPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "trial"}, OnlySingleTrialPerGA: true},
@@ -684,15 +641,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -719,9 +675,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		// #create provisioner endpoint
 		provisionEndpoint := broker.NewProvision(
@@ -731,15 +684,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			nil,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -760,9 +712,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite"}, OnlySingleTrialPerGA: true},
@@ -771,15 +720,14 @@ func TestProvision_Provision(t *testing.T) {
 			nil,
 			nil,
 			nil,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -798,15 +746,9 @@ func TestProvision_Provision(t *testing.T) {
 		// given
 		memoryStorage := storage.NewMemoryStorage()
 
-		factoryBuilder := &automock.PlanValidator{}
-		factoryBuilder.On("IsPlanSupport", broker.AzureLitePlanID).Return(true)
-
 		queue := &automock.Queue{}
 		queue.On("Add", mock.AnythingOfType("string"))
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite"}, OnlySingleTrialPerGA: true},
@@ -815,15 +757,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -852,9 +793,6 @@ func TestProvision_Provision(t *testing.T) {
 		queue := &automock.Queue{}
 		queue.On("Add", mock.AnythingOfType("string"))
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite", "trial"}, OnlySingleTrialPerGA: true},
@@ -863,15 +801,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -900,9 +837,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		// #create provisioner endpoint
 		provisionEndpoint := broker.NewProvision(
@@ -916,15 +850,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		oidcParams := `"issuerURL":"https://test.local"`
@@ -959,9 +892,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		// #create provisioner endpoint
 		provisionEndpoint := broker.NewProvision(
@@ -975,15 +905,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		oidcParams := `"clientID":"client-id","issuerURL":"https://test.local","signingAlgs":["RS256","notValid"]`
@@ -1018,9 +947,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		// #create provisioner endpoint
 		provisionEndpoint := broker.NewProvision(
@@ -1034,15 +960,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		testCases := []struct {
@@ -1117,9 +1042,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 		// #create provisioner endpoint
@@ -1134,15 +1056,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		oidcParams := `"clientID":"client-id","issuerURL":"https://test.local","signingAlgs":["RS256"]`
@@ -1170,9 +1091,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.FreemiumPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite", broker.FreemiumPlanName}, OnlyOneFreePerGA: true},
@@ -1181,15 +1099,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -1239,9 +1156,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.FreemiumPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite", broker.FreemiumPlanName}, OnlyOneFreePerGA: true},
@@ -1250,15 +1164,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -1298,9 +1211,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.FreemiumPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite", broker.FreemiumPlanName}, OnlyOneFreePerGA: true},
@@ -1309,15 +1219,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{globalAccountID: struct{}{}},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -1355,9 +1264,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.FreemiumPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite", broker.FreemiumPlanName}, OnlyOneFreePerGA: true},
@@ -1366,15 +1272,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			nil,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -1402,10 +1307,6 @@ func TestProvision_Provision(t *testing.T) {
 
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.FreemiumPlanID).Return(true)
-
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{EnablePlans: []string{"gcp", "azure", "azure_lite", broker.FreemiumPlanName}, OnlyOneFreePerGA: true},
@@ -1414,15 +1315,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			nil,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		// when
@@ -1447,9 +1347,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.GCPPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 		// #create provisioner endpoint
@@ -1464,15 +1361,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		oidcParams := `"clientID":"client-id","issuerURL":"https://test.local","signingAlgs":["RS256"]`
@@ -1500,9 +1396,6 @@ func TestProvision_Provision(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.GCPPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 		// #create provisioner endpoint
@@ -1517,15 +1410,14 @@ func TestProvision_Provision(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		oidcParams := `"clientID":"client-id","issuerURL":"https://test.local","signingAlgs":["RS256"]`
@@ -1636,9 +1528,6 @@ func TestAdditionalWorkerNodePools(t *testing.T) {
 			factoryBuilder := &automock.PlanValidator{}
 			factoryBuilder.On("IsPlanSupport", broker.AWSPlanID).Return(true)
 
-			planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-				return &gqlschema.ClusterConfigInput{}, nil
-			}
 			kcBuilder := &kcMock.KcBuilder{}
 			kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 			// #create provisioner endpoint
@@ -1653,15 +1542,14 @@ func TestAdditionalWorkerNodePools(t *testing.T) {
 				memoryStorage.Instances(),
 				memoryStorage.InstancesArchived(),
 				queue,
-				factoryBuilder,
 				broker.PlansConfig{},
-				planDefaults,
 				log,
 				dashboardConfig,
 				kcBuilder,
 				whitelist.Set{},
 				&broker.OneForAllConvergedCloudRegionsProvider{},
 				nil,
+				fixValueProvider(),
 			)
 
 			// when
@@ -1704,9 +1592,6 @@ func TestAdditionalWorkerNodePoolsForUnsupportedPlans(t *testing.T) {
 			factoryBuilder := &automock.PlanValidator{}
 			factoryBuilder.On("IsPlanSupport", tc.planID).Return(true)
 
-			planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-				return &gqlschema.ClusterConfigInput{}, nil
-			}
 			kcBuilder := &kcMock.KcBuilder{}
 			kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 			// #create provisioner endpoint
@@ -1721,15 +1606,14 @@ func TestAdditionalWorkerNodePoolsForUnsupportedPlans(t *testing.T) {
 				memoryStorage.Instances(),
 				memoryStorage.InstancesArchived(),
 				queue,
-				factoryBuilder,
 				broker.PlansConfig{},
-				planDefaults,
 				log,
 				dashboardConfig,
 				kcBuilder,
 				whitelist.Set{},
 				&broker.OneForAllConvergedCloudRegionsProvider{},
 				nil,
+				fixValueProvider(),
 			)
 
 			additionalWorkerNodePools := `[{"name": "name-1", "machineType": "m6i.large", "autoScalerMin": 3, "autoScalerMax": 20}]`
@@ -1864,9 +1748,6 @@ func TestNetworkingValidation(t *testing.T) {
 			factoryBuilder := &automock.PlanValidator{}
 			factoryBuilder.On("IsPlanSupport", mock.AnythingOfType("string")).Return(true)
 
-			planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-				return &gqlschema.ClusterConfigInput{}, nil
-			}
 			kcBuilder := &kcMock.KcBuilder{}
 			// #create provisioner endpoint
 			provisionEndpoint := broker.NewProvision(
@@ -1876,15 +1757,14 @@ func TestNetworkingValidation(t *testing.T) {
 				memoryStorage.Instances(),
 				memoryStorage.InstancesArchived(),
 				queue,
-				factoryBuilder,
 				broker.PlansConfig{},
-				planDefaults,
 				log,
 				dashboardConfig,
 				kcBuilder,
 				whitelist.Set{},
 				&broker.OneForAllConvergedCloudRegionsProvider{},
 				nil,
+				fixValueProvider(),
 			)
 
 			// when
@@ -1967,9 +1847,6 @@ func TestRegionValidation(t *testing.T) {
 			factoryBuilder := &automock.PlanValidator{}
 			factoryBuilder.On("IsPlanSupport", tc.planID).Return(true)
 
-			planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-				return &gqlschema.ClusterConfigInput{}, nil
-			}
 			kcBuilder := &kcMock.KcBuilder{}
 			// #create provisioner endpoint
 			provisionEndpoint := broker.NewProvision(
@@ -1979,15 +1856,14 @@ func TestRegionValidation(t *testing.T) {
 				memoryStorage.Instances(),
 				memoryStorage.InstancesArchived(),
 				queue,
-				factoryBuilder,
 				broker.PlansConfig{},
-				planDefaults,
 				log,
 				dashboardConfig,
 				kcBuilder,
 				whitelist.Set{},
 				&broker.OneForAllConvergedCloudRegionsProvider{},
 				nil,
+				fixValueProvider(),
 			)
 
 			// when
@@ -2026,9 +1902,6 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.SapConvergedCloudPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 		// #create provisioner endpoint
@@ -2043,15 +1916,14 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		oidcParams := `"clientID":"client-id","issuerURL":"https://test.local","signingAlgs":["RS256"]`
@@ -2079,9 +1951,6 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", planID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 		provisionEndpoint := broker.NewProvision(
@@ -2095,15 +1964,14 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		oidcParams := `"clientID":"client-id","issuerURL":"https://test.local","signingAlgs":["RS256"]`
@@ -2131,9 +1999,6 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 		factoryBuilder := &automock.PlanValidator{}
 		factoryBuilder.On("IsPlanSupport", broker.SapConvergedCloudPlanID).Return(true)
 
-		planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-			return &gqlschema.ClusterConfigInput{}, nil
-		}
 		kcBuilder := &kcMock.KcBuilder{}
 		provisionEndpoint := broker.NewProvision(
 			broker.Config{
@@ -2146,15 +2011,14 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 			memoryStorage.Instances(),
 			memoryStorage.InstancesArchived(),
 			queue,
-			factoryBuilder,
 			broker.PlansConfig{},
-			planDefaults,
 			log,
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
 			&broker.OneForAllConvergedCloudRegionsProvider{},
 			nil,
+			fixValueProvider(),
 		)
 
 		oidcParams := `"clientID":"client-id","issuerURL":"https://test.local","signingAlgs":["RS256"]`
@@ -2194,9 +2058,6 @@ func TestUnsupportedMachineType(t *testing.T) {
 	factoryBuilder := &automock.PlanValidator{}
 	factoryBuilder.On("IsPlanSupport", broker.GCPPlanID).Return(true)
 
-	planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-		return &gqlschema.ClusterConfigInput{}, nil
-	}
 	kcBuilder := &kcMock.KcBuilder{}
 	kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 	// #create provisioner endpoint
@@ -2211,15 +2072,14 @@ func TestUnsupportedMachineType(t *testing.T) {
 		memoryStorage.Instances(),
 		memoryStorage.InstancesArchived(),
 		queue,
-		factoryBuilder,
 		broker.PlansConfig{},
-		planDefaults,
 		log,
 		dashboardConfig,
 		kcBuilder,
 		whitelist.Set{},
 		&broker.OneForAllConvergedCloudRegionsProvider{},
 		fixRegionsSupportingMachine(),
+		fixValueProvider(),
 	)
 
 	// when
@@ -2249,9 +2109,6 @@ func TestUnsupportedMachineTypeInAdditionalWorkerNodePools(t *testing.T) {
 	factoryBuilder := &automock.PlanValidator{}
 	factoryBuilder.On("IsPlanSupport", broker.AWSPlanID).Return(true)
 
-	planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-		return &gqlschema.ClusterConfigInput{}, nil
-	}
 	kcBuilder := &kcMock.KcBuilder{}
 	kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 	// #create provisioner endpoint
@@ -2266,15 +2123,14 @@ func TestUnsupportedMachineTypeInAdditionalWorkerNodePools(t *testing.T) {
 		memoryStorage.Instances(),
 		memoryStorage.InstancesArchived(),
 		queue,
-		factoryBuilder,
 		broker.PlansConfig{},
-		planDefaults,
 		log,
 		dashboardConfig,
 		kcBuilder,
 		whitelist.Set{},
 		&broker.OneForAllConvergedCloudRegionsProvider{},
 		fixRegionsSupportingMachine(),
+		fixValueProvider(),
 	)
 
 	testCases := []struct {
@@ -2330,9 +2186,6 @@ func TestGPUMachineForInternalUser(t *testing.T) {
 	factoryBuilder := &automock.PlanValidator{}
 	factoryBuilder.On("IsPlanSupport", broker.AWSPlanID).Return(true)
 
-	planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-		return &gqlschema.ClusterConfigInput{}, nil
-	}
 	kcBuilder := &kcMock.KcBuilder{}
 	kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 	// #create provisioner endpoint
@@ -2347,15 +2200,14 @@ func TestGPUMachineForInternalUser(t *testing.T) {
 		memoryStorage.Instances(),
 		memoryStorage.InstancesArchived(),
 		queue,
-		factoryBuilder,
 		broker.PlansConfig{},
-		planDefaults,
 		log,
 		dashboardConfig,
 		kcBuilder,
 		whitelist.Set{},
 		&broker.OneForAllConvergedCloudRegionsProvider{},
 		fixRegionsSupportingMachine(),
+		fixValueProvider(),
 	)
 
 	additionalWorkerNodePools := `[{"name": "name-1", "machineType": "g6.xlarge", "haZones": true, "autoScalerMin": 3, "autoScalerMax": 20}]`
@@ -2383,11 +2235,6 @@ func TestGPUMachinesForExternalCustomer(t *testing.T) {
 	queue := &automock.Queue{}
 	queue.On("Add", mock.AnythingOfType("string"))
 
-	factoryBuilder := &automock.PlanValidator{}
-
-	planDefaults := func(planID string, platformProvider pkg.CloudProvider, provider *pkg.CloudProvider) (*gqlschema.ClusterConfigInput, error) {
-		return &gqlschema.ClusterConfigInput{}, nil
-	}
 	kcBuilder := &kcMock.KcBuilder{}
 	kcBuilder.On("GetServerURL", "").Return("", fmt.Errorf("error"))
 	// #create provisioner endpoint
@@ -2402,15 +2249,14 @@ func TestGPUMachinesForExternalCustomer(t *testing.T) {
 		memoryStorage.Instances(),
 		memoryStorage.InstancesArchived(),
 		queue,
-		factoryBuilder,
 		broker.PlansConfig{},
-		planDefaults,
 		log,
 		dashboardConfig,
 		kcBuilder,
 		whitelist.Set{},
 		&broker.OneForAllConvergedCloudRegionsProvider{},
 		fixRegionsSupportingMachine(),
+		fixValueProvider(),
 	)
 
 	testCases := []struct {
@@ -2567,5 +2413,6 @@ func fixRegionsSupportingMachine() map[string][]string {
 		"m8g":         {"ap-northeast-1", "ap-southeast-1", "ca-central-1"},
 		"m7g":         {"us-west-2"},
 		"c2d-highmem": {"us-central1", "southamerica-east1"},
+		"Standard_D":  {"uksouth", "brazilsouth"},
 	}
 }
