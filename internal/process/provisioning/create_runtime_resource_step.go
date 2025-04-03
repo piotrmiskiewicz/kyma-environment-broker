@@ -300,6 +300,7 @@ func (s *CreateRuntimeResourceStep) createKubernetesConfiguration(operation inte
 	}
 
 	if s.config.UseAdditionalOIDC {
+		oidc.GroupsPrefix = ptr.String("-")
 		kubernetesConfig.KubeAPIServer.AdditionalOidcConfig = &[]gardener.OIDCConfig{oidc}
 	}
 
