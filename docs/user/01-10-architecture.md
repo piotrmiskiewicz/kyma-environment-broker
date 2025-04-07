@@ -1,4 +1,4 @@
-# Kyma Environment Broker Target Architecture
+# Kyma Environment Broker Architecture
 
 ![KEB architecture](../assets/target-keb-arch.drawio.svg)
 
@@ -9,6 +9,3 @@
 5. KEB creates a Kyma resource.
 6. Lifecycle Manager reads the Secret every time it's needed.
 7. Lifecycle Manager manages modules within SAP BTP, Kyma runtime.
-
-> [!NOTE]
-> Once the planned changes are implemented, the [Orchestration](../contributor/02-50-orchestration.md) document will be deprecated as irrelevant.
