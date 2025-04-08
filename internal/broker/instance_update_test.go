@@ -1100,6 +1100,7 @@ func TestLabelChangeWhenMovingSubaccount(t *testing.T) {
 	require.NoError(t, err)
 
 	kcBuilder := &kcMock.KcBuilder{}
+	kcBuilder.On("GetServerURL", mock.Anything).Return("https://kcp.example.com.dummy", nil)
 
 	handler := &handler{}
 
