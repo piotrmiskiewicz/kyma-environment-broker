@@ -3,7 +3,6 @@ package internal
 import (
 	"database/sql"
 	"fmt"
-	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 	"log/slog"
 	"time"
 
@@ -315,9 +314,6 @@ type RuntimeState struct {
 
 	RuntimeID   string `json:"runtimeId"`
 	OperationID string `json:"operationId"`
-
-	KymaConfig    gqlschema.KymaConfigInput     `json:"kymaConfig"`
-	ClusterConfig gqlschema.GardenerConfigInput `json:"clusterConfig"`
 }
 
 // OperationStats provide number of operations per type and state

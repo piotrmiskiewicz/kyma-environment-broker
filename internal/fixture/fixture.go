@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/control-plane/components/provisioner/pkg/gqlschema"
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"github.com/kyma-project/kyma-environment-broker/common/orchestration"
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
@@ -307,16 +306,11 @@ func FixDNSProvidersConfig() gardener.DNSProvidersData {
 }
 
 func FixRuntimeState(id, runtimeID, operationID string) internal.RuntimeState {
-	disabled := false
 	return internal.RuntimeState{
 		ID:          id,
 		CreatedAt:   time.Now(),
 		RuntimeID:   runtimeID,
 		OperationID: operationID,
-		KymaConfig:  gqlschema.KymaConfigInput{},
-		ClusterConfig: gqlschema.GardenerConfigInput{
-			ShootNetworkingFilterDisabled: &disabled,
-		},
 	}
 }
 

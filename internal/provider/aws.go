@@ -2,8 +2,28 @@ package provider
 
 import (
 	"github.com/kyma-project/kyma-environment-broker/internal"
+	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/euaccess"
 )
+
+const (
+	DefaultAWSRegion              = "eu-central-1"
+	DefaultAWSTrialRegion         = "eu-west-1"
+	DefaultEuAccessAWSRegion      = "eu-central-1"
+	DefaultAWSMultiZoneCount      = 3
+	DefaultAWSMachineType         = "m6i.large"
+	DefaultOldAWSTrialMachineType = "m5.xlarge"
+)
+
+var europeAWS = "eu-west-1"
+var usAWS = "us-east-1"
+var asiaAWS = "ap-southeast-1"
+
+var toAWSSpecific = map[string]*string{
+	string(broker.Europe): &europeAWS,
+	string(broker.Us):     &usAWS,
+	string(broker.Asia):   &asiaAWS,
+}
 
 type (
 	AWSInputProvider struct {
