@@ -52,8 +52,7 @@ type UpdateEndpoint struct {
 
 	updatingQueue Queue
 
-	plansConfig  PlansConfig
-	planDefaults PlanDefaults
+	plansConfig PlansConfig
 
 	dashboardConfig dashboard.Config
 	kcBuilder       kubeconfig.KcBuilder
