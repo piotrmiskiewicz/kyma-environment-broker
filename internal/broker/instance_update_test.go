@@ -1,4 +1,4 @@
-package broker
+package broker_test
 
 import (
 	"context"
@@ -888,7 +888,7 @@ func TestUpdateEndpoint_UpdateWithEnabledDashboard(t *testing.T) {
 	// when
 	response, err := svc.Update(context.Background(), instanceID, domain.UpdateDetails{
 		ServiceID:       "",
-		PlanID:          TrialPlanID,
+		PlanID:          broker.TrialPlanID,
 		RawParameters:   nil,
 		PreviousValues:  domain.PreviousValues{},
 		RawContext:      json.RawMessage("{\"active\":false}"),
@@ -1012,6 +1012,7 @@ func TestSubaccountMovement(t *testing.T) {
 	require.NoError(t, err)
 
 	kcBuilder := &kcMock.KcBuilder{}
+	kcBuilder.On("GetServerURL", mock.Anything).Return("https://kcp.example.com", nil)
 
 	handler := &handler{}
 
