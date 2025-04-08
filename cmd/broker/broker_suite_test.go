@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"log/slog"
 	"net/http"
@@ -14,6 +13,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
 
 	"golang.org/x/exp/maps"
 	"k8s.io/apimachinery/pkg/util/sets"
