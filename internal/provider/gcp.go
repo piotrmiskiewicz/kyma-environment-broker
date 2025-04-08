@@ -2,10 +2,11 @@ package provider
 
 import (
 	"fmt"
+	"math/rand"
+
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/assuredworkloads"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
-	"math/rand"
 )
 
 const (
