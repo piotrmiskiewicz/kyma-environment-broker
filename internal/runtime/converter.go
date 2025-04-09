@@ -46,7 +46,7 @@ func (c *converter) ApplyProvisioningOperation(dto *pkg.RuntimeDTO, pOpr *intern
 		dto.SubscriptionSecretName = pOpr.ProvisioningParameters.Parameters.TargetSecret
 
 		// fallback if the field is not set, the provisioning operation contains it in the ProviderValues, see instance creation in the instance_create.go
-		if dto.Provider == "" {
+		if dto.Provider == "" && pOpr.ProviderValues != nil {
 			dto.Provider = string(pkg.CloudProviderFromString(pOpr.ProviderValues.ProviderType))
 		}
 	}
