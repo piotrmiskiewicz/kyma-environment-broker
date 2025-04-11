@@ -19,26 +19,33 @@ type Config struct {
 type Builder struct {
 	kubeconfigProvider kubeconfigProvider
 	kcpClient          client.Client
+	multipleContexts   bool
 }
 
 type kubeconfigProvider interface {
 	KubeconfigForRuntimeID(runtimeID string) ([]byte, error)
 }
 
-func NewBuilder(kcpClient client.Client, provider kubeconfigProvider) *Builder {
+func NewBuilder(kcpClient client.Client, provider kubeconfigProvider, multipleContexts bool) *Builder {
 	return &Builder{
 		kcpClient:          kcpClient,
 		kubeconfigProvider: provider,
+		multipleContexts:   multipleContexts,
 	}
 }
 
 type kubeconfigData struct {
-	ContextName   string
-	CAData        string
-	ServerURL     string
-	OIDCIssuerURL string
-	OIDCClientID  string
-	Token         string
+	ContextName string
+	CAData      string
+	ServerURL   string
+	OIDCConfigs []OIDCConfig
+	Token       string
+}
+
+type OIDCConfig struct {
+	Name      string
+	IssuerURL string
+	ClientID  string
 }
 
 func (b *Builder) BuildFromAdminKubeconfigForBinding(runtimeID string, token string) (string, error) {
@@ -64,12 +71,9 @@ func (b *Builder) BuildFromAdminKubeconfig(instance *internal.Instance, adminKub
 	if instance.RuntimeID == "" {
 		return "", fmt.Errorf("RuntimeID must not be empty")
 	}
-	issuerURL, clientID, err := b.getOidcDataFromRuntimeResource(instance.RuntimeID)
-	if err != nil {
-		return "", fmt.Errorf("while fetching oidc data: %w", err)
-	}
 
 	var kubeconfigContent []byte
+	var err error
 	if adminKubeconfig == "" {
 		kubeconfigContent, err = b.kubeconfigProvider.KubeconfigForRuntimeID(instance.RuntimeID)
 		if err != nil {
@@ -84,12 +88,16 @@ func (b *Builder) BuildFromAdminKubeconfig(instance *internal.Instance, adminKub
 		return "", fmt.Errorf("during unmarshal invocation: %w", err)
 	}
 
+	OIDCConfigs, err := b.getOidcDataFromRuntimeResource(instance.RuntimeID, kubeCfg.CurrentContext)
+	if err != nil {
+		return "", fmt.Errorf("while fetching oidc data: %w", err)
+	}
+
 	return b.parseTemplate(kubeconfigData{
-		ContextName:   kubeCfg.CurrentContext,
-		CAData:        kubeCfg.Clusters[0].Cluster.CertificateAuthorityData,
-		ServerURL:     kubeCfg.Clusters[0].Cluster.Server,
-		OIDCIssuerURL: issuerURL,
-		OIDCClientID:  clientID,
+		ContextName: kubeCfg.CurrentContext,
+		CAData:      kubeCfg.Clusters[0].Cluster.CertificateAuthorityData,
+		ServerURL:   kubeCfg.Clusters[0].Cluster.Server,
+		OIDCConfigs: OIDCConfigs,
 	}, kubeconfigTemplate)
 }
 
@@ -158,25 +166,36 @@ func (b *Builder) validKubeconfig(kc kubeconfig) error {
 	return nil
 }
 
-func (b *Builder) getOidcDataFromRuntimeResource(id string) (string, string, error) {
+func (b *Builder) getOidcDataFromRuntimeResource(id string, currentContext string) ([]OIDCConfig, error) {
 	var runtime imv1.Runtime
+	var oidcConfigs []OIDCConfig
 	err := b.kcpClient.Get(context.Background(), client.ObjectKey{Name: id, Namespace: kcpNamespace}, &runtime)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
-
-	oidcConfig := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.AdditionalOidcConfig
-	if oidcConfig == nil || len(*oidcConfig) == 0 {
-		return "", "", fmt.Errorf("runtime resource contains no OIDC config")
+	additionalConfigs := runtime.Spec.Shoot.Kubernetes.KubeAPIServer.AdditionalOidcConfig
+	if additionalConfigs == nil {
+		return nil, fmt.Errorf("Runtime Resource contains no additional OIDC config")
 	}
-
-	config := (*oidcConfig)[0]
-	if config.IssuerURL == nil || *config.IssuerURL == "" {
-		return "", "", fmt.Errorf("runtime resource contains an empty OIDC issuer URL")
+	for i, config := range *additionalConfigs {
+		if config.IssuerURL == nil {
+			return nil, fmt.Errorf("Runtime Resource contains an empty OIDC issuer URL")
+		}
+		if config.ClientID == nil {
+			return nil, fmt.Errorf("Runtime Resource contains an empty OIDC client ID")
+		}
+		name := currentContext
+		if i > 0 {
+			name = fmt.Sprintf("%s-%d", currentContext, i+1)
+		}
+		oidcConfigs = append(oidcConfigs, OIDCConfig{
+			Name:      name,
+			IssuerURL: *config.IssuerURL,
+			ClientID:  *config.ClientID,
+		})
+		if !b.multipleContexts {
+			return oidcConfigs, nil
+		}
 	}
-	if config.ClientID == nil || *config.ClientID == "" {
-		return "", "", fmt.Errorf("runtime resource contains an empty OIDC client ID")
-	}
-
-	return *config.IssuerURL, *config.ClientID, nil
+	return oidcConfigs, nil
 }
