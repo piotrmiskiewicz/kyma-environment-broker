@@ -45,7 +45,6 @@ const (
 	K8sDependency                   Component = "k8s client - keb"
 	KEBDependency                   Component = "keb"
 	EDPDependency                   Component = "edp"
-	ProvisionerDependency           Component = "provisioner"
 	ReconcileDependency             Component = "reconciler"
 	InfrastructureManagerDependency Component = "infrastructure-manager"
 	LifeCycleManagerDependency      Component = "lifecycle-manager"
