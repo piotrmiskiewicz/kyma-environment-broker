@@ -12,8 +12,6 @@ import (
 	"github.com/kyma-project/kyma-environment-broker/internal/validator"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 
-	"github.com/kyma-project/kyma-environment-broker/internal/regionssupportingmachine"
-
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal/assuredworkloads"
 
@@ -59,11 +57,12 @@ type UpdateEndpoint struct {
 
 	convergedCloudRegionsProvider ConvergedCloudRegionProvider
 
-	regionsSupportingMachine map[string][]string
+	regionsSupportingMachine RegionsSupporter
 
 	kcpClient              client.Client
 	valuesProvider         ValuesProvider
 	useSmallerMachineTypes bool
+	zoneMapping            bool
 }
 
 func NewUpdate(cfg Config,
@@ -80,8 +79,9 @@ func NewUpdate(cfg Config,
 	kcBuilder kubeconfig.KcBuilder,
 	convergedCloudRegionsProvider ConvergedCloudRegionProvider,
 	kcpClient client.Client,
-	regionsSupportingMachine map[string][]string,
+	regionsSupportingMachine RegionsSupporter,
 	useSmallerMachineTypes bool,
+	zoneMapping bool,
 ) *UpdateEndpoint {
 	return &UpdateEndpoint{
 		config:                                   cfg,
@@ -101,6 +101,7 @@ func NewUpdate(cfg Config,
 		kcpClient:                                kcpClient,
 		regionsSupportingMachine:                 regionsSupportingMachine,
 		useSmallerMachineTypes:                   useSmallerMachineTypes,
+		zoneMapping:                              zoneMapping,
 	}
 }
 
@@ -243,12 +244,12 @@ func (b *UpdateEndpoint) processUpdateParameters(instance *internal.Instance, de
 		logger.Debug(fmt.Sprintf("Updating with params: %+v", params))
 	}
 
-	if !regionssupportingmachine.IsSupported(b.regionsSupportingMachine, valueOfPtr(instance.Parameters.Parameters.Region), valueOfPtr(params.MachineType)) {
+	if !b.regionsSupportingMachine.IsSupported(valueOfPtr(instance.Parameters.Parameters.Region), valueOfPtr(params.MachineType)) {
 		message := fmt.Sprintf(
 			"In the region %s, the machine type %s is not available, it is supported in the %v",
 			valueOfPtr(instance.Parameters.Parameters.Region),
 			valueOfPtr(params.MachineType),
-			strings.Join(regionssupportingmachine.SupportedRegions(b.regionsSupportingMachine, valueOfPtr(params.MachineType)), ", "),
+			strings.Join(b.regionsSupportingMachine.SupportedRegions(valueOfPtr(params.MachineType)), ", "),
 		)
 		return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(fmt.Errorf("%s", message), http.StatusBadRequest, message)
 	}
@@ -292,6 +293,11 @@ func (b *UpdateEndpoint) processUpdateParameters(instance *internal.Instance, de
 			}
 			if err := additionalWorkerNodePool.ValidateHAZonesUnchanged(instance.Parameters.Parameters.AdditionalWorkerNodePools); err != nil {
 				return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
+			}
+			if b.zoneMapping {
+				if err := checkAvailableZones(b.regionsSupportingMachine, additionalWorkerNodePool, providerValues.Region, details.PlanID); err != nil {
+					return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
+				}
 			}
 		}
 		if isExternalCustomer(ersContext) {

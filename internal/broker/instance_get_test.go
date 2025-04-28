@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma-environment-broker/internal/regionssupportingmachine"
 	"github.com/kyma-project/kyma-environment-broker/internal/whitelist"
 
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
@@ -62,8 +63,9 @@ func TestGetEndpoint_GetProvisioningInstance(t *testing.T) {
 		kcBuilder,
 		whitelist.Set{},
 		&broker.OneForAllConvergedCloudRegionsProvider{},
-		nil,
+		regionssupportingmachine.RegionsSupportingMachine{},
 		fixValueProvider(),
+		false,
 		false,
 	)
 	getSvc := broker.NewGetInstance(broker.Config{}, st.Instances(), st.Operations(), kcBuilder, fixLogger())

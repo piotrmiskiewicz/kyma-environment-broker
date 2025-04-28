@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/process/infrastructure_manager"
-	"github.com/kyma-project/kyma-environment-broker/internal/regionssupportingmachine"
 	"github.com/kyma-project/kyma-environment-broker/internal/validator"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 
@@ -62,6 +61,12 @@ type ValuesProvider interface {
 	ValuesForPlanAndParameters(provisioningParameters internal.ProvisioningParameters) (internal.ProviderValues, error)
 }
 
+type RegionsSupporter interface {
+	IsSupported(region string, machineType string) bool
+	SupportedRegions(machineType string) []string
+	AvailableZones(machineType, region, planID string) ([]string, error)
+}
+
 type ProvisionEndpoint struct {
 	config                  Config
 	infrastructureManager   infrastructure_manager.InfrastructureManagerConfig
@@ -83,11 +88,12 @@ type ProvisionEndpoint struct {
 
 	convergedCloudRegionsProvider ConvergedCloudRegionProvider
 
-	regionsSupportingMachine map[string][]string
+	regionsSupportingMachine RegionsSupporter
 
 	log                    *slog.Logger
 	valuesProvider         ValuesProvider
 	useSmallerMachineTypes bool
+	zoneMapping            bool
 }
 
 const (
@@ -104,9 +110,10 @@ func NewProvision(cfg Config,
 	kcBuilder kubeconfig.KcBuilder,
 	freemiumWhitelist whitelist.Set,
 	convergedCloudRegionsProvider ConvergedCloudRegionProvider,
-	regionsSupportingMachine map[string][]string,
+	regionsSupportingMachine RegionsSupporter,
 	valuesProvider ValuesProvider,
 	useSmallerMachineTypes bool,
+	zoneMapping bool,
 ) *ProvisionEndpoint {
 	enabledPlanIDs := map[string]struct{}{}
 	for _, planName := range cfg.EnablePlans {
@@ -133,6 +140,7 @@ func NewProvision(cfg Config,
 		regionsSupportingMachine:      regionsSupportingMachine,
 		valuesProvider:                valuesProvider,
 		useSmallerMachineTypes:        useSmallerMachineTypes,
+		zoneMapping:                   zoneMapping,
 	}
 }
 
@@ -310,12 +318,12 @@ func (b *ProvisionEndpoint) validate(ctx context.Context, details domain.Provisi
 		return fmt.Errorf("while obtaining plan defaults: %w", err)
 	}
 
-	if !regionssupportingmachine.IsSupported(b.regionsSupportingMachine, valueOfPtr(parameters.Region), valueOfPtr(parameters.MachineType)) {
+	if !b.regionsSupportingMachine.IsSupported(valueOfPtr(parameters.Region), valueOfPtr(parameters.MachineType)) {
 		return fmt.Errorf(
 			"In the region %s, the machine type %s is not available, it is supported in the %v",
 			valueOfPtr(parameters.Region),
 			valueOfPtr(parameters.MachineType),
-			strings.Join(regionssupportingmachine.SupportedRegions(b.regionsSupportingMachine, valueOfPtr(parameters.MachineType)), ", "),
+			strings.Join(b.regionsSupportingMachine.SupportedRegions(valueOfPtr(parameters.MachineType)), ", "),
 		)
 	}
 
@@ -344,6 +352,11 @@ func (b *ProvisionEndpoint) validate(ctx context.Context, details domain.Provisi
 		for _, additionalWorkerNodePool := range parameters.AdditionalWorkerNodePools {
 			if err := additionalWorkerNodePool.Validate(); err != nil {
 				return apiresponses.NewFailureResponse(err, http.StatusUnprocessableEntity, err.Error())
+			}
+			if b.zoneMapping {
+				if err := checkAvailableZones(b.regionsSupportingMachine, additionalWorkerNodePool, valueOfPtr(parameters.Region), details.PlanID); err != nil {
+					return apiresponses.NewFailureResponse(err, http.StatusUnprocessableEntity, err.Error())
+				}
 			}
 		}
 		if isExternalCustomer(provisioningParameters.ErsContext) {
@@ -510,12 +523,12 @@ func checkGPUMachinesUsage(additionalWorkerNodePools []pkg.AdditionalWorkerNodeP
 	return fmt.Errorf("%s", errorMsg.String())
 }
 
-func checkUnsupportedMachines(regionsSupportingMachine map[string][]string, region string, additionalWorkerNodePools []pkg.AdditionalWorkerNodePool) error {
+func checkUnsupportedMachines(regionsSupportingMachine RegionsSupporter, region string, additionalWorkerNodePools []pkg.AdditionalWorkerNodePool) error {
 	unsupportedMachines := make(map[string][]string)
 	var orderedMachineTypes []string
 
 	for _, pool := range additionalWorkerNodePools {
-		if !regionssupportingmachine.IsSupported(regionsSupportingMachine, region, pool.MachineType) {
+		if !regionsSupportingMachine.IsSupported(region, pool.MachineType) {
 			if _, exists := unsupportedMachines[pool.MachineType]; !exists {
 				orderedMachineTypes = append(orderedMachineTypes, pool.MachineType)
 			}
@@ -534,11 +547,22 @@ func checkUnsupportedMachines(regionsSupportingMachine map[string][]string, regi
 		if i > 0 {
 			errorMsg.WriteString("; ")
 		}
-		availableRegions := strings.Join(regionssupportingmachine.SupportedRegions(regionsSupportingMachine, machineType), ", ")
+		availableRegions := strings.Join(regionsSupportingMachine.SupportedRegions(machineType), ", ")
 		errorMsg.WriteString(fmt.Sprintf("%s (used in: %s), it is supported in the %s", machineType, strings.Join(unsupportedMachines[machineType], ", "), availableRegions))
 	}
 
 	return fmt.Errorf("%s", errorMsg.String())
+}
+
+func checkAvailableZones(regionsSupportingMachine RegionsSupporter, additionalWorkerNodePool pkg.AdditionalWorkerNodePool, region, planID string) error {
+	zones, err := regionsSupportingMachine.AvailableZones(additionalWorkerNodePool.MachineType, region, planID)
+	if err != nil {
+		return fmt.Errorf("while getting available zones: %w", err)
+	}
+	if len(zones) > 0 && len(zones) < 3 && additionalWorkerNodePool.HAZones {
+		return fmt.Errorf("In the %s, the %s machine type is not available in 3 zones. If you want to use this machine type, set HA to false.", region, additionalWorkerNodePool.MachineType)
+	}
+	return nil
 }
 
 // Rudimentary kubeconfig validation
