@@ -534,3 +534,14 @@ func (a AdditionalWorkerNodePool) ValidateHAZonesUnchanged(currentAdditionalWork
 	}
 	return nil
 }
+
+func (a AdditionalWorkerNodePool) ValidateMachineTypesUnchanged(currentAdditionalWorkerNodePools []AdditionalWorkerNodePool) error {
+	for _, currentAdditionalWorkerNodePool := range currentAdditionalWorkerNodePools {
+		if a.Name == currentAdditionalWorkerNodePool.Name {
+			if a.MachineType != currentAdditionalWorkerNodePool.MachineType {
+				return fmt.Errorf("Machine type setting is permanent, and you cannot change it for the %s additional worker node pool", a.Name)
+			}
+		}
+	}
+	return nil
+}
