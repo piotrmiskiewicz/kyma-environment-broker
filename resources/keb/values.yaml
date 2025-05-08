@@ -200,9 +200,6 @@ serviceAccount:
 lifecycleManager:
   disabled: "false"
 
-resolveSubscriptionSecretStep:
-  disabled: "true"
-
 infrastructureManager:
   kubernetesVersion: "1.16.9"
   defaultShootPurpose: "development"
