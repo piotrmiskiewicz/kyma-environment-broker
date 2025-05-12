@@ -2,10 +2,11 @@ package configuration
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/common/runtime"
-	"gopkg.in/yaml.v2"
 	"io"
 	"strings"
+
+	"github.com/kyma-project/kyma-environment-broker/common/runtime"
+	"gopkg.in/yaml.v2"
 )
 
 type ProviderSpec struct {

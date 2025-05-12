@@ -79,6 +79,19 @@ func (s *SchemaService) Plans(plans PlansConfig, platformRegion string, cp pkg.C
 		BuildRuntimeAzurePlanID: defaultServicePlan(BuildRuntimeAzurePlanID, BuildRuntimeAzurePlanName, plans, buildRuntimeAzureCreateSchema, buildRuntimeAzureUpdateSchema),
 		SapConvergedCloudPlanID: defaultServicePlan(SapConvergedCloudPlanID, SapConvergedCloudPlanName, plans, sapConvergedCloudCreateSchema, sapConvergedCloudUpdateSchema),
 	}
+	// remove plans if there is no any region defined for given platform region (for example strict list of platform regions for sap converged cloud)
+	for id := range outputPlans {
+		// if trial or Own cluster - do not check regions
+		// freemium - always enabled
+		if id == TrialPlanID || id == OwnClusterPlanID || id == FreemiumPlanID {
+			continue
+		}
+
+		regions := s.planSpec.Regions(PlanNamesMapping[id], platformRegion)
+		if len(regions) == 0 || regions == nil {
+			delete(outputPlans, id)
+		}
+	}
 
 	return outputPlans
 }
@@ -233,15 +246,19 @@ func (s *SchemaService) AzureLiteSchema(platformRegion string, update bool) *map
 		flags.disabledMachineTypeUpdate,
 	)
 	properties.AutoScalerMax.Minimum = 2
-	properties.AutoScalerMin.Minimum = 2
 	properties.AutoScalerMax.Maximum = 40
+	properties.AutoScalerMin.Minimum = 2
+	properties.AutoScalerMin.Maximum = 40
 
 	properties.AdditionalWorkerNodePools.Items.Properties.HAZones = nil
 	properties.AdditionalWorkerNodePools.Items.ControlsOrder = removeString(properties.AdditionalWorkerNodePools.Items.ControlsOrder, "haZones")
 	properties.AdditionalWorkerNodePools.Items.Required = removeString(properties.AdditionalWorkerNodePools.Items.Required, "haZones")
+	properties.AdditionalWorkerNodePools.Items.Properties.AutoScalerMin.Minimum = 0
+	properties.AdditionalWorkerNodePools.Items.Properties.AutoScalerMin.Maximum = 40
 	properties.AdditionalWorkerNodePools.Items.Properties.AutoScalerMin.Default = 2
-	properties.AdditionalWorkerNodePools.Items.Properties.AutoScalerMax.Default = 10
+	properties.AdditionalWorkerNodePools.Items.Properties.AutoScalerMax.Minimum = 1
 	properties.AdditionalWorkerNodePools.Items.Properties.AutoScalerMax.Maximum = 40
+	properties.AdditionalWorkerNodePools.Items.Properties.AutoScalerMax.Default = 10
 
 	if !update {
 		properties.AutoScalerMax.Default = 10

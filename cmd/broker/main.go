@@ -450,22 +450,17 @@ func createAPI(router *httputil.Router, servicesConfig broker.ServicesConfig, cf
 	fatalOnError(err, logs)
 	logs.Info(fmt.Sprintf("Number of globalAccountIds for unlimited freemium: %d", len(freemiumGlobalAccountIds)))
 
-	// backward compatibility for tests
-	convergedCloudRegionProvider, err := broker.NewDefaultConvergedCloudRegionsProvider(cfg.SapConvergedCloudRegionMappingsFilePath, &broker.YamlRegionReader{})
-	fatalOnError(err, logs)
-	logs.Info(fmt.Sprintf("%s plan region mappings loaded", broker.SapConvergedCloudPlanName))
-
 	// create KymaEnvironmentBroker endpoints
 	kymaEnvBroker := &broker.KymaEnvironmentBroker{
-		ServicesEndpoint: broker.NewServices(cfg.Broker, schemaService, servicesConfig, logs, convergedCloudRegionProvider, oidcDefaultValues, cfg.InfrastructureManager),
+		ServicesEndpoint: broker.NewServices(cfg.Broker, schemaService, servicesConfig, logs, oidcDefaultValues, cfg.InfrastructureManager),
 		ProvisionEndpoint: broker.NewProvision(cfg.Broker, cfg.Gardener, cfg.InfrastructureManager, db,
 			provisionQueue, defaultPlansConfig, logs, cfg.KymaDashboardConfig, kcBuilder, freemiumGlobalAccountIds,
-			convergedCloudRegionProvider, regionsSupportingMachine, valuesProvider, cfg.InfrastructureManager.UseSmallerMachineTypes,
+			schemaService, regionsSupportingMachine, valuesProvider, cfg.InfrastructureManager.UseSmallerMachineTypes,
 		),
 		DeprovisionEndpoint: broker.NewDeprovision(db.Instances(), db.Operations(), deprovisionQueue, logs),
 		UpdateEndpoint: broker.NewUpdate(cfg.Broker, db,
 			suspensionCtxHandler, cfg.UpdateProcessingEnabled, cfg.Broker.SubaccountMovementEnabled, cfg.Broker.UpdateCustomResourcesLabelsOnAccountMove, updateQueue, defaultPlansConfig,
-			valuesProvider, logs, cfg.KymaDashboardConfig, kcBuilder, convergedCloudRegionProvider, kcpK8sClient, regionsSupportingMachine, cfg.InfrastructureManager),
+			valuesProvider, logs, cfg.KymaDashboardConfig, kcBuilder, kcpK8sClient, regionsSupportingMachine, cfg.InfrastructureManager, schemaService),
 		GetInstanceEndpoint:          broker.NewGetInstance(cfg.Broker, db.Instances(), db.Operations(), kcBuilder, logs),
 		LastOperationEndpoint:        broker.NewLastOperation(db.Operations(), db.InstancesArchived(), logs),
 		BindEndpoint:                 broker.NewBind(cfg.Broker.Binding, db, logs, clientProvider, kubeconfigProvider, publisher, cfg.MultipleContexts),

@@ -22,16 +22,15 @@ type ServicesEndpoint struct {
 	cfg            Config
 	servicesConfig ServicesConfig
 
-	enabledPlanIDs                map[string]struct{}
-	convergedCloudRegionsProvider ConvergedCloudRegionProvider
-	defaultOIDCConfig             *pkg.OIDCConfigDTO
-	useSmallerMachineTypes        bool
-	ingressFilteringFeatureFlag   bool
-	ingressFilteringPlans         EnablePlans
-	schemaService                 *SchemaService
+	enabledPlanIDs              map[string]struct{}
+	defaultOIDCConfig           *pkg.OIDCConfigDTO
+	useSmallerMachineTypes      bool
+	ingressFilteringFeatureFlag bool
+	ingressFilteringPlans       EnablePlans
+	schemaService               *SchemaService
 }
 
-func NewServices(cfg Config, schemaService *SchemaService, servicesConfig ServicesConfig, log *slog.Logger, convergedCloudRegionsProvider ConvergedCloudRegionProvider, defaultOIDCConfig pkg.OIDCConfigDTO, imConfig InfrastructureManager) *ServicesEndpoint {
+func NewServices(cfg Config, schemaService *SchemaService, servicesConfig ServicesConfig, log *slog.Logger, defaultOIDCConfig pkg.OIDCConfigDTO, imConfig InfrastructureManager) *ServicesEndpoint {
 	enabledPlanIDs := map[string]struct{}{}
 	for _, planName := range cfg.EnablePlans {
 		id := PlanIDsMapping[planName]
@@ -39,15 +38,15 @@ func NewServices(cfg Config, schemaService *SchemaService, servicesConfig Servic
 	}
 
 	return &ServicesEndpoint{
-		log:                           log.With("service", "ServicesEndpoint"),
-		cfg:                           cfg,
-		servicesConfig:                servicesConfig,
-		enabledPlanIDs:                enabledPlanIDs,
-		convergedCloudRegionsProvider: convergedCloudRegionsProvider,
-		defaultOIDCConfig:             &defaultOIDCConfig,
-		useSmallerMachineTypes:        imConfig.UseSmallerMachineTypes,
-		ingressFilteringFeatureFlag:   imConfig.EnableIngressFiltering,
-		ingressFilteringPlans:         imConfig.IngressFilteringPlans,
+		log:                         log.With("service", "ServicesEndpoint"),
+		cfg:                         cfg,
+		servicesConfig:              servicesConfig,
+		enabledPlanIDs:              enabledPlanIDs,
+		defaultOIDCConfig:           &defaultOIDCConfig,
+		useSmallerMachineTypes:      imConfig.UseSmallerMachineTypes,
+		ingressFilteringFeatureFlag: imConfig.EnableIngressFiltering,
+		ingressFilteringPlans:       imConfig.IngressFilteringPlans,
+		schemaService:               schemaService,
 	}
 }
 

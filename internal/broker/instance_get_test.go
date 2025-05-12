@@ -63,7 +63,7 @@ func TestGetEndpoint_GetProvisioningInstance(t *testing.T) {
 		dashboardConfig,
 		kcBuilder,
 		whitelist.Set{},
-		&broker.OneForAllConvergedCloudRegionsProvider{},
+		newSchemaService(t),
 		regionssupportingmachine.RegionsSupportingMachine{},
 		fixValueProvider(),
 		false,

@@ -1,11 +1,12 @@
 package configuration
 
 import (
+	"strings"
+	"testing"
+
 	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"strings"
-	"testing"
 )
 
 func TestProviderSpec(t *testing.T) {

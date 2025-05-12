@@ -1,9 +1,10 @@
 package configuration
 
 import (
-	"gopkg.in/yaml.v2"
 	"io"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 type PlanSpecifications struct {

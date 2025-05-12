@@ -8,7 +8,7 @@ testing/e2e/skr/config.yaml
 
 .idea/
 
-cmd/broker/catalog-test-new.json
+cmd/broker/catalog-test.json
 
 bin
 
