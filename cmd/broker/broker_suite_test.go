@@ -367,7 +367,15 @@ func (s *BrokerSuiteTest) CreateAPI(cfg *Config, db storage.BrokerStorage, provi
 	kcBuilder := &kcMock.KcBuilder{}
 	kcBuilder.On("Build", nil).Return("--kubeconfig file", nil)
 	kcBuilder.On("GetServerURL", mock.Anything).Return("https://api.server.url.dummy", nil)
-	createAPI(s.router, servicesConfig, cfg, db, provisioningQueue, deprovisionQueue, updateQueue,
+
+	providersSource, err := os.Open(cfg.ProvidersConfigurationFilePath)
+	fatalOnError(err, log)
+	plansSource, err := os.Open(cfg.PlansConfigurationFilePath)
+	fatalOnError(err, log)
+	defaultOIDC := defaultOIDCValues()
+	schemaService, err := broker.NewSchemaService(providersSource, plansSource, &defaultOIDC, cfg.Broker, cfg.InfrastructureManager.EnableIngressFiltering, cfg.InfrastructureManager.IngressFilteringPlans)
+
+	createAPI(s.router, schemaService, servicesConfig, cfg, db, provisioningQueue, deprovisionQueue, updateQueue,
 		lager.NewLogger("api"), log, kcBuilder, skrK8sClientProvider, skrK8sClientProvider, fakeKcpK8sClient, eventBroker, defaultOIDCValues(),
 		regionssupportingmachine.RegionsSupportingMachine{})
 

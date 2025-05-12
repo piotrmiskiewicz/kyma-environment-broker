@@ -149,6 +149,10 @@ type Config struct {
 	HapRuleFilePath string
 
 	MultipleContexts bool `envconfig:"default=false"`
+
+	ProvidersConfigurationFilePath string
+
+	PlansConfigurationFilePath string
 }
 
 type ProfilerConfig struct {
@@ -331,13 +335,20 @@ func main() {
 	servicesConfig, err := broker.NewServicesConfigFromFile(cfg.CatalogFilePath)
 	fatalOnError(err, log)
 
+	plansConfiguration, err := os.Open(cfg.PlansConfigurationFilePath)
+	fatalOnError(err, log)
+	providersConfiguration, err := os.Open(cfg.ProvidersConfigurationFilePath)
+	fatalOnError(err, log)
+	schemaService, err := broker.NewSchemaService(providersConfiguration, plansConfiguration, &oidcDefaultValues, cfg.Broker, cfg.InfrastructureManager.EnableIngressFiltering, cfg.InfrastructureManager.IngressFilteringPlans)
+	fatalOnError(err, log)
+
 	// create kubeconfig builder
 	kcBuilder := kubeconfig.NewBuilder(kcpK8sClient, skrK8sClientProvider, cfg.MultipleContexts)
 
 	// create server
 	router := httputil.NewRouter()
 
-	createAPI(router, servicesConfig, &cfg, db, provisionQueue, deprovisionQueue, updateQueue, logger, log,
+	createAPI(router, schemaService, servicesConfig, &cfg, db, provisionQueue, deprovisionQueue, updateQueue, logger, log,
 		kcBuilder, skrK8sClientProvider, skrK8sClientProvider, kcpK8sClient, eventBroker, oidcDefaultValues, regionsSupportingMachine)
 
 	// create metrics endpoint
@@ -446,7 +457,7 @@ func createAPI(router *httputil.Router, servicesConfig broker.ServicesConfig, cf
 
 	// create KymaEnvironmentBroker endpoints
 	kymaEnvBroker := &broker.KymaEnvironmentBroker{
-		ServicesEndpoint: broker.NewServices(cfg.Broker, servicesConfig, logs, convergedCloudRegionProvider, oidcDefaultValues, cfg.InfrastructureManager),
+		ServicesEndpoint: broker.NewServices(cfg.Broker, schemaService, servicesConfig, logs, convergedCloudRegionProvider, oidcDefaultValues, cfg.InfrastructureManager),
 		ProvisionEndpoint: broker.NewProvision(cfg.Broker, cfg.Gardener, cfg.InfrastructureManager, db,
 			provisionQueue, defaultPlansConfig, logs, cfg.KymaDashboardConfig, kcBuilder, freemiumGlobalAccountIds,
 			convergedCloudRegionProvider, regionsSupportingMachine, valuesProvider, cfg.InfrastructureManager.UseSmallerMachineTypes,
