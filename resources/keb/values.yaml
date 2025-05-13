@@ -476,14 +476,10 @@ plansConfiguration:
       cf-eu20: [ "eu-de-1" ]
       cf-ap10: [ "ap-au-1" ]
       cf-us10: [ "na-us-1" ]
-      cf-jp10:
-        - ap-jp-1
-      cf-eu10:
-        - eu-de-2
-      cf-us20:
-        - na-us-2
-      cf-in30:
-        - ap-ae-1
+      cf-jp10: [ "ap-jp-1" ]
+      cf-eu10: [ "eu-de-2" ]
+      cf-us20: [ "na-us-2" ]
+      cf-in30: [ "ap-ae-1" ]
 
   gcp,build-runtime-gcp:
     regions:
