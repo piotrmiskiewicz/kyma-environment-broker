@@ -484,7 +484,7 @@ plansConfiguration:
   gcp,build-runtime-gcp:
     regions:
       cf-sa30:
-        - "cf-sa30"
+        - "me-central2"
       default:
         - "europe-west3"
         - "asia-south1"

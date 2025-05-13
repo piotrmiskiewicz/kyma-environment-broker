@@ -256,13 +256,13 @@ spec:
               value: "orchestration-config"
             - name: APP_ORCHESTRATION_CONFIG_NAMESPACE
               value: "{{ .Release.Namespace }}"
-            - name: APP_PLANS_FILE_PATH
+            - name: APP_PLANS_CONFIGURATION_FILE_PATH
               value: /config/plansConfig.yaml
             - name: APP_PORT
               value: "{{ .Values.broker.port }}"
             - name: APP_PROFILER_MEMORY
               value: "{{ .Values.broker.profiler.memory }}"
-            - name: APP_PROVIDERS_FILE_PATH
+            - name: APP_PROVIDERS_CONFIGURATION_FILE_PATH
               value: /config/providersConfig.yaml
             - name: APP_REGIONS_SUPPORTING_MACHINE_FILE_PATH
               value: /config/regionsSupportingMachine.yaml
