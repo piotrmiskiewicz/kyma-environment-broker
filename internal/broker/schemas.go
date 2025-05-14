@@ -67,14 +67,12 @@ func (s *SchemaService) Plans(plans PlansConfig, platformRegion string, cp pkg.C
 	if createSchema, updateSchema, available := s.BuildRuntimeAzureSchemas(platformRegion); available {
 		outputPlans[BuildRuntimeAzurePlanID] = defaultServicePlan(BuildRuntimeAzurePlanID, BuildRuntimeAzurePlanName, plans, createSchema, updateSchema)
 	}
-
-	azureLiteCreateSchema := s.AzureLiteSchema(platformRegion, false)
-	azureLiteUpdateSchema := s.AzureLiteSchema(platformRegion, true)
-	outputPlans[AzureLitePlanID] = defaultServicePlan(AzureLitePlanID, AzureLitePlanName, plans, azureLiteCreateSchema, azureLiteUpdateSchema)
-
-	freemiumCreateSchema := s.FreeSchema(cp, platformRegion, false)
-	freemiumUpdateSchema := s.FreeSchema(cp, platformRegion, true)
-	outputPlans[FreemiumPlanID] = defaultServicePlan(FreemiumPlanID, FreemiumPlanName, plans, freemiumCreateSchema, freemiumUpdateSchema)
+	if azureLiteCreateSchema, azureLiteUpdateSchema, available := s.AzureLiteSchemas(platformRegion); available {
+		outputPlans[AzureLitePlanID] = defaultServicePlan(AzureLitePlanID, AzureLitePlanName, plans, azureLiteCreateSchema, azureLiteUpdateSchema)
+	}
+	if freemiumCreateSchema, freemiumUpdateSchema, available := s.FreeSchemas(cp, platformRegion); available {
+		outputPlans[FreemiumPlanID] = defaultServicePlan(FreemiumPlanID, FreemiumPlanName, plans, freemiumCreateSchema, freemiumUpdateSchema)
+	}
 
 	trialCreateSchema := s.TrialSchema(false)
 	trialUpdateSchema := s.TrialSchema(true)
@@ -192,8 +190,7 @@ func (s *SchemaService) SapConvergedCloudSchemas(platformRegion string) (create,
 		SapConvergedCloudMachinesNames())
 }
 
-func (s *SchemaService) AzureLiteSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions(AzureLitePlanName, platformRegion)
+func (s *SchemaService) AzureLiteSchema(platformRegion string, regions []string, update bool) *map[string]interface{} {
 	flags := s.createFlags(AzureLitePlanName)
 
 	properties := NewProvisioningProperties(
@@ -229,6 +226,15 @@ func (s *SchemaService) AzureLiteSchema(platformRegion string, update bool) *map
 	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
 }
 
+func (s *SchemaService) AzureLiteSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	regions := s.planSpec.Regions(AzureLitePlanName, platformRegion)
+	if len(regions) == 0 {
+		return nil, nil, false
+	}
+	return s.AzureLiteSchema(platformRegion, regions, false),
+		s.AzureLiteSchema(platformRegion, regions, true), true
+}
+
 func (s *SchemaService) FreeSchema(provider pkg.CloudProvider, platformRegion string, update bool) *map[string]interface{} {
 	var regions []string
 	var regionsDisplayNames map[string]string
@@ -258,6 +264,12 @@ func (s *SchemaService) FreeSchema(provider pkg.CloudProvider, platformRegion st
 	}
 
 	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
+}
+
+func (s *SchemaService) FreeSchemas(provider pkg.CloudProvider, platformRegion string) (create, update *map[string]interface{}, available bool) {
+	create = s.FreeSchema(provider, platformRegion, false)
+	update = s.FreeSchema(provider, platformRegion, true)
+	return create, update, true
 }
 
 func (s *SchemaService) TrialSchema(update bool) *map[string]interface{} {
