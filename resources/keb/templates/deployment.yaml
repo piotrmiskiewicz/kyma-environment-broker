@@ -221,8 +221,6 @@ spec:
               value: "{{ .Values.broker.defaultRequestRegion }}"
             - name: APP_UPDATE_PROCESSING_ENABLED
               value: "{{ .Values.osbUpdateProcessingEnabled }}"
-            - name: APP_NOTIFICATION_URL
-              value: "{{ .Values.notification.url }}"
             - name: APP_DOMAIN_NAME
               value: "{{ .Values.global.ingress.domainName }}"
             - name: APP_SKR_OIDC_DEFAULT_VALUES_YAML_FILE_PATH
@@ -253,8 +251,6 @@ spec:
               value: /config/freemiumWhitelistedGlobalAccountIds.yaml
             - name: APP_HAP_RULE_FILE_PATH
               value: /config/hapRule.yaml
-            - name: APP_KYMA_RESOURCE_DELETION_TIMEOUT
-              value: "{{ .Values.kymaResourceDeletionTimeout }}"
             - name: APP_BROKER_USE_ADDITIONAL_OIDC_SCHEMA
               value: "{{ .Values.broker.useAdditionalOIDCSchema }}"
             - name: APP_BROKER_DISABLE_SAP_CONVERGED_CLOUD
