@@ -193,7 +193,7 @@ func (s *SchemaService) SapConvergedCloudSchemas(platformRegion string) (create,
 }
 
 func (s *SchemaService) AzureLiteSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions("azure", platformRegion)
+	regions := s.planSpec.Regions(AzureLitePlanName, platformRegion)
 	flags := s.createFlags(AzureLitePlanName)
 
 	properties := NewProvisioningProperties(
