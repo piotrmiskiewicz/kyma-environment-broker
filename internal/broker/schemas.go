@@ -40,195 +40,156 @@ func NewSchemaService(providerConfig io.Reader, planConfig io.Reader, defaultOID
 }
 
 func (s *SchemaService) Plans(plans PlansConfig, platformRegion string, cp pkg.CloudProvider) map[string]domain.ServicePlan {
-	awsCreateSchema := s.AWSSchema(platformRegion, false)
-	awsUpdateSchema := s.AWSSchema(platformRegion, true)
-	gcpCreateSchema := s.GCPSchema(platformRegion, false)
-	gcpUpdateSchema := s.GCPSchema(platformRegion, true)
-	azureCreateSchema := s.AzureSchema(platformRegion, false)
-	azureUpdateSchema := s.AzureSchema(platformRegion, true)
+
+	outputPlans := map[string]domain.ServicePlan{}
+
+	if createSchema, updateSchema, available := s.AWSSchemas(platformRegion); available {
+		outputPlans[AWSPlanID] = defaultServicePlan(AWSPlanID, AWSPlanName, plans, createSchema, updateSchema)
+	}
+	if createSchema, updateSchema, available := s.GCPSchemas(platformRegion); available {
+		outputPlans[GCPPlanID] = defaultServicePlan(GCPPlanID, GCPPlanName, plans, createSchema, updateSchema)
+	}
+	if createSchema, updateSchema, available := s.AzureSchemas(platformRegion); available {
+		outputPlans[AzurePlanID] = defaultServicePlan(AzurePlanID, AzurePlanName, plans, createSchema, updateSchema)
+	}
+	if createSchema, updateSchema, available := s.SapConvergedCloudSchemas(platformRegion); available {
+		outputPlans[SapConvergedCloudPlanID] = defaultServicePlan(SapConvergedCloudPlanID, SapConvergedCloudPlanName, plans, createSchema, updateSchema)
+	}
+	if createSchema, updateSchema, available := s.PreviewSchemas(platformRegion); available {
+		outputPlans[PreviewPlanID] = defaultServicePlan(PreviewPlanID, PreviewPlanName, plans, createSchema, updateSchema)
+	}
+	if createSchema, updateSchema, available := s.BuildRuntimeAWSSchemas(platformRegion); available {
+		outputPlans[BuildRuntimeAWSPlanID] = defaultServicePlan(BuildRuntimeAWSPlanID, BuildRuntimeAWSPlanName, plans, createSchema, updateSchema)
+	}
+	if createSchema, updateSchema, available := s.BuildRuntimeGcpSchemas(platformRegion); available {
+		outputPlans[BuildRuntimeGCPPlanID] = defaultServicePlan(BuildRuntimeGCPPlanID, BuildRuntimeGCPPlanName, plans, createSchema, updateSchema)
+	}
+	if createSchema, updateSchema, available := s.BuildRuntimeAzureSchemas(platformRegion); available {
+		outputPlans[BuildRuntimeAzurePlanID] = defaultServicePlan(BuildRuntimeAzurePlanID, BuildRuntimeAzurePlanName, plans, createSchema, updateSchema)
+	}
+
 	azureLiteCreateSchema := s.AzureLiteSchema(platformRegion, false)
 	azureLiteUpdateSchema := s.AzureLiteSchema(platformRegion, true)
-	sapConvergedCloudCreateSchema := s.SapConvergedCloudSchema(platformRegion, false)
-	sapConvergedCloudUpdateSchema := s.SapConvergedCloudSchema(platformRegion, true)
+	outputPlans[AzureLitePlanID] = defaultServicePlan(AzureLitePlanID, AzureLitePlanName, plans, azureLiteCreateSchema, azureLiteUpdateSchema)
+
 	freemiumCreateSchema := s.FreeSchema(cp, platformRegion, false)
 	freemiumUpdateSchema := s.FreeSchema(cp, platformRegion, true)
+	outputPlans[FreemiumPlanID] = defaultServicePlan(FreemiumPlanID, FreemiumPlanName, plans, freemiumCreateSchema, freemiumUpdateSchema)
+
 	trialCreateSchema := s.TrialSchema(false)
 	trialUpdateSchema := s.TrialSchema(true)
+	outputPlans[TrialPlanID] = defaultServicePlan(TrialPlanID, TrialPlanName, plans, trialCreateSchema, trialUpdateSchema)
+
 	ownClusterCreateSchema := s.OwnClusterSchema(false)
 	ownClusterUpdateSchema := s.OwnClusterSchema(true)
-	buildRuntimeAWSCreateSchema := s.BuildRuntimeAWSSchema(platformRegion, false)
-	buildRuntimeAWSUpdateSchema := s.BuildRuntimeAWSSchema(platformRegion, true)
-	buildRuntimeGCPCreateSchema := s.BuildRuntimeGcpSchema(platformRegion, false)
-	buildRuntimeGCPUpdateSchema := s.BuildRuntimeGcpSchema(platformRegion, true)
-	buildRuntimeAzureCreateSchema := s.BuildRuntimeAzureSchema(platformRegion, false)
-	buildRuntimeAzureUpdateSchema := s.BuildRuntimeAzureSchema(platformRegion, true)
-	previewCreateSchema := s.PreviewSchema(platformRegion, false)
-	previewUpdateSchema := s.PreviewSchema(platformRegion, true)
-
-	outputPlans := map[string]domain.ServicePlan{
-		AWSPlanID:               defaultServicePlan(AWSPlanID, AWSPlanName, plans, awsCreateSchema, awsUpdateSchema),
-		GCPPlanID:               defaultServicePlan(GCPPlanID, GCPPlanName, plans, gcpCreateSchema, gcpUpdateSchema),
-		AzurePlanID:             defaultServicePlan(AzurePlanID, AzurePlanName, plans, azureCreateSchema, azureUpdateSchema),
-		AzureLitePlanID:         defaultServicePlan(AzureLitePlanID, AzureLitePlanName, plans, azureLiteCreateSchema, azureLiteUpdateSchema),
-		FreemiumPlanID:          defaultServicePlan(FreemiumPlanID, FreemiumPlanName, plans, freemiumCreateSchema, freemiumUpdateSchema),
-		TrialPlanID:             defaultServicePlan(TrialPlanID, TrialPlanName, plans, trialCreateSchema, trialUpdateSchema),
-		OwnClusterPlanID:        defaultServicePlan(OwnClusterPlanID, OwnClusterPlanName, plans, ownClusterCreateSchema, ownClusterUpdateSchema),
-		PreviewPlanID:           defaultServicePlan(PreviewPlanID, PreviewPlanName, plans, previewCreateSchema, previewUpdateSchema),
-		BuildRuntimeAWSPlanID:   defaultServicePlan(BuildRuntimeAWSPlanID, BuildRuntimeAWSPlanName, plans, buildRuntimeAWSCreateSchema, buildRuntimeAWSUpdateSchema),
-		BuildRuntimeGCPPlanID:   defaultServicePlan(BuildRuntimeGCPPlanID, BuildRuntimeGCPPlanName, plans, buildRuntimeGCPCreateSchema, buildRuntimeGCPUpdateSchema),
-		BuildRuntimeAzurePlanID: defaultServicePlan(BuildRuntimeAzurePlanID, BuildRuntimeAzurePlanName, plans, buildRuntimeAzureCreateSchema, buildRuntimeAzureUpdateSchema),
-		SapConvergedCloudPlanID: defaultServicePlan(SapConvergedCloudPlanID, SapConvergedCloudPlanName, plans, sapConvergedCloudCreateSchema, sapConvergedCloudUpdateSchema),
-	}
-	// remove plans if there is no any region defined for given platform region (for example strict list of platform regions for sap converged cloud)
-	for id := range outputPlans {
-		// if trial or Own cluster - do not check regions
-		// freemium - always enabled
-		if id == TrialPlanID || id == OwnClusterPlanID || id == FreemiumPlanID {
-			continue
-		}
-
-		regions := s.planSpec.Regions(PlanNamesMapping[id], platformRegion)
-		if len(regions) == 0 || regions == nil {
-			delete(outputPlans, id)
-		}
-	}
+	outputPlans[OwnClusterPlanID] = defaultServicePlan(OwnClusterPlanID, OwnClusterPlanName, plans, ownClusterCreateSchema, ownClusterUpdateSchema)
 
 	return outputPlans
 }
 
-func (s *SchemaService) AzureSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions("azure", platformRegion)
-	flags := s.createFlags(AzurePlanName)
+func (s *SchemaService) createUpdateSchemas(machineTypesDisplay, additionalMachineTypesDisplay, regionsDisplay map[string]string, machineTypes, additionalMachineTypes, regions []string, flags ControlFlagsObject) (create, update *map[string]interface{}) {
+	createProperties := NewProvisioningProperties(machineTypesDisplay, additionalMachineTypesDisplay, regionsDisplay, machineTypes, additionalMachineTypes, regions, false, flags.disabledMachineTypeUpdate)
+	updateProperties := NewProvisioningProperties(machineTypesDisplay, additionalMachineTypesDisplay, regionsDisplay, machineTypes, additionalMachineTypes, regions, true, flags.disabledMachineTypeUpdate)
 
-	properties := NewProvisioningProperties(AzureMachinesDisplay(false),
-		AzureMachinesDisplay(true),
-		s.providerSpec.RegionDisplayNames(pkg.Azure, regions),
-		AzureMachinesNames(false),
-		AzureMachinesNames(true),
-		regions,
-		update,
-		flags.disabledMachineTypeUpdate,
-	)
-	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
+	return createSchemaWithProperties(createProperties, s.defaultOIDCConfig, false, requiredSchemaProperties(), flags),
+		createSchemaWithProperties(updateProperties, s.defaultOIDCConfig, true, requiredSchemaProperties(), flags)
 }
 
-func (s *SchemaService) AWSSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions("aws", platformRegion)
-	flags := s.createFlags(AWSPlanName)
+func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegion string, machineTypesDisplay, additionalMachineTypesDisplay map[string]string, machineTypes, additionalMachineTypes []string) (create, update *map[string]interface{}, available bool) {
+	// todo:
+	// - when machines are configurable, it will be removed from arguments list and taken similar like regions
+	regions := s.planSpec.Regions(planName, platformRegion)
+	if len(regions) == 0 {
+		return nil, nil, false
+	}
+	flags := s.createFlags(planName)
 
-	properties := NewProvisioningProperties(
-		AwsMachinesDisplay(false),
-		AwsMachinesDisplay(true),
-		s.providerSpec.RegionDisplayNames(pkg.AWS, regions),
-		AwsMachinesNames(false),
-		AwsMachinesNames(true),
+	createProperties := NewProvisioningProperties(
+		machineTypesDisplay,
+		additionalMachineTypesDisplay,
+		s.providerSpec.RegionDisplayNames(cp, regions),
+		machineTypes,
+		additionalMachineTypes,
 		regions,
-		update,
+		false,
 		flags.disabledMachineTypeUpdate,
 	)
-	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
-}
-
-func (s *SchemaService) PreviewSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions("preview", platformRegion)
-	flags := s.createFlags(PreviewPlanName)
-
-	properties := NewProvisioningProperties(
-		AwsMachinesDisplay(false),
-		AwsMachinesDisplay(true),
-		s.providerSpec.RegionDisplayNames(pkg.AWS, regions),
-		AwsMachinesNames(false),
-		AwsMachinesNames(true),
+	updateProperties := NewProvisioningProperties(
+		machineTypesDisplay,
+		additionalMachineTypesDisplay,
+		s.providerSpec.RegionDisplayNames(cp, regions),
+		machineTypes,
+		additionalMachineTypes,
 		regions,
-		update,
+		true,
 		flags.disabledMachineTypeUpdate,
 	)
-	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
+	return createSchemaWithProperties(createProperties, s.defaultOIDCConfig, false, requiredSchemaProperties(), flags),
+		createSchemaWithProperties(updateProperties, s.defaultOIDCConfig, true, requiredSchemaProperties(), flags), true
 }
 
-func (s *SchemaService) BuildRuntimeAWSSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions("build-runtime-aws", platformRegion)
-	flags := s.createFlags(BuildRuntimeAWSPlanName)
-
-	properties := NewProvisioningProperties(
-		AwsMachinesDisplay(false),
-		AwsMachinesDisplay(true),
-		s.providerSpec.RegionDisplayNames(pkg.AWS, regions),
-		AwsMachinesNames(false),
-		AwsMachinesNames(true),
-		regions,
-		update,
-		flags.disabledMachineTypeUpdate,
-	)
-	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
-}
-
-func (s *SchemaService) GCPSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions("gcp", platformRegion)
-	flags := s.createFlags(GCPPlanName)
-
-	properties := NewProvisioningProperties(
-		GcpMachinesDisplay(false),
-		GcpMachinesDisplay(true),
-		s.providerSpec.RegionDisplayNames(pkg.GCP, regions),
-		GcpMachinesNames(false),
-		GcpMachinesNames(true),
-		regions,
-		update,
-		flags.disabledMachineTypeUpdate,
-	)
-	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
-}
-
-func (s *SchemaService) BuildRuntimeGcpSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions(BuildRuntimeGCPPlanName, platformRegion)
-	flags := s.createFlags(BuildRuntimeGCPPlanName)
-
-	properties := NewProvisioningProperties(
-		GcpMachinesDisplay(false),
-		GcpMachinesDisplay(true),
-		s.providerSpec.RegionDisplayNames(pkg.GCP, regions),
-		GcpMachinesNames(false),
-		GcpMachinesNames(true),
-		regions,
-		update,
-		flags.disabledMachineTypeUpdate,
-	)
-	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
-}
-
-func (s *SchemaService) BuildRuntimeAzureSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions(BuildRuntimeAzurePlanName, platformRegion)
-	flags := s.createFlags(BuildRuntimeAzurePlanName)
-
-	properties := NewProvisioningProperties(
+func (s *SchemaService) AzureSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	return s.planSchemas(pkg.Azure, AzurePlanName, platformRegion,
 		AzureMachinesDisplay(false),
 		AzureMachinesDisplay(true),
-		s.providerSpec.RegionDisplayNames(pkg.Azure, regions),
 		AzureMachinesNames(false),
-		AzureMachinesNames(true),
-		regions,
-		update,
-		flags.disabledMachineTypeUpdate,
-	)
-	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
+		AzureMachinesNames(true))
 }
 
-func (s *SchemaService) SapConvergedCloudSchema(platformRegion string, update bool) *map[string]interface{} {
-	regions := s.planSpec.Regions("sap-converged-cloud", platformRegion)
-	flags := s.createFlags(SapConvergedCloudPlanName)
+func (s *SchemaService) BuildRuntimeAzureSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	return s.planSchemas(pkg.Azure, BuildRuntimeAzurePlanName, platformRegion,
+		AzureMachinesDisplay(false),
+		AzureMachinesDisplay(true),
+		AzureMachinesNames(false),
+		AzureMachinesNames(true))
+}
 
-	properties := NewProvisioningProperties(
+func (s *SchemaService) AWSSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	return s.planSchemas(pkg.AWS, AWSPlanName, platformRegion,
+		AwsMachinesDisplay(false),
+		AwsMachinesDisplay(true),
+		AwsMachinesNames(false),
+		AwsMachinesNames(true))
+}
+
+func (s *SchemaService) BuildRuntimeAWSSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	return s.planSchemas(pkg.AWS, BuildRuntimeAWSPlanName, platformRegion,
+		AwsMachinesDisplay(false),
+		AwsMachinesDisplay(true),
+		AwsMachinesNames(false),
+		AwsMachinesNames(true))
+}
+
+func (s *SchemaService) GCPSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	return s.planSchemas(pkg.GCP, GCPPlanName, platformRegion,
+		GcpMachinesDisplay(false),
+		GcpMachinesDisplay(true),
+		GcpMachinesNames(false),
+		GcpMachinesNames(true))
+}
+
+func (s *SchemaService) BuildRuntimeGcpSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	return s.planSchemas(pkg.GCP, BuildRuntimeGCPPlanName, platformRegion,
+		GcpMachinesDisplay(false),
+		GcpMachinesDisplay(true),
+		GcpMachinesNames(false),
+		GcpMachinesNames(true))
+}
+
+func (s *SchemaService) PreviewSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	return s.planSchemas(pkg.AWS, PreviewPlanName, platformRegion,
+		AwsMachinesDisplay(false),
+		AwsMachinesDisplay(true),
+		AwsMachinesNames(false),
+		AwsMachinesNames(true))
+}
+
+func (s *SchemaService) SapConvergedCloudSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
+	return s.planSchemas(pkg.SapConvergedCloud, SapConvergedCloudPlanName, platformRegion,
 		SapConvergedCloudMachinesDisplay(),
 		SapConvergedCloudMachinesDisplay(),
-		s.providerSpec.RegionDisplayNames(pkg.SapConvergedCloud, regions),
 		SapConvergedCloudMachinesNames(),
-		SapConvergedCloudMachinesNames(),
-		regions,
-		update,
-		flags.disabledMachineTypeUpdate,
-	)
-	return createSchemaWithProperties(properties, s.defaultOIDCConfig, update, requiredSchemaProperties(), flags)
+		SapConvergedCloudMachinesNames())
 }
 
 func (s *SchemaService) AzureLiteSchema(platformRegion string, update bool) *map[string]interface{} {
@@ -273,10 +234,10 @@ func (s *SchemaService) FreeSchema(provider pkg.CloudProvider, platformRegion st
 	var regionsDisplayNames map[string]string
 	switch provider {
 	case pkg.Azure:
-		regions = s.planSpec.Regions("azure", platformRegion)
+		regions = s.planSpec.Regions(AzurePlanName, platformRegion)
 		regionsDisplayNames = s.providerSpec.RegionDisplayNames(pkg.Azure, regions)
 	default: // AWS and other BTP regions
-		regions = s.planSpec.Regions("aws", platformRegion)
+		regions = s.planSpec.Regions(AWSPlanName, platformRegion)
 		regionsDisplayNames = s.providerSpec.RegionDisplayNames(pkg.AWS, regions)
 	}
 	flags := s.createFlags(FreemiumPlanName)

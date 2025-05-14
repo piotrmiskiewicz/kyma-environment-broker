@@ -16,35 +16,39 @@ import (
 func TestSchemaService_Azure(t *testing.T) {
 	schemaService := createSchemaService(t)
 
-	got := schemaService.AzureSchema("cf-ch20", false)
-	validateSchema(t, Marshal(got), "azure/azure-schema-additional-params-ingress-eu.json")
+	create, _, _ := schemaService.AzureSchemas("cf-ch20")
+	validateSchema(t, Marshal(create), "azure/azure-schema-additional-params-ingress-eu.json")
 
-	got = schemaService.AzureSchema("cf-us21", false)
-	validateSchema(t, Marshal(got), "azure/azure-schema-additional-params-ingress.json")
+	create, update, _ := schemaService.AzureSchemas("cf-us21")
+	validateSchema(t, Marshal(create), "azure/azure-schema-additional-params-ingress.json")
+	validateSchema(t, Marshal(update), "azure/update-azure-schema-additional-params-ingress.json")
 }
 
 func TestSchemaService_Aws(t *testing.T) {
 	schemaService := createSchemaService(t)
 
-	got := schemaService.AWSSchema("cf-eu11", false)
-	validateSchema(t, Marshal(got), "aws/aws-schema-additional-params-ingress-eu.json")
+	create, update, _ := schemaService.AWSSchemas("cf-eu11")
+	validateSchema(t, Marshal(create), "aws/aws-schema-additional-params-ingress-eu.json")
 
-	got = schemaService.AWSSchema("cf-us11", false)
-	validateSchema(t, Marshal(got), "aws/aws-schema-additional-params-ingress.json")
+	create, update, _ = schemaService.AWSSchemas("cf-us11")
+	validateSchema(t, Marshal(create), "aws/aws-schema-additional-params-ingress.json")
+	validateSchema(t, Marshal(update), "aws/update-aws-schema-additional-params-ingress.json")
 }
 
 func TestSchemaService_Gcp(t *testing.T) {
 	schemaService := createSchemaService(t)
 
-	got := schemaService.GCPSchema("cf-us11", false)
-	validateSchema(t, Marshal(got), "gcp/gcp-schema-additional-params-ingress.json")
+	create, update, _ := schemaService.GCPSchemas("cf-us11")
+	validateSchema(t, Marshal(create), "gcp/gcp-schema-additional-params-ingress.json")
+	validateSchema(t, Marshal(update), "gcp/update-gcp-schema-additional-params-ingress.json")
 }
 
 func TestSchemaService_SapConvergedCloud(t *testing.T) {
 	schemaService := createSchemaService(t)
 
-	got := schemaService.SapConvergedCloudSchema("cf-eu20", false)
-	validateSchema(t, Marshal(got), "sap-converged-cloud/sap-converged-cloud-schema-additional-params-ingress.json")
+	create, update, _ := schemaService.SapConvergedCloudSchemas("cf-eu20")
+	validateSchema(t, Marshal(create), "sap-converged-cloud/sap-converged-cloud-schema-additional-params-ingress.json")
+	validateSchema(t, Marshal(update), "sap-converged-cloud/update-sap-converged-cloud-schema-additional-params-ingress.json")
 }
 
 func TestSchemaService_FreeAWS(t *testing.T) {
