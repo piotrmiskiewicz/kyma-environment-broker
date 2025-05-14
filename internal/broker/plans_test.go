@@ -74,11 +74,12 @@ func TestSchemaService_FreeAzure(t *testing.T) {
 func TestSchemaService_AzureLite(t *testing.T) {
 	schemaService := createSchemaService(t)
 
-	got := schemaService.AzureLiteSchema("cf-us21", false)
-	validateSchema(t, Marshal(got), "azure/azure-lite-schema-additional-params-ingress.json")
+	create, update, _ := schemaService.AzureLiteSchemas("cf-us21")
+	validateSchema(t, Marshal(create), "azure/azure-lite-schema-additional-params-ingress.json")
+	validateSchema(t, Marshal(update), "azure/update-azure-lite-schema-additional-params-ingress.json")
 
-	got = schemaService.AzureLiteSchema("cf-ch20", false)
-	validateSchema(t, Marshal(got), "azure/azure-lite-schema-additional-params-ingress-eu.json")
+	create, _, _ = schemaService.AzureLiteSchemas("cf-ch20")
+	validateSchema(t, Marshal(create), "azure/azure-lite-schema-additional-params-ingress-eu.json")
 }
 
 func TestSchemaService_Trial(t *testing.T) {
