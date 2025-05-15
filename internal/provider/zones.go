@@ -2,8 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"math/rand"
+
+	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 )
 
 func GenerateAzureZones(zonesCount int) []string {
