@@ -2657,9 +2657,9 @@ func TestAdditionalProperties(t *testing.T) {
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
-			&broker.OneForAllConvergedCloudRegionsProvider{},
+			newSchemaService(t),
 			fixRegionsSupportingMachine(),
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -2726,9 +2726,9 @@ func TestAdditionalProperties(t *testing.T) {
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
-			&broker.OneForAllConvergedCloudRegionsProvider{},
+			newSchemaService(t),
 			fixRegionsSupportingMachine(),
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -2809,9 +2809,9 @@ func TestAdditionalProperties(t *testing.T) {
 			dashboardConfig,
 			kcBuilder,
 			whitelist.Set{},
-			&broker.OneForAllConvergedCloudRegionsProvider{},
+			newSchemaService(t),
 			fixRegionsSupportingMachine(),
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
