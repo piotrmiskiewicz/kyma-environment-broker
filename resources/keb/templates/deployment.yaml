@@ -56,6 +56,21 @@ spec:
               mountPath: /tmp/profiler
               readOnly: false
         {{- end }}
+        {{- if .Values.broker.monitorAdditionalProperties }}
+        - name: additional-properties
+          command:
+          - bash
+          - -c
+          - chmod 777 /additional-properties && sleep inf
+          securityContext:
+            runAsUser: 0
+          image: ubuntu:20.04
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: keb-additional-properties
+              mountPath: /additional-properties
+              readOnly: false
+        {{- end }}
         - name: {{ include "kyma-env-broker.name" . }}
           image: "{{ .Values.global.images.container_registry.path }}/{{ .Values.global.images.kyma_environment_broker.dir }}kyma-environment-broker:{{ .Values.global.images.kyma_environment_broker.version }}"
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
@@ -96,6 +111,8 @@ spec:
               value: "{{ .Values.freeExpirationPeriod }}"
             - name: APP_BROKER_INCLUDE_ADDITIONAL_PARAMS_IN_SCHEMA
               value: "{{ .Values.includeAdditionalParamsInSchema }}"
+            - name: APP_BROKER_MONITOR_ADDITIONAL_PROPERTIES
+              value: "{{ .Values.broker.monitorAdditionalProperties }}"
             - name: APP_BROKER_ONLY_ONE_FREE_PER_GA
               value: "{{ .Values.onlyOneFreePerGA }}"
             - name: APP_BROKER_ONLY_SINGLE_TRIAL_PER_GA
@@ -302,6 +319,11 @@ spec:
               mountPath: /tmp/profiler
               readOnly: false
           {{- end }}
+          {{- if .Values.broker.monitorAdditionalProperties }}
+            - name: keb-additional-properties
+              mountPath: /additional-properties
+              readOnly: false
+          {{- end }}
           {{- if and (eq .Values.global.database.embedded.enabled false) (eq .Values.global.database.cloudsqlproxy.enabled false)}}
             - name: cloudsql-sslrootcert
               mountPath: /secrets/cloudsql-sslrootcert
@@ -359,4 +381,9 @@ spec:
       - name: keb-memory-profile
         persistentVolumeClaim:
           claimName: {{ include "kyma-env-broker.fullname" . }}-profiler
+      {{- end }}
+      {{- if .Values.broker.monitorAdditionalProperties }}
+      - name: keb-additional-properties
+        persistentVolumeClaim:
+          claimName: {{ include "kyma-env-broker.fullname" . }}-additional-properties
       {{- end }}

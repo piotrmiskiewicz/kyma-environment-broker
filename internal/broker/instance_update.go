@@ -1,34 +1,34 @@
 package broker
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma-environment-broker/internal/validator"
-	"github.com/santhosh-tekuri/jsonschema/v6"
-
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
+	"github.com/kyma-project/kyma-environment-broker/internal"
+	"github.com/kyma-project/kyma-environment-broker/internal/additionalproperties"
 	"github.com/kyma-project/kyma-environment-broker/internal/assuredworkloads"
-
+	"github.com/kyma-project/kyma-environment-broker/internal/dashboard"
 	"github.com/kyma-project/kyma-environment-broker/internal/euaccess"
 	"github.com/kyma-project/kyma-environment-broker/internal/kubeconfig"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
+	"github.com/kyma-project/kyma-environment-broker/internal/storage"
+	"github.com/kyma-project/kyma-environment-broker/internal/storage/dberr"
+	"github.com/kyma-project/kyma-environment-broker/internal/validator"
 
 	"github.com/google/uuid"
 	"github.com/pivotal-cf/brokerapi/v12/domain"
 	"github.com/pivotal-cf/brokerapi/v12/domain/apiresponses"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"k8s.io/apimachinery/pkg/util/wait"
-
-	"github.com/kyma-project/kyma-environment-broker/internal"
-	"github.com/kyma-project/kyma-environment-broker/internal/dashboard"
-	"github.com/kyma-project/kyma-environment-broker/internal/ptr"
-	"github.com/kyma-project/kyma-environment-broker/internal/storage"
-	"github.com/kyma-project/kyma-environment-broker/internal/storage/dberr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type ContextUpdateHandler interface {
@@ -131,6 +131,9 @@ func (b *UpdateEndpoint) Update(_ context.Context, instanceID string, details do
 	}
 	logger.Info(fmt.Sprintf("Global account ID: %s active: %s", instance.GlobalAccountID, ptr.BoolAsString(ersContext.Active)))
 	logger.Info(fmt.Sprintf("Received context: %s", marshallRawContext(hideSensitiveDataFromRawContext(details.RawContext))))
+	if b.config.MonitorAdditionalProperties {
+		b.monitorAdditionalProperties(instanceID, ersContext, details.RawParameters)
+	}
 	// validation of incoming input
 	if err := b.validateWithJsonSchemaValidator(details, instance); err != nil {
 		return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, "validation failed")
@@ -477,4 +480,16 @@ func (b *UpdateEndpoint) getJsonSchemaValidator(provider pkg.CloudProvider, plan
 	plan := plans[planID]
 
 	return validator.NewFromSchema(plan.Schemas.Instance.Update.Parameters)
+}
+
+func (b *UpdateEndpoint) monitorAdditionalProperties(instanceID string, ersContext internal.ERSContext, rawParameters json.RawMessage) {
+	var parameters internal.UpdatingParametersDTO
+	decoder := json.NewDecoder(bytes.NewReader(rawParameters))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&parameters); err == nil {
+		return
+	}
+	if err := insertRequest(instanceID, filepath.Join(b.config.AdditionalPropertiesPath, additionalproperties.UpdateRequestsFileName), ersContext, rawParameters); err != nil {
+		b.log.Error(fmt.Sprintf("failed to save update request with additonal properties: %v", err))
+	}
 }
