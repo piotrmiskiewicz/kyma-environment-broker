@@ -32,6 +32,9 @@ func (p *SapConvergedCloudInputProvider) Provide() internal.ProviderValues {
 	}
 
 	zones := ZonesForSapConvergedCloud(region, p.ZonesProvider.RandomZones(pkg.SapConvergedCloud, region, zonesCount))
+	if len(zones) < zonesCount {
+		zonesCount = len(zones)
+	}
 	return internal.ProviderValues{
 		DefaultAutoScalerMax: 20,
 		DefaultAutoScalerMin: 3,

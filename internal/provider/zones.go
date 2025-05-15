@@ -50,7 +50,10 @@ type zonesProviderMock struct {
 }
 
 func (z *zonesProviderMock) RandomZones(cp runtime.CloudProvider, region string, zonesCount int) []string {
-	return z.zones[:zonesCount]
+	if zonesCount < len(z.zones) {
+		return z.zones[:zonesCount]
+	}
+	return z.zones
 }
 
 func FakeZonesProvider(zones []string) *zonesProviderMock {
