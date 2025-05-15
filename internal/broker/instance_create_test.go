@@ -88,7 +88,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -160,7 +160,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -236,7 +236,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -283,7 +283,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -355,7 +355,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -429,7 +429,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -477,7 +477,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -526,7 +526,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -589,7 +589,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -652,7 +652,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -695,7 +695,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -733,7 +733,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -770,7 +770,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -814,7 +814,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -863,7 +863,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -918,7 +918,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -972,7 +972,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1029,7 +1029,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1084,7 +1084,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1181,7 +1181,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1266,7 +1266,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1309,7 +1309,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1374,7 +1374,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1429,7 +1429,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{globalAccountID: struct{}{}},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1482,7 +1482,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1525,7 +1525,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1571,7 +1571,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1620,7 +1620,7 @@ func TestProvision_Provision(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -1760,7 +1760,7 @@ func TestAdditionalWorkerNodePools(t *testing.T) {
 				whitelist.Set{},
 				newSchemaService(t),
 				regionssupportingmachine.RegionsSupportingMachine{},
-				fixValueProvider(),
+				fixValueProvider(t),
 				false,
 			)
 
@@ -1824,7 +1824,7 @@ func TestAdditionalWorkerNodePoolsForUnsupportedPlans(t *testing.T) {
 				whitelist.Set{},
 				newSchemaService(t),
 				regionssupportingmachine.RegionsSupportingMachine{},
-				fixValueProvider(),
+				fixValueProvider(t),
 				false,
 			)
 
@@ -1975,7 +1975,7 @@ func TestNetworkingValidation(t *testing.T) {
 				whitelist.Set{},
 				newSchemaService(t),
 				regionssupportingmachine.RegionsSupportingMachine{},
-				fixValueProvider(),
+				fixValueProvider(t),
 				false,
 			)
 
@@ -2074,7 +2074,7 @@ func TestRegionValidation(t *testing.T) {
 				whitelist.Set{},
 				newSchemaService(t),
 				regionssupportingmachine.RegionsSupportingMachine{},
-				fixValueProvider(),
+				fixValueProvider(t),
 				false,
 			)
 
@@ -2134,7 +2134,7 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -2182,7 +2182,7 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -2229,7 +2229,7 @@ func TestSapConvergedCloudBlocking(t *testing.T) {
 			whitelist.Set{},
 			newSchemaService(t),
 			regionssupportingmachine.RegionsSupportingMachine{},
-			fixValueProvider(),
+			fixValueProvider(t),
 			false,
 		)
 
@@ -2290,7 +2290,7 @@ func TestUnsupportedMachineType(t *testing.T) {
 		whitelist.Set{},
 		newSchemaService(t),
 		fixRegionsSupportingMachine(),
-		fixValueProvider(),
+		fixValueProvider(t),
 		false,
 	)
 
@@ -2341,7 +2341,7 @@ func TestUnsupportedMachineTypeInAdditionalWorkerNodePools(t *testing.T) {
 		whitelist.Set{},
 		newSchemaService(t),
 		fixRegionsSupportingMachine(),
-		fixValueProvider(),
+		fixValueProvider(t),
 		false,
 	)
 
@@ -2418,7 +2418,7 @@ func TestGPUMachineForInternalUser(t *testing.T) {
 		whitelist.Set{},
 		newSchemaService(t),
 		fixRegionsSupportingMachine(),
-		fixValueProvider(),
+		fixValueProvider(t),
 		false,
 	)
 
@@ -2468,7 +2468,7 @@ func TestGPUMachinesForExternalCustomer(t *testing.T) {
 		whitelist.Set{},
 		newSchemaService(t),
 		fixRegionsSupportingMachine(),
-		fixValueProvider(),
+		fixValueProvider(t),
 		false,
 	)
 
@@ -2600,7 +2600,7 @@ func TestAvailableZonesValidation(t *testing.T) {
 		whitelist.Set{},
 		newSchemaService(t),
 		fixRegionsSupportingMachine(),
-		fixValueProvider(),
+		fixValueProvider(t),
 		false,
 	)
 

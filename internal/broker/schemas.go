@@ -318,3 +318,7 @@ func (s *SchemaService) createFlags(planName string) ControlFlagsObject {
 		disabledMachineTypeUpdate:   s.cfg.DisableMachineTypeUpdate,
 	}
 }
+
+func (s *SchemaService) RandomZones(cp pkg.CloudProvider, region string, zonesCount int) []string {
+	return s.providerSpec.RandomZones(cp, region, zonesCount)
+}

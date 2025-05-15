@@ -2,8 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"math/rand"
-	"strings"
 )
 
 func GenerateAzureZones(zonesCount int) []string {
@@ -14,29 +14,6 @@ func GenerateAzureZones(zonesCount int) []string {
 
 	rand.Shuffle(len(zones), func(i, j int) { zones[i], zones[j] = zones[j], zones[i] })
 	return zones[:zonesCount]
-}
-
-func MultipleZonesForAWSRegion(region string, zonesCount int) []string {
-	zones, found := awsZones[region]
-	if !found {
-		zones = "a"
-		zonesCount = 1
-	}
-
-	availableZones := strings.Split(zones, "")
-	rand.Shuffle(len(availableZones), func(i, j int) { availableZones[i], availableZones[j] = availableZones[j], availableZones[i] })
-	if zonesCount > len(availableZones) {
-		// get maximum number of zones for region
-		zonesCount = len(availableZones)
-	}
-
-	availableZones = availableZones[:zonesCount]
-
-	var generatedZones []string
-	for _, zone := range availableZones {
-		generatedZones = append(generatedZones, fmt.Sprintf("%s%s", region, zone))
-	}
-	return generatedZones
 }
 
 // sapConvergedCloudZones defines a possible suffixes for given OpenStack regions
@@ -60,25 +37,24 @@ func CountZonesForSapConvergedCloud(region string) int {
 	return len(zones)
 }
 
-func ZonesForSapConvergedCloud(region string, zonesCount int) []string {
-	zones, found := sapConvergedCloudZones[region]
-	if !found {
-		zones = "a"
-		zonesCount = 1
-	}
-
-	availableZones := strings.Split(zones, "")
-	rand.Shuffle(len(availableZones), func(i, j int) { availableZones[i], availableZones[j] = availableZones[j], availableZones[i] })
-	if zonesCount > len(availableZones) {
-		// get maximum number of zones for region
-		zonesCount = len(availableZones)
-	}
-
-	availableZones = availableZones[:zonesCount]
-
+func ZonesForSapConvergedCloud(region string, availableZones []string) []string {
 	var generatedZones []string
 	for _, zone := range availableZones {
 		generatedZones = append(generatedZones, fmt.Sprintf("%s%s", region, zone))
 	}
 	return generatedZones
+}
+
+type zonesProviderMock struct {
+	zones []string
+}
+
+func (z *zonesProviderMock) RandomZones(cp runtime.CloudProvider, region string, zonesCount int) []string {
+	return z.zones[:zonesCount]
+}
+
+func FakeZonesProvider(zones []string) *zonesProviderMock {
+	return &zonesProviderMock{
+		zones: zones,
+	}
 }

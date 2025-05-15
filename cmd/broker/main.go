@@ -320,6 +320,13 @@ func main() {
 
 	workersProvider := workers.NewProvider(cfg.InfrastructureManager, regionsSupportingMachine)
 
+	plansConfiguration, err := os.Open(cfg.PlansConfigurationFilePath)
+	fatalOnError(err, log)
+	providersConfiguration, err := os.Open(cfg.ProvidersConfigurationFilePath)
+	fatalOnError(err, log)
+	schemaService, err := broker.NewSchemaService(providersConfiguration, plansConfiguration, &oidcDefaultValues, cfg.Broker, cfg.InfrastructureManager.EnableIngressFiltering, cfg.InfrastructureManager.IngressFilteringPlans)
+	fatalOnError(err, log)
+
 	// run queues
 	provisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Provisioning, log.With("provisioning", "manager"))
 	provisionQueue := NewProvisioningProcessingQueue(ctx, provisionManager, cfg.Provisioning.WorkersAmount, &cfg, db, configProvider,
@@ -330,16 +337,9 @@ func main() {
 		skrK8sClientProvider, kcpK8sClient, configProvider, log)
 
 	updateManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Update, log.With("update", "manager"))
-	updateQueue := NewUpdateProcessingQueue(ctx, updateManager, cfg.Update.WorkersAmount, db, cfg, kcpK8sClient, log, workersProvider)
+	updateQueue := NewUpdateProcessingQueue(ctx, updateManager, cfg.Update.WorkersAmount, db, cfg, kcpK8sClient, log, workersProvider, schemaService)
 	/***/
 	servicesConfig, err := broker.NewServicesConfigFromFile(cfg.CatalogFilePath)
-	fatalOnError(err, log)
-
-	plansConfiguration, err := os.Open(cfg.PlansConfigurationFilePath)
-	fatalOnError(err, log)
-	providersConfiguration, err := os.Open(cfg.ProvidersConfigurationFilePath)
-	fatalOnError(err, log)
-	schemaService, err := broker.NewSchemaService(providersConfiguration, plansConfiguration, &oidcDefaultValues, cfg.Broker, cfg.InfrastructureManager.EnableIngressFiltering, cfg.InfrastructureManager.IngressFilteringPlans)
 	fatalOnError(err, log)
 
 	// create kubeconfig builder
@@ -432,7 +432,7 @@ func createAPI(router *httputil.Router, servicesConfig broker.ServicesConfig, cf
 	fatalOnError(err, logs)
 	logs.Info(fmt.Sprintf("Platform region mapping for trial: %v", regions))
 	valuesProvider := provider.NewPlanSpecificValuesProvider(cfg.InfrastructureManager.MultiZoneCluster, cfg.InfrastructureManager.DefaultTrialProvider,
-		cfg.InfrastructureManager.UseSmallerMachineTypes, regions, cfg.InfrastructureManager.DefaultGardenerShootPurpose, cfg.InfrastructureManager.ControlPlaneFailureTolerance)
+		cfg.InfrastructureManager.UseSmallerMachineTypes, regions, cfg.InfrastructureManager.DefaultGardenerShootPurpose, cfg.InfrastructureManager.ControlPlaneFailureTolerance, schemaService)
 
 	suspensionCtxHandler := suspension.NewContextUpdateHandler(db.Operations(), provisionQueue, deprovisionQueue, logs)
 

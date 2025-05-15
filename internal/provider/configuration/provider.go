@@ -3,6 +3,7 @@ package configuration
 import (
 	"fmt"
 	"io"
+	"math/rand"
 	"strings"
 
 	"github.com/kyma-project/kyma-environment-broker/common/runtime"
@@ -62,9 +63,21 @@ func (p *ProviderSpec) Zones(cp runtime.CloudProvider, region string) []string {
 	return dto.Zones
 }
 
+func (p *ProviderSpec) RandomZones(cp runtime.CloudProvider, region string, zonesCount int) []string {
+	availableZones := p.Zones(cp, region)
+	rand.Shuffle(len(availableZones), func(i, j int) { availableZones[i], availableZones[j] = availableZones[j], availableZones[i] })
+	if zonesCount > len(availableZones) {
+		// get maximum number of zones for region
+		zonesCount = len(availableZones)
+	}
+
+	return availableZones[:zonesCount]
+}
+
 func (p *ProviderSpec) findRegion(cp runtime.CloudProvider, region string) *regionDTO {
 	for name, provider := range p.data {
-		if strings.ToLower(string(name)) != strings.ToLower(string(cp)) {
+		// remove '-' to support "sap-converged-cloud" for CloudProviderSapConvergedCloud
+		if strings.ToLower(strings.ReplaceAll(string(name), "-", "")) != strings.ToLower(string(cp)) {
 			continue
 		}
 		if regionData, ok := provider.Regions[region]; ok {
