@@ -209,7 +209,7 @@ func TestUpdateEndpoint_UpdateAutoscalerParams(t *testing.T) {
 
 	kcBuilder := &kcMock.KcBuilder{}
 	svc := broker.NewUpdate(broker.Config{}, st, handler, true, false, true, q, broker.PlansConfig{},
-		fixValueProvider(), fixLogger(), dashboardConfig, kcBuilder,
+		fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder,
 		fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, newSchemaService(t))
 
 	t.Run("Should fail on invalid (too low) autoScalerMin and autoScalerMax", func(t *testing.T) {
@@ -531,7 +531,7 @@ func TestUpdateEndpoint_UpdateFromOIDCObject(t *testing.T) {
 
 	t.Run("Should accept update to OIDC list", func(t *testing.T) {
 		// given
-		oidcParams := `"clientID":"updated-client","groupsClaim":"groups","issuerURL":"https://test.com","signingAlgs":["RS256"],"usernameClaim":"email","usernamePrefix":"-"`
+		oidcParams := `"clientID":"updated-client","groupsClaim":"groups","issuerURL":"https://test.com","signingAlgs":["RS256"],"usernameClaim":"email","usernamePrefix":"-","groupsPrefix":"-","requiredClaims":[]`
 
 		// when
 		response, err := svc.Update(context.Background(), instanceID, domain.UpdateDetails{
@@ -806,7 +806,7 @@ func TestHAZones(t *testing.T) {
 		kcBuilder := &kcMock.KcBuilder{}
 
 		svc := broker.NewUpdate(broker.Config{}, st, handler, true, true, false, q, broker.PlansConfig{},
-			fixValueProvider(), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, false, newSchemaService(t))
+			fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, newSchemaService(t))
 
 		// when
 		_, err = svc.Update(context.Background(), instanceID, domain.UpdateDetails{
@@ -1470,7 +1470,7 @@ func TestAvailableZonesValidationDuringUpdate(t *testing.T) {
 	}
 
 	svc := broker.NewUpdate(broker.Config{}, st, handler, true, true, false, q, broker.PlansConfig{},
-		fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, fixRegionsSupportingMachine(), imConfig, true, newSchemaService(t))
+		fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, fixRegionsSupportingMachine(), imConfig, newSchemaService(t))
 
 	additionalWorkerNodePools := `[{"name": "name-1", "machineType": "g6.xlarge", "haZones": true, "autoScalerMin": 3, "autoScalerMax": 20}]`
 
@@ -1554,7 +1554,7 @@ func TestUpdateAdditionalProperties(t *testing.T) {
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", mock.Anything).Return("https://kcp.example.dummy", nil)
 		svc := broker.NewUpdate(broker.Config{MonitorAdditionalProperties: true, AdditionalPropertiesPath: tempDir}, st, handler, true, true, false, q, broker.PlansConfig{},
-			fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, false, newSchemaService(t))
+			fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, newSchemaService(t))
 
 		// when
 		_, err = svc.Update(context.Background(), instanceID, domain.UpdateDetails{
@@ -1601,7 +1601,7 @@ func TestUpdateAdditionalProperties(t *testing.T) {
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", mock.Anything).Return("https://kcp.example.dummy", nil)
 		svc := broker.NewUpdate(broker.Config{MonitorAdditionalProperties: true, AdditionalPropertiesPath: tempDir}, st, handler, true, true, false, q, broker.PlansConfig{},
-			fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, false, newSchemaService(t))
+			fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, newSchemaService(t))
 
 		// when
 		_, err = svc.Update(context.Background(), instanceID, domain.UpdateDetails{
@@ -1662,7 +1662,7 @@ func TestUpdateAdditionalProperties(t *testing.T) {
 		kcBuilder := &kcMock.KcBuilder{}
 		kcBuilder.On("GetServerURL", mock.Anything).Return("https://kcp.example.dummy", nil)
 		svc := broker.NewUpdate(broker.Config{MonitorAdditionalProperties: true, AdditionalPropertiesPath: tempDir}, st, handler, true, true, false, q, broker.PlansConfig{},
-			fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, false, newSchemaService(t))
+			fixValueProvider(t), fixLogger(), dashboardConfig, kcBuilder, fakeKcpK8sClient, regionssupportingmachine.RegionsSupportingMachine{}, imConfigFixture, newSchemaService(t))
 
 		// when
 		_, err = svc.Update(context.Background(), instanceID, domain.UpdateDetails{

@@ -2924,7 +2924,6 @@ func newSchemaService(t *testing.T) *broker.SchemaService {
 		IncludeAdditionalParamsInSchema: true,
 		EnableShootAndSeedSameRegion:    true,
 		UseAdditionalOIDCSchema:         true,
-		DisableMachineTypeUpdate:        true,
 	}, true, broker.EnablePlans{broker.TrialPlanName, broker.AzurePlanName, broker.AzureLitePlanName, broker.AWSPlanName,
 		broker.GCPPlanName, broker.SapConvergedCloudPlanName, broker.FreemiumPlanName})
 	require.NoError(t, err)

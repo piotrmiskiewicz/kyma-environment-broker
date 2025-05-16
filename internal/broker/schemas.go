@@ -111,8 +111,8 @@ func (s *SchemaService) Plans(plans PlansConfig, platformRegion string, cp pkg.C
 }
 
 func (s *SchemaService) createUpdateSchemas(machineTypesDisplay, additionalMachineTypesDisplay, regionsDisplay map[string]string, machineTypes, additionalMachineTypes, regions []string, flags ControlFlagsObject) (create, update *map[string]interface{}) {
-	createProperties := NewProvisioningProperties(machineTypesDisplay, additionalMachineTypesDisplay, regionsDisplay, machineTypes, additionalMachineTypes, regions, false, flags.disabledMachineTypeUpdate)
-	updateProperties := NewProvisioningProperties(machineTypesDisplay, additionalMachineTypesDisplay, regionsDisplay, machineTypes, additionalMachineTypes, regions, true, flags.disabledMachineTypeUpdate)
+	createProperties := NewProvisioningProperties(machineTypesDisplay, additionalMachineTypesDisplay, regionsDisplay, machineTypes, additionalMachineTypes, regions, false)
+	updateProperties := NewProvisioningProperties(machineTypesDisplay, additionalMachineTypesDisplay, regionsDisplay, machineTypes, additionalMachineTypes, regions, true)
 
 	return createSchemaWithProperties(createProperties, s.defaultOIDCConfig, false, requiredSchemaProperties(), flags),
 		createSchemaWithProperties(updateProperties, s.defaultOIDCConfig, true, requiredSchemaProperties(), flags)
@@ -135,7 +135,6 @@ func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegi
 		additionalMachineTypes,
 		regions,
 		false,
-		flags.disabledMachineTypeUpdate,
 	)
 	updateProperties := NewProvisioningProperties(
 		machineTypesDisplay,
@@ -145,7 +144,6 @@ func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegi
 		additionalMachineTypes,
 		regions,
 		true,
-		flags.disabledMachineTypeUpdate,
 	)
 	return createSchemaWithProperties(createProperties, s.defaultOIDCConfig, false, requiredSchemaProperties(), flags),
 		createSchemaWithProperties(updateProperties, s.defaultOIDCConfig, true, requiredSchemaProperties(), flags), true
@@ -226,7 +224,6 @@ func (s *SchemaService) AzureLiteSchema(platformRegion string, regions []string,
 		AzureLiteMachinesNames(),
 		regions,
 		update,
-		flags.disabledMachineTypeUpdate,
 	)
 	properties.AutoScalerMax.Minimum = 2
 	properties.AutoScalerMax.Maximum = 40
@@ -340,7 +337,6 @@ func (s *SchemaService) createFlags(planName string) ControlFlagsObject {
 		s.cfg.UseAdditionalOIDCSchema,
 		s.cfg.EnableShootAndSeedSameRegion,
 		s.ingressFilteringFeatureFlag && s.ingressFilteringPlans.Contains(planName),
-		s.cfg.DisableMachineTypeUpdate,
 	)
 }
 
