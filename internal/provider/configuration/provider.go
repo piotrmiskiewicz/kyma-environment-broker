@@ -76,7 +76,7 @@ func (p *ProviderSpec) RandomZones(cp runtime.CloudProvider, region string, zone
 
 func (p *ProviderSpec) findRegion(cp runtime.CloudProvider, region string) *regionDTO {
 	for name, provider := range p.data {
-		// remove '-' to support "sap-converged-cloud" for CloudProviderSapConvergedCloud
+		// remove '-' to support "sap-converged-cloud" for CloudProvider SapConvergedCloud
 		if strings.ToLower(strings.ReplaceAll(string(name), "-", "")) != strings.ToLower(string(cp)) {
 			continue
 		}

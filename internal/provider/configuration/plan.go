@@ -54,3 +54,14 @@ func (p *PlanSpecifications) Regions(planName string, platformRegion string) []s
 
 	return regions
 }
+
+func (p *PlanSpecifications) AllRegionsByPlan() map[string][]string {
+	planRegions := map[string][]string{}
+	for planName, plan := range p.plans {
+		for _, regions := range plan.Regions {
+			planRegions[planName] = append(planRegions[planName], regions...)
+		}
+	}
+	return planRegions
+
+}

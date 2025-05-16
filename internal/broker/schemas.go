@@ -39,6 +39,31 @@ func NewSchemaService(providerConfig io.Reader, planConfig io.Reader, defaultOID
 	}, nil
 }
 
+func (s *SchemaService) Validate() error {
+	for planName, regions := range s.planSpec.AllRegionsByPlan() {
+		var provider pkg.CloudProvider
+		switch planName {
+		case AWSPlanName, BuildRuntimeAWSPlanName, PreviewPlanName:
+			provider = pkg.AWS
+		case GCPPlanName, BuildRuntimeGCPPlanName:
+			provider = pkg.GCP
+		case AzurePlanName, BuildRuntimeAzurePlanName, AzureLitePlanName:
+			provider = pkg.Azure
+		case SapConvergedCloudPlanName:
+			provider = pkg.SapConvergedCloud
+		default:
+			continue
+		}
+		for _, region := range regions {
+			err := s.providerSpec.Validate(provider, region)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func (s *SchemaService) Plans(plans PlansConfig, platformRegion string, cp pkg.CloudProvider) map[string]domain.ServicePlan {
 
 	outputPlans := map[string]domain.ServicePlan{}

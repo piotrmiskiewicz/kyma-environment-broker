@@ -326,6 +326,8 @@ func main() {
 	fatalOnError(err, log)
 	schemaService, err := broker.NewSchemaService(providersConfiguration, plansConfiguration, &oidcDefaultValues, cfg.Broker, cfg.InfrastructureManager.EnableIngressFiltering, cfg.InfrastructureManager.IngressFilteringPlans)
 	fatalOnError(err, log)
+	fatalOnError(schemaService.Validate(), log)
+	log.Info("Plans and providers configuration is valid")
 
 	// run queues
 	provisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.OperationTimeout, cfg.Provisioning, log.With("provisioning", "manager"))
