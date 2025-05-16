@@ -1219,8 +1219,7 @@ modules: []
 `
 	operation.ProvisioningParameters.PlatformProvider = platformProvider
 
-	valuesProvider := provider.NewPlanSpecificValuesProvider(inputConfig.MultiZoneCluster, inputConfig.DefaultTrialProvider, false, nil, inputConfig.DefaultGardenerShootPurpose,
-		inputConfig.ControlPlaneFailureTolerance, provider.FakeZonesProvider([]string{"a", "b", "c"}))
+	valuesProvider := provider.NewPlanSpecificValuesProvider(inputConfig, nil, provider.FakeZonesProvider([]string{"a", "b", "c"}))
 
 	values, _ := valuesProvider.ValuesForPlanAndParameters(operation.ProvisioningParameters)
 	operation.ProviderValues = &values

@@ -1684,7 +1684,15 @@ func TestUpdateAdditionalProperties(t *testing.T) {
 }
 
 func fixValueProvider(t *testing.T) broker.ValuesProvider {
-	return provider.NewPlanSpecificValuesProvider(true, pkg.AWS, true, nil, "production", "", newSchemaService(t))
+	return provider.NewPlanSpecificValuesProvider(
+		broker.InfrastructureManager{
+			DefaultGardenerShootPurpose:  "production",
+			DefaultTrialProvider:         pkg.AWS,
+			MultiZoneCluster:             true,
+			ControlPlaneFailureTolerance: "",
+			UseSmallerMachineTypes:       true,
+		}, nil,
+		newSchemaService(t))
 }
 
 func registerCRD() {

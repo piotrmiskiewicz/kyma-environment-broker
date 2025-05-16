@@ -27,17 +27,16 @@ type PlanSpecificValuesProvider struct {
 	zonesProvider ZonesProvider
 }
 
-func NewPlanSpecificValuesProvider(multiZoneCluster bool, defaultTrialProvider pkg.CloudProvider,
-	useSmallerMachineTypes bool, trialPlatformRegionMapping map[string]string, defaultPurpose string,
-	commercialFailureTolerance string, zonesProvider ZonesProvider) *PlanSpecificValuesProvider {
-	var _ broker.InfrastructureManager
+func NewPlanSpecificValuesProvider(cfg broker.InfrastructureManager,
+	trialPlatformRegionMapping map[string]string, zonesProvider ZonesProvider) *PlanSpecificValuesProvider {
+
 	return &PlanSpecificValuesProvider{
-		multiZoneCluster:           multiZoneCluster,
-		defaultTrialProvider:       defaultTrialProvider,
-		useSmallerMachineTypes:     useSmallerMachineTypes,
+		multiZoneCluster:           cfg.MultiZoneCluster,
+		defaultTrialProvider:       cfg.DefaultTrialProvider,
+		useSmallerMachineTypes:     cfg.UseSmallerMachineTypes,
 		trialPlatformRegionMapping: trialPlatformRegionMapping,
-		defaultPurpose:             defaultPurpose,
-		commercialFailureTolerance: commercialFailureTolerance,
+		defaultPurpose:             cfg.DefaultGardenerShootPurpose,
+		commercialFailureTolerance: cfg.ControlPlaneFailureTolerance,
 		zonesProvider:              zonesProvider,
 	}
 }

@@ -619,7 +619,14 @@ func fixLogger() *slog.Logger {
 }
 
 func fixValuesProvider() broker.ValuesProvider {
-	return provider.NewPlanSpecificValuesProvider(true, pkg.AWS, true, nil, "production", "", newZonesProvider())
+	return provider.NewPlanSpecificValuesProvider(
+		broker.InfrastructureManager{
+			MultiZoneCluster:             true,
+			DefaultTrialProvider:         pkg.AWS,
+			UseSmallerMachineTypes:       true,
+			ControlPlaneFailureTolerance: "",
+			DefaultGardenerShootPurpose:  provider.PurposeProduction,
+		}, nil, newZonesProvider())
 }
 
 type fakeZonesProvider struct {
