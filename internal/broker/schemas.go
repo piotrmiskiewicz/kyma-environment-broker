@@ -335,13 +335,13 @@ func (s *SchemaService) OwnClusterSchema(update bool) *map[string]interface{} {
 }
 
 func (s *SchemaService) createFlags(planName string) ControlFlagsObject {
-	return ControlFlagsObject{
-		includeAdditionalParameters: s.cfg.IncludeAdditionalParamsInSchema,
-		useAdditionalOIDCSchema:     s.cfg.UseAdditionalOIDCSchema,
-		shootAndSeedFeatureEnabled:  s.cfg.EnableShootAndSeedSameRegion,
-		ingressFilteringEnabled:     s.ingressFilteringFeatureFlag && s.ingressFilteringPlans.Contains(planName),
-		disabledMachineTypeUpdate:   s.cfg.DisableMachineTypeUpdate,
-	}
+	return NewControlFlagsObject(
+		s.cfg.IncludeAdditionalParamsInSchema,
+		s.cfg.UseAdditionalOIDCSchema,
+		s.cfg.EnableShootAndSeedSameRegion,
+		s.ingressFilteringFeatureFlag && s.ingressFilteringPlans.Contains(planName),
+		s.cfg.DisableMachineTypeUpdate,
+	)
 }
 
 func (s *SchemaService) RandomZones(cp pkg.CloudProvider, region string, zonesCount int) []string {
