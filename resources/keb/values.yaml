@@ -161,7 +161,6 @@ broker:
   subaccountMovementEnabled: "false"
   updateCustomResourcesLabelsOnAccountMove: "false"
   useAdditionalOIDCSchema: "false"
-  disableMachineTypeUpdate: "false"
   monitorAdditionalProperties: false
 
 binding:
@@ -466,11 +465,5 @@ serviceBindingCleanup:
   requestRetries: 2
 
 regionsSupportingMachine: |-
-  c2d-highcpu:
-    - europe-west3
-    - asia-south1
-    - us-central1
 
 multipleContexts: false
-
-zoneMapping: false
