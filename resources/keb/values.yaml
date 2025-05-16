@@ -508,7 +508,7 @@ plansConfiguration:
       cf-ch20: [ "switzerlandnorth" ]
       default: [ "eastus","centralus","westus2","uksouth","northeurope","westeurope","japaneast","southeastasia","australiaeast","brazilsouth","canadacentral" ]
 
-providersCofiguration:
+providersConfiguration:
   aws:
     regions:
       eu-central-1:
