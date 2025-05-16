@@ -531,7 +531,7 @@ providersConfiguration:
         zones: [ "a", "b", "c", "d" ]
       ap-northeast-1:
         displayName: "ap-northeast-1 (Asia Pacific, Tokyo)"
-        zones: [ "a", "b", "c" ]
+        zones: [ "a", "c", "d" ]
       ap-northeast-2:
         displayName: "ap-northeast-2 (Asia Pacific, Seoul)"
         zones: [ "a", "b", "c" ]
@@ -614,7 +614,6 @@ providersConfiguration:
       asia-southeast1:
         displayName: "asia-southeast1 (Singapore, Jurong West)"
         zones: [ "a", "b", "c" ]
-
       us-west1:
         displayName: "us-west1 (North America, Oregon)"
         zones: [ "a", "b", "c" ]
@@ -646,4 +645,4 @@ providersConfiguration:
         zones: [ "a" ]
       ap-ae-1:
         displayName: "ap-ae-1"
-        zones: [ "a" ]
+        zones: [ "a", "b" ]
