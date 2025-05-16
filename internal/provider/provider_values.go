@@ -30,6 +30,7 @@ type PlanSpecificValuesProvider struct {
 func NewPlanSpecificValuesProvider(multiZoneCluster bool, defaultTrialProvider pkg.CloudProvider,
 	useSmallerMachineTypes bool, trialPlatformRegionMapping map[string]string, defaultPurpose string,
 	commercialFailureTolerance string, zonesProvider ZonesProvider) *PlanSpecificValuesProvider {
+	var _ broker.InfrastructureManager
 	return &PlanSpecificValuesProvider{
 		multiZoneCluster:           multiZoneCluster,
 		defaultTrialProvider:       defaultTrialProvider,
