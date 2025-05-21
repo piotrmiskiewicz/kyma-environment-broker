@@ -1,7 +1,7 @@
 # Regions and Zones Configuration
 
 Most Kyma plans require specifying a region in the request body as one of the provisioning parameters. The regions' configuration allows you to control which regions are available for the Kyma plan and the platform region. Additionally, every region has a different set of zones.
-The configuration is used to validate the region specified in the request body. Additionally, those regions are used to generate schemas for catalog endpoint.
+The configuration is used to validate the region specified in the request body. Additionally, those regions are used to generate schemas for the catalog endpoint.
 
 ## Allowed Regions
 
@@ -19,7 +19,7 @@ plansConfiguration:
 ```
 
 The above configuration means that the `cf-eu11` platform region can only use the `eu-central-1` provider region, while all other platform regions can use the `us-east-1` and `us-west-2` provider regions. 
-Tial and Free plans are not listed in the `plansConfiguration` section. The list of allowed regions for Free is calculated in the code. The trial plan does not support region parameter.
+Trial and free plans are not listed in the `plansConfiguration` section. The list of allowed regions for free is calculated in the code. The trial plan does not support region parameter.
 
 ## Display Names and Zones
 
