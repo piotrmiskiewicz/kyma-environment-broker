@@ -1,7 +1,6 @@
 # Regions and Zones Configuration
 
-Most of the Kyma plans requires a region to be specified in the request body (provisioning parameters). The regions configuration  allows you to control which regions are available for the Kyma plan and a platform region. Additionally, every region has different set of zones which can be sleected.
-
+Most Kyma plans require specifying a region in the request body as one of the provisioning parameters. The regions' configuration allows you to control which regions are available for the Kyma plan and the platform region. Additionally, every region has a different set of zones.
 ## Allowed Regions
 
 The `plansConfiguration` section of the `values.yaml` file contains a list of plans. Every plan has a platform region with allowed regions. To avoid specifying all possible platform regions, define `default` values, for example:
