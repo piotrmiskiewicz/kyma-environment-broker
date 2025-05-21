@@ -2,9 +2,9 @@
 
 Most of the Kyma plans requires a region to be specified in the request body (provisioning parameters). The regions configuration  allows you to control which regions are available for the Kyma plan and a platform region. Additionally, every region has different set of zones which can be sleected.
 
-## Allowed regions
+## Allowed Regions
 
-The `plansConfiguration` section of the `values.yaml` file contains a list of plans. Every plan has a platform region with allowed regions. To avoid specifying all possible platform regions you can define `default` values, for example:
+The `plansConfiguration` section of the `values.yaml` file contains a list of plans. Every plan has a platform region with allowed regions. To avoid specifying all possible platform regions, define `default` values, for example:
 
 ```yaml
 
@@ -17,11 +17,11 @@ plansConfiguration:
       - us-west-2
 ```
 
-The above configuration means that the `cf-eu11` platform region is allowed to use only the `eu-central-1` provider region, while all other platform regions are allowed to use `us-east-1` and `us-west-2` provider regions.
+The above configuration means that the `cf-eu11` platform region can only use the `eu-central-1` provider region, while all other platform regions can use the `us-east-1` and `us-west-2` provider regions.
 
-## Display names and zones
+## Display Names and Zones
 
-The json schema, which defines allowed regions, contains a list of a region display name, which is shown to the user. All region must have corresponding display name and set of zones defined in the `providersConfiguration`. The display name is shown to the user in the UI, while the zones are used by the provisioning process to create a worker node pool.
+The JSON schema, which defines allowed regions, contains a list of region display names, which are shown to the user. Each region must have a corresponding display name and a set of zones defined in the `providersConfiguration` section. The display name is shown to the user in the UI, while the zones are used by the provisioning process to create a worker node pool.
 ```yaml
 providersConfiguration:
   aws:
