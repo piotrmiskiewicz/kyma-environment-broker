@@ -22,7 +22,7 @@ The above configuration means that the `cf-eu11` platform region can only use th
 The trial and free plans are not listed in the `plansConfiguration` section. The list of allowed regions for the free plan is calculated in the code. The trial plan does not support the **region** parameter.
 
 > [!NOTE]
-> If the configuration does not contain any region for given plan, such plan is not present in the catalog endpoint and cannot be used for provisioning.
+> If your configuration does not contain any region for a given plan, this plan is not present in the catalog endpoint and cannot be used for provisioning.
 
 
 ## Display Names and Zones
@@ -48,4 +48,4 @@ providersConfiguration:
         zones: [ "1", "2", "3" ]
 ```
 
-The above configuration defines display names and zones for AWS and Azure regions. You can describe regions for the following providers: azure, aws, gcp, sap-converged-cloud.
+The above configuration defines display names and zones for AWS and Azure regions. You can describe regions for the following providers: `azure`, `aws`, `gcp`, `sap-converged-cloud`.
