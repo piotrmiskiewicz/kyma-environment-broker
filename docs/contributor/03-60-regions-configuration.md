@@ -19,7 +19,7 @@ plansConfiguration:
 ```
 
 The above configuration means that the `cf-eu11` platform region can only use the `eu-central-1` provider region, while all other platform regions can use the `us-east-1` and `us-west-2` provider regions. 
-Trial and free plans are not listed in the `plansConfiguration` section. The list of allowed regions for free is calculated in the code. The trial plan does not support region parameter.
+The trial and free plans are not listed in the `plansConfiguration` section. The list of allowed regions for the free plan is calculated in the code. The trial plan does not support the **region** parameter.
 
 ## Display Names and Zones
 
