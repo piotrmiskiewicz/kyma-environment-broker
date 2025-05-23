@@ -21,6 +21,10 @@ plansConfiguration:
 The above configuration means that the `cf-eu11` platform region can only use the `eu-central-1` provider region, while all other platform regions can use the `us-east-1` and `us-west-2` provider regions. 
 The trial and free plans are not listed in the `plansConfiguration` section. The list of allowed regions for the free plan is calculated in the code. The trial plan does not support the **region** parameter.
 
+> [!NOTE]
+> If the configuration does not contain any region for given plan, such plan is not present in the catalog endpoint and cannot be used for provisioning.
+
+
 ## Display Names and Zones
 
 The JSON schema, which defines allowed regions, contains a list of region display names, which are shown to the user. Each region must have a corresponding display name and a set of zones defined in the `providersConfiguration` section. The display name is shown to the user in the UI, while the zones are used by the provisioning process to create a worker node pool.
