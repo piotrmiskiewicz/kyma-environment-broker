@@ -132,8 +132,8 @@ func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegi
 	flags := s.createFlags(planName)
 
 	createProperties := NewProvisioningProperties(
-		s.providerSpec.MachineDisplayNames(cp),
-		additionalMachineTypesDisplay,
+		s.providerSpec.MachineDisplayNames(cp, machines),
+		s.providerSpec.MachineDisplayNames(cp, regularAndAdditionalMachines),
 		s.providerSpec.RegionDisplayNames(cp, regions),
 		machines,
 		regularAndAdditionalMachines,
@@ -141,8 +141,8 @@ func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegi
 		false,
 	)
 	updateProperties := NewProvisioningProperties(
-		machineTypesDisplay,
-		additionalMachineTypesDisplay,
+		s.providerSpec.MachineDisplayNames(cp, machines),
+		s.providerSpec.MachineDisplayNames(cp, regularAndAdditionalMachines),
 		s.providerSpec.RegionDisplayNames(cp, regions),
 		machines,
 		regularAndAdditionalMachines,
