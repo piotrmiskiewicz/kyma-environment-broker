@@ -104,7 +104,6 @@ preview,aws,build-runtime-aws:
     cf-eu11: [ "eu-central-1" ]
     default: [ "eu-central-1", "eu-west-2", "ca-central-1", "sa-east-1", "us-east-1", "us-west-2", "ap-northeast-1", "ap-northeast-2", "ap-south-1", "ap-southeast-1", "ap-southeast-2" ]
 
-
 azure,build-runtime-azure:
   regularMachines:
     - "Standard_D2s_v5"
@@ -136,7 +135,6 @@ azure,build-runtime-azure:
     cf-ch20: [ "switzerlandnorth" ]
     default: [ "eastus","centralus","westus2","uksouth","northeurope","westeurope","japaneast","southeastasia","australiaeast","brazilsouth","canadacentral" ]
 
-# azure lite wydzielony
 azure_lite:
   regularMachines:
     - "Standard_D2s_v5"
