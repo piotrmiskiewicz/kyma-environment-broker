@@ -20,7 +20,8 @@ type regionDTO struct {
 }
 
 type providerDTO struct {
-	Regions map[string]regionDTO `yaml:"regions"`
+	Regions             map[string]regionDTO `yaml:"regions"`
+	MachineDisplayNames map[string]string    `yaml:"machines"`
 }
 
 type dto map[runtime.CloudProvider]providerDTO
@@ -98,4 +99,8 @@ func (p *ProviderSpec) Validate(provider runtime.CloudProvider, region string) e
 		return nil
 	}
 	return fmt.Errorf("region %s not found for provider %s", region, provider)
+}
+
+func (p *ProviderSpec) MachineDisplayNames(cp runtime.CloudProvider) map[string]string {
+
 }

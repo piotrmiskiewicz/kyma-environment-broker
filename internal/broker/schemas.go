@@ -1,11 +1,10 @@
 package broker
 
 import (
-	"io"
-
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"github.com/pivotal-cf/brokerapi/v12/domain"
+	"io"
 )
 
 type SchemaService struct {
@@ -118,21 +117,26 @@ func (s *SchemaService) createUpdateSchemas(machineTypesDisplay, additionalMachi
 		createSchemaWithProperties(updateProperties, s.defaultOIDCConfig, true, requiredSchemaProperties(), flags)
 }
 
-func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegion string, machineTypesDisplay, additionalMachineTypesDisplay map[string]string, machineTypes, additionalMachineTypes []string) (create, update *map[string]interface{}, available bool) {
+func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegion string, machineTypesDisplay, additionalMachineTypesDisplay map[string]string) (create, update *map[string]interface{}, available bool) {
 	// todo:
 	// - when machines are configurable, it will be removed from arguments list and taken similar like regions
 	regions := s.planSpec.Regions(planName, platformRegion)
 	if len(regions) == 0 {
 		return nil, nil, false
 	}
+	machines := s.planSpec.RegularMachines(planName)
+	if len(machines) == 0 {
+		return nil, nil, false
+	}
+	regularAndAdditionalMachines := append(machines, s.planSpec.AdditionalMachines(planName)...)
 	flags := s.createFlags(planName)
 
 	createProperties := NewProvisioningProperties(
-		machineTypesDisplay,
+		s.providerSpec.MachineDisplayNames(cp),
 		additionalMachineTypesDisplay,
 		s.providerSpec.RegionDisplayNames(cp, regions),
-		machineTypes,
-		additionalMachineTypes,
+		machines,
+		regularAndAdditionalMachines,
 		regions,
 		false,
 	)
@@ -140,8 +144,8 @@ func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegi
 		machineTypesDisplay,
 		additionalMachineTypesDisplay,
 		s.providerSpec.RegionDisplayNames(cp, regions),
-		machineTypes,
-		additionalMachineTypes,
+		machines,
+		regularAndAdditionalMachines,
 		regions,
 		true,
 	)
@@ -152,65 +156,49 @@ func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegi
 func (s *SchemaService) AzureSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
 	return s.planSchemas(pkg.Azure, AzurePlanName, platformRegion,
 		AzureMachinesDisplay(false),
-		AzureMachinesDisplay(true),
-		AzureMachinesNames(false),
-		AzureMachinesNames(true))
+		AzureMachinesDisplay(true))
 }
 
 func (s *SchemaService) BuildRuntimeAzureSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
 	return s.planSchemas(pkg.Azure, BuildRuntimeAzurePlanName, platformRegion,
 		AzureMachinesDisplay(false),
-		AzureMachinesDisplay(true),
-		AzureMachinesNames(false),
-		AzureMachinesNames(true))
+		AzureMachinesDisplay(true))
 }
 
 func (s *SchemaService) AWSSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
 	return s.planSchemas(pkg.AWS, AWSPlanName, platformRegion,
 		AwsMachinesDisplay(false),
-		AwsMachinesDisplay(true),
-		AwsMachinesNames(false),
-		AwsMachinesNames(true))
+		AwsMachinesDisplay(true))
 }
 
 func (s *SchemaService) BuildRuntimeAWSSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
 	return s.planSchemas(pkg.AWS, BuildRuntimeAWSPlanName, platformRegion,
 		AwsMachinesDisplay(false),
-		AwsMachinesDisplay(true),
-		AwsMachinesNames(false),
-		AwsMachinesNames(true))
+		AwsMachinesDisplay(true))
 }
 
 func (s *SchemaService) GCPSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
 	return s.planSchemas(pkg.GCP, GCPPlanName, platformRegion,
 		GcpMachinesDisplay(false),
-		GcpMachinesDisplay(true),
-		GcpMachinesNames(false),
-		GcpMachinesNames(true))
+		GcpMachinesDisplay(true))
 }
 
 func (s *SchemaService) BuildRuntimeGcpSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
 	return s.planSchemas(pkg.GCP, BuildRuntimeGCPPlanName, platformRegion,
 		GcpMachinesDisplay(false),
-		GcpMachinesDisplay(true),
-		GcpMachinesNames(false),
-		GcpMachinesNames(true))
+		GcpMachinesDisplay(true))
 }
 
 func (s *SchemaService) PreviewSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
 	return s.planSchemas(pkg.AWS, PreviewPlanName, platformRegion,
 		AwsMachinesDisplay(false),
-		AwsMachinesDisplay(true),
-		AwsMachinesNames(false),
-		AwsMachinesNames(true))
+		AwsMachinesDisplay(true))
 }
 
 func (s *SchemaService) SapConvergedCloudSchemas(platformRegion string) (create, update *map[string]interface{}, available bool) {
 	return s.planSchemas(pkg.SapConvergedCloud, SapConvergedCloudPlanName, platformRegion,
 		SapConvergedCloudMachinesDisplay(),
-		SapConvergedCloudMachinesDisplay(),
-		SapConvergedCloudMachinesNames(),
-		SapConvergedCloudMachinesNames())
+		SapConvergedCloudMachinesDisplay())
 }
 
 func (s *SchemaService) AzureLiteSchema(platformRegion string, regions []string, update bool) *map[string]interface{} {
