@@ -152,7 +152,6 @@ gcp:
     "g2-standard-24": "g2-standard-24 (2GPU, 24vCPU, 96GB RAM)*"
     "g2-standard-32": "g2-standard-32 (1GPU, 32vCPU, 128GB RAM)*"
     "g2-standard-48": "g2-standard-48 (4GPU, 48vCPU, 192GB RAM)*"
-  XXX:
 
   regions:
     europe-west3:
