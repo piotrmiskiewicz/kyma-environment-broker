@@ -118,8 +118,6 @@ func (s *SchemaService) createUpdateSchemas(machineTypesDisplay, additionalMachi
 }
 
 func (s *SchemaService) planSchemas(cp pkg.CloudProvider, planName, platformRegion string) (create, update *map[string]interface{}, available bool) {
-	// todo:
-	// - when machines are configurable, it will be removed from arguments list and taken similar like regions
 	regions := s.planSpec.Regions(planName, platformRegion)
 	if len(regions) == 0 {
 		return nil, nil, false
