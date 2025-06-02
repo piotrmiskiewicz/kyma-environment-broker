@@ -19,6 +19,9 @@ plansConfiguration:
 
 The above configuration means that the `Standard_D2s_v5` and `Standard_D4s_v5` machine types are available for the `machineType` parameter. The `additionalWorkerNodePool` could use the following machine types: `Standard_D2s_v5`, `Standard_D4s_v5`, `Standard_D8s_v5`, `Standard_D16s_v5`.
 
+>[!NOTE]
+> Free and Trial plans do not support the `machineType` parameter. The machine type is hardcoded for these plans.
+
 ## Display Names
 
 The catalog endpoint provides display names for machine types. The display names are defined in the `providersConfiguration` section of the `values.yaml` file, for example:
