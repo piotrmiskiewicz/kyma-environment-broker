@@ -84,7 +84,7 @@ func (p *AWSInputProvider) Provide() internal.ProviderValues {
 		DefaultMachineType:   DefaultAWSMachineType,
 		Region:               region,
 		Purpose:              p.Purpose,
-		VolumeSizeGb:         100,
+		VolumeSizeGb:         160,
 		DiskType:             "gp3",
 		FailureTolerance:     &p.FailureTolerance,
 	}
