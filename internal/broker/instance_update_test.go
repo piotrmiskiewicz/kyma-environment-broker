@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -1684,6 +1685,7 @@ func TestUpdateAdditionalProperties(t *testing.T) {
 }
 
 func fixValueProvider(t *testing.T) broker.ValuesProvider {
+	planSpec, _ := configuration.NewPlanSpecifications(strings.NewReader(""))
 	return provider.NewPlanSpecificValuesProvider(
 		broker.InfrastructureManager{
 			DefaultGardenerShootPurpose:  "production",
@@ -1692,7 +1694,7 @@ func fixValueProvider(t *testing.T) broker.ValuesProvider {
 			ControlPlaneFailureTolerance: "",
 			UseSmallerMachineTypes:       true,
 		}, nil,
-		newSchemaService(t))
+		newSchemaService(t), planSpec)
 }
 
 func registerCRD() {
