@@ -74,7 +74,6 @@ func FixProvisioningParameters(id string) internal.ProvisioningParameters {
 
 	provisioningParametersDTO := pkg.ProvisioningParametersDTO{
 		Name:             "cluster-test",
-		VolumeSizeGb:     ptr.Integer(50),
 		MachineType:      ptr.String("Standard_D8_v3"),
 		Region:           ptr.String(Region),
 		Purpose:          ptr.String("Purpose"),

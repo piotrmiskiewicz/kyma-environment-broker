@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
+
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
@@ -1219,7 +1221,8 @@ modules: []
 `
 	operation.ProvisioningParameters.PlatformProvider = platformProvider
 
-	valuesProvider := provider.NewPlanSpecificValuesProvider(inputConfig, nil, provider.FakeZonesProvider([]string{"a", "b", "c"}))
+	planSpec, _ := configuration.NewPlanSpecifications(strings.NewReader(""))
+	valuesProvider := provider.NewPlanSpecificValuesProvider(inputConfig, nil, provider.FakeZonesProvider([]string{"a", "b", "c"}), planSpec)
 
 	values, _ := valuesProvider.ValuesForPlanAndParameters(operation.ProvisioningParameters)
 	operation.ProviderValues = &values

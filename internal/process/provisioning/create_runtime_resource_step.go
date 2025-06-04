@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"strconv"
 	"strings"
 	"time"
 
@@ -216,10 +215,9 @@ func (s *CreateRuntimeResourceStep) createShootProvider(operation *internal.Oper
 	}
 
 	if steps.IsNotSapConvergedCloud(operation.CloudProvider) {
-		volumeSize := strconv.Itoa(DefaultIfParamNotSet(values.VolumeSizeGb, operation.ProvisioningParameters.Parameters.VolumeSizeGb))
 		provider.Workers[0].Volume = &gardener.Volume{
 			Type:       ptr.String(values.DiskType),
-			VolumeSize: fmt.Sprintf("%sGi", volumeSize),
+			VolumeSize: fmt.Sprintf("%dGi", values.VolumeSizeGb),
 		}
 	}
 

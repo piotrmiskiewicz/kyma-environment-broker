@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
+
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
@@ -306,6 +308,8 @@ func main() {
 
 	plansConfiguration, err := os.Open(cfg.PlansConfigurationFilePath)
 	fatalOnError(err, log)
+	plansSpec, err := configuration.NewPlanSpecificationsFromFile(cfg.PlansConfigurationFilePath)
+	fatalOnError(err, log)
 	providersConfiguration, err := os.Open(cfg.ProvidersConfigurationFilePath)
 	fatalOnError(err, log)
 	schemaService, err := broker.NewSchemaService(providersConfiguration, plansConfiguration, &oidcDefaultValues, cfg.Broker, cfg.InfrastructureManager.EnableIngressFiltering, cfg.InfrastructureManager.IngressFilteringPlans)
@@ -316,14 +320,14 @@ func main() {
 	// run queues
 	provisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.Broker.OperationTimeout, cfg.Provisioning, log.With("provisioning", "manager"))
 	provisionQueue := NewProvisioningProcessingQueue(ctx, provisionManager, cfg.Provisioning.WorkersAmount, &cfg, db, configProvider,
-		edpClient, accountProvider, skrK8sClientProvider, kcpK8sClient, gardenerClient, oidcDefaultValues, log, rulesService, workersProvider)
+		edpClient, skrK8sClientProvider, kcpK8sClient, gardenerClient, oidcDefaultValues, log, rulesService, workersProvider)
 
 	deprovisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.Broker.OperationTimeout, cfg.Deprovisioning, log.With("deprovisioning", "manager"))
 	deprovisionQueue := NewDeprovisioningProcessingQueue(ctx, cfg.Deprovisioning.WorkersAmount, deprovisionManager, &cfg, db, edpClient, accountProvider,
 		skrK8sClientProvider, kcpK8sClient, configProvider, log)
 
 	updateManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.Broker.OperationTimeout, cfg.Update, log.With("update", "manager"))
-	updateQueue := NewUpdateProcessingQueue(ctx, updateManager, cfg.Update.WorkersAmount, db, cfg, kcpK8sClient, log, workersProvider, schemaService)
+	updateQueue := NewUpdateProcessingQueue(ctx, updateManager, cfg.Update.WorkersAmount, db, cfg, kcpK8sClient, log, workersProvider, schemaService, plansSpec)
 	/***/
 	servicesConfig, err := broker.NewServicesConfigFromFile(cfg.CatalogFilePath)
 	fatalOnError(err, log)
@@ -336,7 +340,7 @@ func main() {
 
 	createAPI(router, schemaService, servicesConfig, &cfg, db, provisionQueue, deprovisionQueue, updateQueue, logger, log,
 		kcBuilder, skrK8sClientProvider, skrK8sClientProvider, kcpK8sClient, eventBroker, oidcDefaultValues,
-		regionsSupportingMachine, configProvider)
+		regionsSupportingMachine, configProvider, plansSpec)
 
 	// create metrics endpoint
 	router.Handle("/metrics", promhttp.Handler())
@@ -414,12 +418,12 @@ func logConfiguration(logs *slog.Logger, cfg Config) {
 func createAPI(router *httputil.Router, schemaService *broker.SchemaService, servicesConfig broker.ServicesConfig, cfg *Config, db storage.BrokerStorage,
 	provisionQueue, deprovisionQueue, updateQueue *process.Queue, logger lager.Logger, logs *slog.Logger, kcBuilder kubeconfig.KcBuilder, clientProvider K8sClientProvider,
 	kubeconfigProvider KubeconfigProvider, kcpK8sClient client.Client, publisher event.Publisher, oidcDefaultValues pkg.OIDCConfigDTO,
-	regionsSupportingMachine regionssupportingmachine.RegionsSupportingMachine, configProvider kebConfig.Provider) {
+	regionsSupportingMachine regionssupportingmachine.RegionsSupportingMachine, configProvider kebConfig.Provider, planSpec *configuration.PlanSpecifications) {
 
 	regions, err := provider.ReadPlatformRegionMappingFromFile(cfg.TrialRegionMappingFilePath)
 	fatalOnError(err, logs)
 	logs.Info(fmt.Sprintf("Platform region mapping for trial: %v", regions))
-	valuesProvider := provider.NewPlanSpecificValuesProvider(cfg.InfrastructureManager, regions, schemaService)
+	valuesProvider := provider.NewPlanSpecificValuesProvider(cfg.InfrastructureManager, regions, schemaService, planSpec)
 
 	suspensionCtxHandler := suspension.NewContextUpdateHandler(db.Operations(), provisionQueue, deprovisionQueue, logs)
 

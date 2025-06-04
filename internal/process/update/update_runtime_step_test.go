@@ -4,7 +4,10 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/provider"
@@ -619,6 +622,10 @@ func fixLogger() *slog.Logger {
 }
 
 func fixValuesProvider() broker.ValuesProvider {
+	planSpec, _ := configuration.NewPlanSpecifications(strings.NewReader(`
+aws:
+  volumeSizeGb: 80
+`))
 	return provider.NewPlanSpecificValuesProvider(
 		broker.InfrastructureManager{
 			MultiZoneCluster:             true,
@@ -626,7 +633,7 @@ func fixValuesProvider() broker.ValuesProvider {
 			UseSmallerMachineTypes:       true,
 			ControlPlaneFailureTolerance: "",
 			DefaultGardenerShootPurpose:  provider.PurposeProduction,
-		}, nil, newZonesProvider())
+		}, nil, newZonesProvider(), planSpec)
 }
 
 type fakeZonesProvider struct {

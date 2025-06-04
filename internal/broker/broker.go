@@ -120,6 +120,10 @@ type InfrastructureManager struct {
 	UseSmallerMachineTypes       bool              `envconfig:"default=false"`
 	EnableIngressFiltering       bool              `envconfig:"default=false"`
 	IngressFilteringPlans        EnablePlans       `envconfig:"default=no-plan"`
+
+	GcpVolumeSizeGb   int `envconfig:"default=80"`
+	AwsVolumeSizeGb   int `envconfig:"default=80"`
+	AzureVolumeSizeGb int `envconfig:"default=80"`
 }
 
 type PlansConfig map[string]PlanData

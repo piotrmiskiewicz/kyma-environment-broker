@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
+
 	imv1 "github.com/kyma-project/infrastructure-manager/api/v1"
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
@@ -193,6 +195,8 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 	fatalOnError(err, log)
 	plansSource, err := os.Open(cfg.PlansConfigurationFilePath)
 	fatalOnError(err, log)
+	plansSpec, err := configuration.NewPlanSpecificationsFromFile(cfg.PlansConfigurationFilePath)
+	fatalOnError(err, log)
 	defaultOIDC := defaultOIDCValues()
 	schemaService, err := broker.NewSchemaService(providersSource, plansSource, &defaultOIDC, cfg.Broker, cfg.InfrastructureManager.EnableIngressFiltering, cfg.InfrastructureManager.IngressFilteringPlans)
 	fatalOnError(err, log)
@@ -208,14 +212,14 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 	}
 
 	provisioningQueue := NewProvisioningProcessingQueue(context.Background(), provisionManager, workersAmount, cfg, db, configProvider,
-		edpClient, accountProvider, k8sClientProvider, cli, gardenerClientWithNamespace, defaultOIDCValues(), log, rulesService,
+		edpClient, k8sClientProvider, cli, gardenerClientWithNamespace, defaultOIDCValues(), log, rulesService,
 		workersProvider(cfg.InfrastructureManager))
 
 	provisioningQueue.SpeedUp(10000)
 	provisionManager.SpeedUp(10000)
 
 	updateManager := process.NewStagedManager(db.Operations(), eventBroker, time.Hour, cfg.Update, log.With("update", "manager"))
-	updateQueue := NewUpdateProcessingQueue(context.Background(), updateManager, 1, db, *cfg, cli, log, workersProvider(cfg.InfrastructureManager), schemaService)
+	updateQueue := NewUpdateProcessingQueue(context.Background(), updateManager, 1, db, *cfg, cli, log, workersProvider(cfg.InfrastructureManager), schemaService, plansSpec)
 	updateQueue.SpeedUp(10000)
 	updateManager.SpeedUp(10000)
 
@@ -241,7 +245,7 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 	}
 	ts.poller = &broker.TimerPoller{PollInterval: 3 * time.Millisecond, PollTimeout: 800 * time.Millisecond, Log: ts.t.Log}
 
-	ts.CreateAPI(cfg, db, provisioningQueue, deprovisioningQueue, updateQueue, log, k8sClientProvider, eventBroker, configProvider)
+	ts.CreateAPI(cfg, db, provisioningQueue, deprovisioningQueue, updateQueue, log, k8sClientProvider, eventBroker, configProvider, plansSpec)
 
 	expirationHandler := expiration.NewHandler(db.Instances(), db.Operations(), deprovisioningQueue, log)
 	expirationHandler.AttachRoutes(ts.router)
@@ -331,7 +335,7 @@ func (s *BrokerSuiteTest) CallAPI(method string, path string, body string) *http
 
 func (s *BrokerSuiteTest) CreateAPI(cfg *Config, db storage.BrokerStorage, provisioningQueue *process.Queue,
 	deprovisionQueue *process.Queue, updateQueue *process.Queue, log *slog.Logger,
-	skrK8sClientProvider *kubeconfig.FakeProvider, eventBroker *event.PubSub, configProvider kebConfig.Provider) {
+	skrK8sClientProvider *kubeconfig.FakeProvider, eventBroker *event.PubSub, configProvider kebConfig.Provider, planSpec *configuration.PlanSpecifications) {
 	servicesConfig := map[string]broker.Service{
 		broker.KymaServiceName: {
 			Description: "",
@@ -381,7 +385,7 @@ func (s *BrokerSuiteTest) CreateAPI(cfg *Config, db storage.BrokerStorage, provi
 
 	createAPI(s.router, schemaService, servicesConfig, cfg, db, provisioningQueue, deprovisionQueue, updateQueue,
 		lager.NewLogger("api"), log, kcBuilder, skrK8sClientProvider, skrK8sClientProvider, fakeKcpK8sClient, eventBroker, defaultOIDCValues(),
-		regionssupportingmachine.RegionsSupportingMachine{}, configProvider)
+		regionssupportingmachine.RegionsSupportingMachine{}, configProvider, planSpec)
 
 	s.httpServer = httptest.NewServer(s.router)
 }

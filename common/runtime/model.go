@@ -78,7 +78,6 @@ type ProvisioningParametersDTO struct {
 
 	Name         string  `json:"name"`
 	TargetSecret *string `json:"targetSecret,omitempty"`
-	VolumeSizeGb *int    `json:"volumeSizeGb,omitempty"`
 	MachineType  *string `json:"machineType,omitempty"`
 	Region       *string `json:"region,omitempty"`
 	Purpose      *string `json:"purpose,omitempty"`
