@@ -16,6 +16,10 @@ type ZonesProvider interface {
 	RandomZones(cp pkg.CloudProvider, region string, zonesCount int) []string
 }
 
+type PlanConfigProvider interface {
+	DefaultVolumeSizeGb(planName string) (int, bool)
+}
+
 type PlanSpecificValuesProvider struct {
 	multiZoneCluster           bool
 	defaultTrialProvider       pkg.CloudProvider
@@ -25,10 +29,11 @@ type PlanSpecificValuesProvider struct {
 	commercialFailureTolerance string
 
 	zonesProvider ZonesProvider
+	planSpec      PlanConfigProvider
 }
 
 func NewPlanSpecificValuesProvider(cfg broker.InfrastructureManager,
-	trialPlatformRegionMapping map[string]string, zonesProvider ZonesProvider) *PlanSpecificValuesProvider {
+	trialPlatformRegionMapping map[string]string, zonesProvider ZonesProvider, planSpec PlanConfigProvider) *PlanSpecificValuesProvider {
 
 	return &PlanSpecificValuesProvider{
 		multiZoneCluster:           cfg.MultiZoneCluster,
@@ -38,6 +43,7 @@ func NewPlanSpecificValuesProvider(cfg broker.InfrastructureManager,
 		defaultPurpose:             cfg.DefaultGardenerShootPurpose,
 		commercialFailureTolerance: cfg.ControlPlaneFailureTolerance,
 		zonesProvider:              zonesProvider,
+		planSpec:                   planSpec,
 	}
 }
 
@@ -145,111 +151,13 @@ func (s *PlanSpecificValuesProvider) ValuesForPlanAndParameters(provisioningPara
 	default:
 		return internal.ProviderValues{}, fmt.Errorf("plan %s not supported", provisioningParameters.PlanID)
 	}
-	return p.Provide(), nil
-}
 
-func GetPlanSpecificValues(
-	operation *internal.Operation,
-	multiZoneCluster bool,
-	defaultTrialProvider pkg.CloudProvider,
-	useSmallerMachineTypes bool,
-	trialPlatformRegionMapping map[string]string,
-	defaultPurpose string,
-	commercialFailureTolerance string,
-) (internal.ProviderValues, error) {
-	var p Provider
-	switch operation.ProvisioningParameters.PlanID {
-	case broker.AWSPlanID, broker.BuildRuntimeAWSPlanID:
-		p = &AWSInputProvider{
-			Purpose:                defaultPurpose,
-			MultiZone:              multiZoneCluster,
-			ProvisioningParameters: operation.ProvisioningParameters,
-			FailureTolerance:       commercialFailureTolerance,
-		}
-	case broker.PreviewPlanID:
-		p = &AWSInputProvider{
-			Purpose:                defaultPurpose,
-			MultiZone:              multiZoneCluster,
-			ProvisioningParameters: operation.ProvisioningParameters,
-			FailureTolerance:       commercialFailureTolerance,
-		}
-	case broker.AzurePlanID, broker.BuildRuntimeAzurePlanID:
-		p = &AzureInputProvider{
-			Purpose:                defaultPurpose,
-			MultiZone:              multiZoneCluster,
-			ProvisioningParameters: operation.ProvisioningParameters,
-			FailureTolerance:       commercialFailureTolerance,
-		}
-	case broker.AzureLitePlanID:
-		p = &AzureLiteInputProvider{
-			Purpose:                defaultPurpose,
-			UseSmallerMachineTypes: useSmallerMachineTypes,
-			ProvisioningParameters: operation.ProvisioningParameters,
-		}
-	case broker.GCPPlanID, broker.BuildRuntimeGCPPlanID:
-		p = &GCPInputProvider{
-			Purpose:                defaultPurpose,
-			MultiZone:              multiZoneCluster,
-			ProvisioningParameters: operation.ProvisioningParameters,
-			FailureTolerance:       commercialFailureTolerance,
-		}
-	case broker.FreemiumPlanID:
-		switch operation.ProvisioningParameters.PlatformProvider {
-		case pkg.AWS:
-			p = &AWSFreemiumInputProvider{
-				UseSmallerMachineTypes: useSmallerMachineTypes,
-				ProvisioningParameters: operation.ProvisioningParameters,
-			}
-		case pkg.Azure:
-			p = &AzureFreemiumInputProvider{
-				UseSmallerMachineTypes: useSmallerMachineTypes,
-				ProvisioningParameters: operation.ProvisioningParameters,
-			}
-		default:
-			return internal.ProviderValues{}, fmt.Errorf("freemium provider for '%s' is not supported", operation.ProvisioningParameters.PlatformProvider)
-		}
-	case broker.SapConvergedCloudPlanID:
-		p = &SapConvergedCloudInputProvider{
-			Purpose:                defaultPurpose,
-			MultiZone:              multiZoneCluster,
-			ProvisioningParameters: operation.ProvisioningParameters,
-			FailureTolerance:       commercialFailureTolerance,
-		}
-	case broker.TrialPlanID:
-		var trialProvider pkg.CloudProvider
-		if operation.ProvisioningParameters.Parameters.Provider == nil {
-			trialProvider = defaultTrialProvider
-		} else {
-			trialProvider = *operation.ProvisioningParameters.Parameters.Provider
-		}
-		switch trialProvider {
-		case pkg.AWS:
-			p = &AWSTrialInputProvider{
-				PlatformRegionMapping:  trialPlatformRegionMapping,
-				UseSmallerMachineTypes: useSmallerMachineTypes,
-				ProvisioningParameters: operation.ProvisioningParameters,
-			}
-		case pkg.GCP:
-			p = &GCPTrialInputProvider{
-				PlatformRegionMapping:  trialPlatformRegionMapping,
-				ProvisioningParameters: operation.ProvisioningParameters,
-			}
-		case pkg.Azure:
-			p = &AzureTrialInputProvider{
-				PlatformRegionMapping:  trialPlatformRegionMapping,
-				UseSmallerMachineTypes: useSmallerMachineTypes,
-				ProvisioningParameters: operation.ProvisioningParameters,
-			}
-		default:
-			return internal.ProviderValues{}, fmt.Errorf("trial provider for %s not yet implemented", trialProvider)
-		}
-
-	case broker.OwnClusterPlanID:
-		p = &OwnClusterinputProvider{}
-	default:
-		return internal.ProviderValues{}, fmt.Errorf("plan %s not supported", operation.ProvisioningParameters.PlanID)
+	values := p.Provide()
+	volumeSize, found := s.planSpec.DefaultVolumeSizeGb(broker.PlanNamesMapping[provisioningParameters.PlanID])
+	if found {
+		values.VolumeSizeGb = volumeSize
 	}
-	return p.Provide(), nil
+	return values, nil
 }
 
 func ProviderToCloudProvider(providerType string) pkg.CloudProvider {

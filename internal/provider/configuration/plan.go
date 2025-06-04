@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"io"
+	"os"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -9,6 +10,18 @@ import (
 
 type PlanSpecifications struct {
 	plans map[string]planSpecificationDTO
+}
+
+func NewPlanSpecificationsFromFile(filePath string) (*PlanSpecifications, error) {
+	// Open the file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// Use the existing function to parse the specifications
+	return NewPlanSpecifications(file)
 }
 
 func NewPlanSpecifications(r io.Reader) (*PlanSpecifications, error) {
@@ -38,6 +51,7 @@ type planSpecificationDTO struct {
 
 	RegularMachines    []string `yaml:"regularMachines"`
 	AdditionalMachines []string `yaml:"additionalMachines"`
+	VolumeSizeGb       int      `yaml:"volumeSizeGb"`
 }
 
 func (p *PlanSpecifications) Regions(planName string, platformRegion string) []string {
@@ -83,4 +97,15 @@ func (p *PlanSpecifications) AdditionalMachines(planName string) []string {
 		return []string{}
 	}
 	return plan.AdditionalMachines
+}
+
+func (p *PlanSpecifications) DefaultVolumeSizeGb(planName string) (int, bool) {
+	plan, ok := p.plans[planName]
+	if !ok {
+		return 0, false
+	}
+	if plan.VolumeSizeGb == 0 {
+		return 0, false
+	}
+	return plan.VolumeSizeGb, true
 }

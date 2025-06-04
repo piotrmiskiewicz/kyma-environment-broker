@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"log/slog"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
@@ -18,7 +19,7 @@ import (
 )
 
 func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManager, workersAmount int, db storage.BrokerStorage,
-	cfg Config, kcpClient client.Client, logs *slog.Logger, workersProvider *workers.Provider, schemaService *broker.SchemaService) *process.Queue {
+	cfg Config, kcpClient client.Client, logs *slog.Logger, workersProvider *workers.Provider, schemaService *broker.SchemaService, planSpec *configuration.PlanSpecifications) *process.Queue {
 
 	trialRegionsMapping, err := provider.ReadPlatformRegionMappingFromFile(cfg.TrialRegionMappingFilePath)
 	if err != nil {
@@ -26,7 +27,7 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 	}
 
 	regions, err := provider.ReadPlatformRegionMappingFromFile(cfg.TrialRegionMappingFilePath)
-	valuesProvider := provider.NewPlanSpecificValuesProvider(cfg.InfrastructureManager, regions, schemaService)
+	valuesProvider := provider.NewPlanSpecificValuesProvider(cfg.InfrastructureManager, regions, schemaService, planSpec)
 
 	manager.DefineStages([]string{"cluster", "btp-operator", "btp-operator-check", "check", "runtime_resource", "check_runtime_resource"})
 	updateSteps := []struct {

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
-	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
@@ -29,7 +28,7 @@ const (
 
 func NewProvisioningProcessingQueue(ctx context.Context, provisionManager *process.StagedManager, workersAmount int, cfg *Config,
 	db storage.BrokerStorage, configProvider config.Provider,
-	edpClient provisioning.EDPClient, accountProvider hyperscaler.AccountProvider,
+	edpClient provisioning.EDPClient,
 	k8sClientProvider provisioning.K8sClientProvider, k8sClient client.Client, gardenerClient *gardener.Client, defaultOIDC pkg.OIDCConfigDTO, logs *slog.Logger, rulesService *rules.RulesService,
 	workersProvider *workers.Provider) *process.Queue {
 

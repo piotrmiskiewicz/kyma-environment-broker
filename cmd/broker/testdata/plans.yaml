@@ -23,6 +23,7 @@ sap-converged-cloud:
       - ap-ae-1
 
 gcp,build-runtime-gcp:
+  volumeSizeGb: 80
   regularMachines:
     - "n2-standard-2"
     - "n2-standard-4"
@@ -65,6 +66,7 @@ gcp,build-runtime-gcp:
 
 
 preview,aws,build-runtime-aws:
+  volumeSizeGb: 81
   regularMachines:
     - "m6i.large"
     - "m6i.xlarge"
@@ -105,6 +107,7 @@ preview,aws,build-runtime-aws:
     default: [ "eu-central-1", "eu-west-2", "ca-central-1", "sa-east-1", "us-east-1", "us-west-2", "ap-northeast-1", "ap-northeast-2", "ap-south-1", "ap-southeast-1", "ap-southeast-2" ]
 
 azure,build-runtime-azure:
+  volumeSizeGb: 82
   regularMachines:
     - "Standard_D2s_v5"
     - "Standard_D4s_v5"
@@ -136,6 +139,7 @@ azure,build-runtime-azure:
     default: [ "eastus","centralus","westus2","uksouth","northeurope","westeurope","japaneast","southeastasia","australiaeast","brazilsouth","canadacentral" ]
 
 azure_lite:
+  volumeSizeGb: 50
   regularMachines:
     - "Standard_D2s_v5"
     - "Standard_D4s_v5"

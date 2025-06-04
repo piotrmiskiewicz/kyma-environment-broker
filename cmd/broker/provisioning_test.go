@@ -1106,6 +1106,7 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 		expectedMaximumNumberOfNodes int
 		expectedMachineType          string
 		expectedSubscriptionName     string
+		expectedVolumeSize           string
 	}{
 		"Regular trial": {
 			planID: broker.TrialPlanID,
@@ -1115,6 +1116,7 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 			expectedMachineType:          "m5.xlarge",
 			expectedProvider:             "aws",
 			expectedSubscriptionName:     "sb-aws-shared",
+			expectedVolumeSize:           "50Gi",
 		},
 		"Regular trial with smaller machines": {
 			planID:                 broker.TrialPlanID,
@@ -1185,6 +1187,7 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 			expectedMachineType:          provider.DefaultAzureMachineType,
 			expectedProvider:             "azure",
 			expectedSubscriptionName:     "sb-azure",
+			expectedVolumeSize:           "82Gi",
 		},
 		"Production Multi-AZ Azure": {
 			planID:                       broker.AzurePlanID,
@@ -1356,6 +1359,9 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 
 			if tc.expectedSubscriptionName != "" {
 				assert.Equal(t, tc.expectedSubscriptionName, runtimeCR.Spec.Shoot.SecretBindingName)
+			}
+			if tc.expectedVolumeSize != "" {
+				assert.Equal(t, tc.expectedVolumeSize, runtimeCR.Spec.Shoot.Provider.Workers[0].Volume.VolumeSize)
 			}
 		})
 
