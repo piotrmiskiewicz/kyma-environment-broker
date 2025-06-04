@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"log/slog"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 

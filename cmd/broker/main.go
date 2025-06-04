@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,6 +10,8 @@ import (
 	"runtime/pprof"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
