@@ -2,11 +2,12 @@ package update
 
 import (
 	"context"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"log/slog"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma-environment-broker/internal/provider"
