@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Kyma Environment Broker release pipeline creates proper artifacts:
+The Kyma Environment Broker (KEB) release pipeline creates proper artifacts:
 
 * `kyma-environment-broker` Docker image in the [registry](https://console.cloud.google.com/artifacts/docker/kyma-project/europe/prod/kyma-environment-broker)
 * `kyma-environment-deprovision-retrigger` Docker image in the [registry](https://console.cloud.google.com/artifacts/docker/kyma-project/europe/prod/kyma-environment-deprovision-retrigger)
@@ -21,7 +21,7 @@ The Kyma Environment Broker release pipeline creates proper artifacts:
 
 To create a release, follow these steps:
 
-1. Run GitHub action **Create release**:
+1. To run the **Create release** GitHub action, follow these steps:
    
    i.  Go to the **Actions** tab  
    ii. Click on **Create release** workflow  
