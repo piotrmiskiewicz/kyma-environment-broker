@@ -2,11 +2,12 @@ package provisioning
 
 import (
 	"context"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
