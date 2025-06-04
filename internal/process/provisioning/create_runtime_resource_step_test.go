@@ -2,6 +2,7 @@ package provisioning
 
 import (
 	"context"
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"os"
 	"reflect"
 	"strings"
@@ -1219,7 +1220,8 @@ modules: []
 `
 	operation.ProvisioningParameters.PlatformProvider = platformProvider
 
-	valuesProvider := provider.NewPlanSpecificValuesProvider(inputConfig, nil, provider.FakeZonesProvider([]string{"a", "b", "c"}))
+	planSpec, _ := configuration.NewPlanSpecifications(strings.NewReader(""))
+	valuesProvider := provider.NewPlanSpecificValuesProvider(inputConfig, nil, provider.FakeZonesProvider([]string{"a", "b", "c"}), planSpec)
 
 	values, _ := valuesProvider.ValuesForPlanAndParameters(operation.ProvisioningParameters)
 	operation.ProviderValues = &values
