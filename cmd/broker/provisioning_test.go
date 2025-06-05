@@ -1369,10 +1369,7 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 				assert.Equal(t, tc.expectedVolumeSize, runtimeCR.Spec.Shoot.Provider.Workers[0].Volume.VolumeSize)
 			}
 			if len(tc.expectedZones) > 0 {
-				assert.Len(t, runtimeCR.Spec.Shoot.Provider.Workers[0].Zones, len(tc.expectedZones))
-				for _, z := range tc.expectedZones {
-					assert.Contains(t, runtimeCR.Spec.Shoot.Provider.Workers[0].Zones, z)
-				}
+				assert.ElementsMatch(t, tc.expectedZones, runtimeCR.Spec.Shoot.Provider.Workers[0].Zones)
 			}
 		})
 

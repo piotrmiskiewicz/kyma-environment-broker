@@ -222,7 +222,7 @@ func (s *CreateRuntimeResourceStep) createShootProvider(operation *internal.Oper
 	}
 
 	if len(operation.ProvisioningParameters.Parameters.AdditionalWorkerNodePools) > 0 {
-		additionalWorkers, err := s.workersProvider.CreateAdditionalWorkers(values, nil, operation.ProvisioningParameters.Parameters.AdditionalWorkerNodePools, values.Zones, operation.ProvisioningParameters.PlanID)
+		additionalWorkers, err := s.workersProvider.CreateAdditionalWorkers(values, nil, operation.ProvisioningParameters.Parameters.AdditionalWorkerNodePools, values.Zones)
 		if err != nil {
 			return imv1.Provider{}, fmt.Errorf("while creating additional workers: %w", err)
 		}
