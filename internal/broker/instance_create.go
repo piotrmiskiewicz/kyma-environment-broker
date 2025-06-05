@@ -51,17 +51,17 @@ type (
 		IsPlanSupport(planID string) bool
 		GetDefaultOIDC() *pkg.OIDCConfigDTO
 	}
+
+	ValuesProvider interface {
+		ValuesForPlanAndParameters(provisioningParameters internal.ProvisioningParameters) (internal.ProviderValues, error)
+	}
+
+	RegionsSupporter interface {
+		IsSupported(region string, machineType string) bool
+		SupportedRegions(machineType string) []string
+		AvailableZones(machineType, region, planID string) ([]string, error)
+	}
 )
-
-type ValuesProvider interface {
-	ValuesForPlanAndParameters(provisioningParameters internal.ProvisioningParameters) (internal.ProviderValues, error)
-}
-
-type RegionsSupporter interface {
-	IsSupported(region string, machineType string) bool
-	SupportedRegions(machineType string) []string
-	AvailableZones(machineType, region, planID string) ([]string, error)
-}
 
 type ProvisionEndpoint struct {
 	config                  Config
@@ -318,7 +318,9 @@ func (b *ProvisionEndpoint) validate(ctx context.Context, details domain.Provisi
 
 	enforceSameRegionForSeedAndShoot := valueOfBoolPtr(parameters.ShootAndSeedSameRegion)
 	if enforceSameRegionForSeedAndShoot {
-		if err := b.validateSeedAndShootRegion(strings.ToLower(values.ProviderType), valueOfPtr(parameters.Region), l); err != nil {
+		platformRegion, _ := middleware.RegionFromContext(ctx)
+		supportedRegions := b.schemaService.PlanRegions(PlanNamesMapping[details.PlanID], platformRegion)
+		if err := b.validateSeedAndShootRegion(strings.ToLower(values.ProviderType), valueOfPtr(parameters.Region), supportedRegions, l); err != nil {
 			return fmt.Errorf("validation of the same region for seed and shoot: %w", err)
 		}
 	}
@@ -780,18 +782,34 @@ func (b *ProvisionEndpoint) monitorAdditionalProperties(instanceID string, ersCo
 	}
 }
 
-func (b *ProvisionEndpoint) validateSeedAndShootRegion(providerType, region string, logger *slog.Logger) error {
+func (b *ProvisionEndpoint) validateSeedAndShootRegion(providerType, region string, supportedRegions []string, logger *slog.Logger) error {
 	providerConfig := &internal.ProviderConfig{}
 	if err := b.providerConfigProvider.Provide(providerType, providerConfig); err != nil {
 		logger.Error(fmt.Sprintf("while loading %s provider config with seed regions", providerType), "error", err)
 		return fmt.Errorf("unable to load %s provider config", providerType)
 	}
-	if !slices.Contains(providerConfig.SeedRegions, region) {
+	supportedSeedRegions := b.filterOutUnsupportedSeedRegions(supportedRegions, providerConfig.SeedRegions)
+	if !slices.Contains(supportedSeedRegions, region) {
 		logger.Warn(fmt.Sprintf("missing seed region %s for provider %s", region, providerType))
-		return fmt.Errorf("seed does not exist in %s region. Provider %s has seeds in the following regions: %s", region, providerType, providerConfig.SeedRegions)
+		msg := fmt.Sprintf("Provider %s has seeds in the following regions: %s", providerType, supportedSeedRegions)
+		return fmt.Errorf("seed does not exist in %s region. %s", region, msg)
 	}
 
 	return nil
+}
+
+func (b *ProvisionEndpoint) filterOutUnsupportedSeedRegions(supportedRegions, seedRegions []string) []string {
+	supportedRegionsSet := make(map[string]struct{}, len(supportedRegions))
+	for _, region := range supportedRegions {
+		supportedRegionsSet[region] = struct{}{}
+	}
+	supportedSeedRegions := make([]string, 0)
+	for _, seedRegion := range seedRegions {
+		if _, ok := supportedRegionsSet[seedRegion]; ok {
+			supportedSeedRegions = append(supportedSeedRegions, seedRegion)
+		}
+	}
+	return supportedSeedRegions
 }
 
 func insertRequest(instanceID, filePath string, ersContext internal.ERSContext, rawParameters json.RawMessage) error {

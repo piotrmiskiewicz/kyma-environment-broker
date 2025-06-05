@@ -316,3 +316,7 @@ func (s *SchemaService) createFlags(planName string) ControlFlagsObject {
 func (s *SchemaService) RandomZones(cp pkg.CloudProvider, region string, zonesCount int) []string {
 	return s.providerSpec.RandomZones(cp, region, zonesCount)
 }
+
+func (s *SchemaService) PlanRegions(planName, platformRegion string) []string {
+	return s.planSpec.Regions(planName, platformRegion)
+}
