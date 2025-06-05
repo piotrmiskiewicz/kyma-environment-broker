@@ -1,8 +1,9 @@
 package workers
 
 import (
-	provider2 "github.com/kyma-project/kyma-environment-broker/internal/provider"
 	"testing"
+
+	provider2 "github.com/kyma-project/kyma-environment-broker/internal/provider"
 
 	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
