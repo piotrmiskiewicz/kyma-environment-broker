@@ -1,6 +1,7 @@
 package workers
 
 import (
+	provider2 "github.com/kyma-project/kyma-environment-broker/internal/provider"
 	"testing"
 
 	"github.com/kyma-project/kyma-environment-broker/common/runtime"
@@ -32,11 +33,10 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 
 		// when
 		workers, err := provider.CreateAdditionalWorkers(
-			internal.ProviderValues{},
+			internal.ProviderValues{ProviderType: provider2.AWSProviderType},
 			currentAdditionalWorkers,
 			additionalWorkerNodePools,
 			[]string{"zone-x", "zone-y", "zone-z"},
-			broker.AWSPlanID,
 		)
 
 		// then
@@ -59,11 +59,13 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 
 		// when
 		workers, err := provider.CreateAdditionalWorkers(
-			internal.ProviderValues{},
+			internal.ProviderValues{
+				ProviderType: provider2.AWSProviderType,
+				VolumeSizeGb: 115,
+			},
 			nil,
 			additionalWorkerNodePools,
 			[]string{"zone-a", "zone-b", "zone-c"},
-			broker.AWSPlanID,
 		)
 
 		// then
@@ -71,6 +73,7 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 		assert.Len(t, workers, 1)
 		assert.Equal(t, "worker", workers[0].Name)
 		assert.ElementsMatch(t, []string{"zone-a", "zone-b", "zone-c"}, workers[0].Zones)
+		assert.Equal(t, "115Gi", workers[0].Volume.VolumeSize)
 	})
 
 	t.Run("should create worker with one zone if ha is disabled", func(t *testing.T) {
@@ -86,11 +89,10 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 
 		// when
 		workers, err := provider.CreateAdditionalWorkers(
-			internal.ProviderValues{},
+			internal.ProviderValues{ProviderType: provider2.AWSProviderType},
 			nil,
 			additionalWorkerNodePools,
 			[]string{"zone-a", "zone-b", "zone-c"},
-			broker.AWSPlanID,
 		)
 
 		// then
@@ -120,12 +122,12 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 		// when
 		workers, err := provider.CreateAdditionalWorkers(
 			internal.ProviderValues{
-				Region: "eu-west-1",
+				Region:       "eu-west-1",
+				ProviderType: provider2.AWSProviderType,
 			},
 			nil,
 			additionalWorkerNodePools,
 			[]string{"zone-x", "zone-y", "zone-z"},
-			broker.AWSPlanID,
 		)
 
 		// then
@@ -134,37 +136,6 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 		assert.Equal(t, "worker", workers[0].Name)
 		assert.Len(t, workers[0].Zones, 3)
 		assert.ElementsMatch(t, []string{"eu-west-1a", "eu-west-1b", "eu-west-1c"}, workers[0].Zones)
-	})
-
-	t.Run("should fail when AvailableZones returns an error", func(t *testing.T) {
-		// given
-		regionsSupportingMachine := regionssupportingmachine.RegionsSupportingMachine{
-			"standard": {
-				"eu-west-1": {"a", "b", "c"},
-			},
-		}
-		provider := NewProvider(broker.InfrastructureManager{}, regionsSupportingMachine)
-		additionalWorkerNodePools := []runtime.AdditionalWorkerNodePool{
-			{
-				Name:        "worker",
-				MachineType: "standard",
-				HAZones:     true,
-			},
-		}
-
-		// when
-		_, err := provider.CreateAdditionalWorkers(
-			internal.ProviderValues{
-				Region: "eu-west-1",
-			},
-			nil,
-			additionalWorkerNodePools,
-			[]string{"zone-x", "zone-y", "zone-z"},
-			"not-supported-plan",
-		)
-
-		// then
-		assert.EqualError(t, err, "while getting available zones from regions supporting machine: plan not-supported-plan not supported")
 	})
 
 	t.Run("should skip volume for openstack provider", func(t *testing.T) {
@@ -186,7 +157,6 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 			nil,
 			additionalWorkerNodePools,
 			[]string{"zone-a", "zone-b", "zone-c"},
-			broker.SapConvergedCloudPlanID,
 		)
 
 		// then

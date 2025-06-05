@@ -1,8 +1,6 @@
 package provider
 
 import (
-	"fmt"
-
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
@@ -173,7 +171,7 @@ func (p *AWSFreemiumInputProvider) region() string {
 func AWSZones(region string, availableZones []string) []string {
 	var generatedZones []string
 	for _, zone := range availableZones {
-		generatedZones = append(generatedZones, fmt.Sprintf("%s%s", region, zone))
+		generatedZones = append(generatedZones, FullZoneName(AWSProviderType, region, zone))
 	}
 	return generatedZones
 }

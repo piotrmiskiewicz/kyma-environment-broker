@@ -1,8 +1,6 @@
 package provider
 
 import (
-	"fmt"
-
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/assuredworkloads"
@@ -85,6 +83,7 @@ func (p *GCPInputProvider) region() string {
 
 func (p *GCPTrialInputProvider) Provide() internal.ProviderValues {
 	region := p.region()
+
 	return internal.ProviderValues{
 		DefaultAutoScalerMax: 1,
 		DefaultAutoScalerMin: 1,
@@ -127,7 +126,7 @@ func (p *GCPTrialInputProvider) region() string {
 func ZonesForGCPRegion(region string, zones []string) []string {
 	fullNames := []string{}
 	for _, zone := range zones {
-		fullNames = append(fullNames, fmt.Sprintf("%s-%s", region, zone))
+		fullNames = append(fullNames, FullZoneName(GCPProviderType, region, zone))
 	}
 
 	return fullNames

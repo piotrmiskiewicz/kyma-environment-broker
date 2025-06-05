@@ -28,7 +28,7 @@ func NewProvider(imConfig broker.InfrastructureManager, regionsSupportingMachine
 }
 
 func (p *Provider) CreateAdditionalWorkers(values internal.ProviderValues, currentAdditionalWorkers map[string]gardener.Worker, additionalWorkerNodePools []pkg.AdditionalWorkerNodePool,
-	zones []string, planID string) ([]gardener.Worker, error) {
+	zones []string) ([]gardener.Worker, error) {
 	additionalWorkerNodePoolsMaxUnavailable := intstr.FromInt32(int32(0))
 	workers := make([]gardener.Worker, 0, len(additionalWorkerNodePools))
 
@@ -40,7 +40,7 @@ func (p *Provider) CreateAdditionalWorkers(values internal.ProviderValues, curre
 			workerZones = currentAdditionalWorker.Zones
 		} else {
 			workerZones = zones
-			customAvailableZones, err := p.regionsSupportingMachine.AvailableZones(additionalWorkerNodePool.MachineType, values.Region, planID)
+			customAvailableZones, err := p.regionsSupportingMachine.AvailableZones(additionalWorkerNodePool.MachineType, values.Region, values.ProviderType)
 			if err != nil {
 				return []gardener.Worker{}, fmt.Errorf("while getting available zones from regions supporting machine: %w", err)
 			}

@@ -142,11 +142,15 @@ func (p *AzureLiteInputProvider) Provide() internal.ProviderValues {
 		region = *p.ProvisioningParameters.Parameters.Region
 	}
 	zones := p.ZonesProvider.RandomZones(pkg.Azure, region, 1)
+	zoneFullNames := []string{}
+	for _, z := range zones {
+		zoneFullNames = append(zoneFullNames, FullZoneName(AzureProviderType, region, z))
+	}
 	return internal.ProviderValues{
 		DefaultAutoScalerMax: 10,
 		DefaultAutoScalerMin: 2,
 		ZonesCount:           1,
-		Zones:                zones,
+		Zones:                zoneFullNames,
 		ProviderType:         AzureProviderType,
 		DefaultMachineType:   machineType,
 		Region:               region,
@@ -174,11 +178,15 @@ func (p *AzureFreemiumInputProvider) Provide() internal.ProviderValues {
 		region = *p.ProvisioningParameters.Parameters.Region
 	}
 	zones := p.ZonesProvider.RandomZones(pkg.Azure, region, 1)
+	zoneFullNames := []string{}
+	for _, z := range zones {
+		zoneFullNames = append(zoneFullNames, FullZoneName(AzureProviderType, region, z))
+	}
 	return internal.ProviderValues{
 		DefaultAutoScalerMax: 1,
 		DefaultAutoScalerMin: 1,
 		ZonesCount:           1,
-		Zones:                zones,
+		Zones:                zoneFullNames,
 		ProviderType:         AzureProviderType,
 		DefaultMachineType:   machineType,
 		Region:               region,
