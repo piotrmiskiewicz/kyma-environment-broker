@@ -41,7 +41,7 @@ func CountZonesForSapConvergedCloud(region string) int {
 func ZonesForSapConvergedCloud(region string, availableZones []string) []string {
 	var generatedZones []string
 	for _, zone := range availableZones {
-		generatedZones = append(generatedZones, fmt.Sprintf("%s%s", region, zone))
+		generatedZones = append(generatedZones, FullZoneName(OpenstackProviderType, region, zone))
 	}
 	return generatedZones
 }
@@ -61,4 +61,18 @@ func FakeZonesProvider(zones []string) *zonesProviderMock {
 	return &zonesProviderMock{
 		zones: zones,
 	}
+}
+
+func FullZoneName(providerType string, region string, zone string) string {
+	switch providerType {
+	case GCPProviderType:
+		return fmt.Sprintf("%s-%s", region, zone)
+	case AzureProviderType:
+		return fmt.Sprintf("%s", zone)
+	case OpenstackProviderType:
+		return fmt.Sprintf("%s%s", region, zone)
+	case AWSProviderType:
+		return fmt.Sprintf("%s%s", region, zone)
+	}
+	return zone
 }

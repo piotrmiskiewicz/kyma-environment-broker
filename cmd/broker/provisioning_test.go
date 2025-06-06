@@ -1107,6 +1107,7 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 		expectedMachineType          string
 		expectedSubscriptionName     string
 		expectedVolumeSize           string
+		expectedZones                []string
 	}{
 		"Regular trial": {
 			planID: broker.TrialPlanID,
@@ -1201,6 +1202,7 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 			expectedMachineType:          provider.DefaultAzureMachineType,
 			expectedProvider:             "azure",
 			expectedSubscriptionName:     "sb-azure",
+			expectedZones:                []string{"1", "2", "3"},
 		},
 		"Production AWS": {
 			planID:                       broker.AWSPlanID,
@@ -1218,7 +1220,7 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 		},
 		"Production Multi-AZ AWS": {
 			planID:                       broker.AWSPlanID,
-			region:                       "us-east-1",
+			region:                       "sa-east-1",
 			multiZone:                    true,
 			controlPlaneFailureTolerance: "zone",
 
@@ -1228,6 +1230,7 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 			expectedMachineType:          provider.DefaultAWSMachineType,
 			expectedProvider:             "aws",
 			expectedSubscriptionName:     "sb-aws",
+			expectedZones:                []string{"sa-east-1a", "sa-east-1b", "sa-east-1c"},
 		},
 		"Production GCP": {
 			planID:                       broker.GCPPlanID,
@@ -1283,6 +1286,8 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 			expectedMachineType:          provider.DefaultSapConvergedCloudMachineType,
 			expectedProvider:             "openstack",
 			expectedSubscriptionName:     "sb-openstack_eu-de-1",
+
+			expectedZones: []string{"eu-de-1a", "eu-de-1b", "eu-de-1d"},
 		},
 		"sap converged cloud eu-de-2": {
 			planID:                       broker.SapConvergedCloudPlanID,
@@ -1362,6 +1367,9 @@ func TestProvisioning_ClusterParameters(t *testing.T) {
 			}
 			if tc.expectedVolumeSize != "" {
 				assert.Equal(t, tc.expectedVolumeSize, runtimeCR.Spec.Shoot.Provider.Workers[0].Volume.VolumeSize)
+			}
+			if len(tc.expectedZones) > 0 {
+				assert.ElementsMatch(t, tc.expectedZones, runtimeCR.Spec.Shoot.Provider.Workers[0].Zones)
 			}
 		})
 

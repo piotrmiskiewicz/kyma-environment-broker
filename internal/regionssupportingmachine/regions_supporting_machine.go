@@ -6,7 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
+	"github.com/kyma-project/kyma-environment-broker/internal/provider"
+
 	"github.com/kyma-project/kyma-environment-broker/internal/utils"
 )
 
@@ -48,7 +49,7 @@ func (r RegionsSupportingMachine) SupportedRegions(machineType string) []string 
 	return []string{}
 }
 
-func (r RegionsSupportingMachine) AvailableZones(machineType, region, planID string) ([]string, error) {
+func (r RegionsSupportingMachine) AvailableZones(machineType, region, providerType string) ([]string, error) {
 	for machineFamily, regionsMap := range r {
 		if strings.HasPrefix(machineType, machineFamily) {
 			zones := regionsMap[region]
@@ -56,34 +57,12 @@ func (r RegionsSupportingMachine) AvailableZones(machineType, region, planID str
 				return []string{}, nil
 			}
 			rand.Shuffle(len(zones), func(i, j int) { zones[i], zones[j] = zones[j], zones[i] })
-			if len(zones) > 3 {
-				zones = zones[:3]
+
+			var formattedZones []string
+			for _, zone := range zones {
+				formattedZones = append(formattedZones, provider.FullZoneName(providerType, region, zone))
 			}
-
-			switch planID {
-			case broker.AWSPlanID, broker.BuildRuntimeAWSPlanID, broker.PreviewPlanID, broker.SapConvergedCloudPlanID:
-				var formattedZones []string
-				for _, zone := range zones {
-					formattedZones = append(formattedZones, fmt.Sprintf("%s%s", region, zone))
-				}
-				return formattedZones, nil
-
-			case broker.AzurePlanID, broker.BuildRuntimeAzurePlanID:
-				return zones, nil
-
-			case broker.AzureLitePlanID:
-				return zones[:1], nil
-
-			case broker.GCPPlanID, broker.BuildRuntimeGCPPlanID:
-				var formattedZones []string
-				for _, zone := range zones {
-					formattedZones = append(formattedZones, fmt.Sprintf("%s-%s", region, zone))
-				}
-				return formattedZones, nil
-
-			default:
-				return []string{}, fmt.Errorf("plan %s not supported", planID)
-			}
+			return formattedZones, nil
 		}
 	}
 
