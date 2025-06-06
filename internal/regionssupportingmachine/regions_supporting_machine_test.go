@@ -241,7 +241,7 @@ func TestAvailableZonesForRegionWith4Zones(t *testing.T) {
 			assert.NoError(t, err)
 
 			//then
-			assert.Len(t, result, 3)
+			assert.Len(t, result, len(tt.expected))
 			for _, v := range result {
 				assert.Contains(t, tt.expected, v)
 			}
