@@ -1,9 +1,8 @@
 package regionssupportingmachine
 
 import (
+	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 	"testing"
-
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -97,98 +96,98 @@ func TestAvailableZones(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		planID      string
+		provider    string
 		machineType string
 		region      string
 		expected    []string
 	}{
 		{
 			name:        "AWS plan - region with 3 zones",
-			planID:      broker.AWSPlanID,
+			provider:    provider.AWSProviderType,
 			machineType: "c2d-highmem-32",
 			region:      "southamerica-east1",
 			expected:    []string{"southamerica-east1a", "southamerica-east1b", "southamerica-east1c"},
 		},
 		{
 			name:        "AWS plan - region with 2 zones",
-			planID:      broker.AWSPlanID,
+			provider:    provider.AWSProviderType,
 			machineType: "Standard_L8s_v3",
 			region:      "brazilsouth",
 			expected:    []string{"brazilsoutha", "brazilsouthb"},
 		},
 		{
 			name:        "AWS plan - region with 1 zones",
-			planID:      broker.AWSPlanID,
+			provider:    provider.AWSProviderType,
 			machineType: "Standard_L8s_v3",
 			region:      "uksouth",
 			expected:    []string{"uksoutha"},
 		},
 		{
 			name:        "Azure plan - region with 3 zones",
-			planID:      broker.AzurePlanID,
+			provider:    provider.AzureProviderType,
 			machineType: "c2d-highmem-32",
 			region:      "southamerica-east1",
 			expected:    []string{"a", "b", "c"},
 		},
 		{
 			name:        "Azure plan - region with 2 zones",
-			planID:      broker.AzurePlanID,
+			provider:    provider.AzureProviderType,
 			machineType: "Standard_L8s_v3",
 			region:      "brazilsouth",
 			expected:    []string{"a", "b"},
 		},
 		{
 			name:        "Azure plan - region with 1 zones",
-			planID:      broker.AzurePlanID,
+			provider:    provider.AzureProviderType,
 			machineType: "Standard_L8s_v3",
 			region:      "uksouth",
 			expected:    []string{"a"},
 		},
 		{
 			name:        "GCP plan - region with 3 zones",
-			planID:      broker.GCPPlanID,
+			provider:    provider.GCPProviderType,
 			machineType: "c2d-highmem-32",
 			region:      "southamerica-east1",
 			expected:    []string{"southamerica-east1-a", "southamerica-east1-b", "southamerica-east1-c"},
 		},
 		{
 			name:        "GCP plan - region with 2 zones",
-			planID:      broker.GCPPlanID,
+			provider:    provider.GCPProviderType,
 			machineType: "Standard_L8s_v3",
 			region:      "brazilsouth",
 			expected:    []string{"brazilsouth-a", "brazilsouth-b"},
 		},
 		{
 			name:        "GCP plan - region with 1 zones",
-			planID:      broker.GCPPlanID,
+			provider:    provider.GCPProviderType,
 			machineType: "Standard_L8s_v3",
 			region:      "uksouth",
 			expected:    []string{"uksouth-a"},
 		},
 		{
 			name:        "region with empty list of zones",
-			planID:      broker.AzurePlanID,
+			provider:    provider.AWSProviderType,
 			machineType: "m8g.large",
 			region:      "ap-southeast-1",
 			expected:    []string{},
 		},
 		{
 			name:        "region with nil zones",
-			planID:      broker.AzurePlanID,
+			provider:    provider.AzureProviderType,
 			machineType: "c2d-highmem-32",
 			region:      "us-central1",
 			expected:    []string{},
 		},
 		{
 			name:        "not supported region",
-			planID:      broker.AzurePlanID,
+			provider:    provider.AzureProviderType,
 			machineType: "Standard_L8s_v3",
 			region:      "westus2",
 			expected:    []string{},
 		},
 		{
 			name:        "not supported machine type",
-			planID:      broker.AzurePlanID,
+			provider:    provider.AzureProviderType,
 			machineType: "notSupportedMachineType",
 			region:      "notSupportedRegion",
 			expected:    []string{},
@@ -198,7 +197,7 @@ func TestAvailableZones(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// when
-			result, err := regionsSupportingMachine.AvailableZones(tt.machineType, tt.region, tt.planID)
+			result, err := regionsSupportingMachine.AvailableZones(tt.machineType, tt.region, tt.provider)
 			assert.NoError(t, err)
 
 			// then
@@ -214,22 +213,22 @@ func TestAvailableZonesForRegionWith4Zones(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		planID   string
+		provider string
 		expected []string
 	}{
 		{
 			name:     "AWS plan",
-			planID:   broker.AWSPlanID,
+			provider: provider.AWSProviderType,
 			expected: []string{"ap-northeast-1a", "ap-northeast-1b", "ap-northeast-1c", "ap-northeast-1d"},
 		},
 		{
 			name:     "Azure plan",
-			planID:   broker.AzurePlanID,
+			provider: provider.AzureProviderType,
 			expected: []string{"a", "b", "c", "d"},
 		},
 		{
 			name:     "GCP plan",
-			planID:   broker.GCPPlanID,
+			provider: provider.GCPProviderType,
 			expected: []string{"ap-northeast-1-a", "ap-northeast-1-b", "ap-northeast-1-c", "ap-northeast-1-d"},
 		},
 	}
@@ -237,7 +236,7 @@ func TestAvailableZonesForRegionWith4Zones(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			//when
-			result, err := regionsSupportingMachine.AvailableZones("m8g", "ap-northeast-1", tt.planID)
+			result, err := regionsSupportingMachine.AvailableZones("m8g", "ap-northeast-1", tt.provider)
 			assert.NoError(t, err)
 
 			//then
@@ -289,7 +288,7 @@ func TestAvailableZonesForAzureLite(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// when
-			result, err := regionsSupportingMachine.AvailableZones(tt.machineType, tt.region, broker.AzureLitePlanID)
+			result, err := regionsSupportingMachine.AvailableZones(tt.machineType, tt.region, provider.AzureProviderType)
 			assert.NoError(t, err)
 
 			//then

@@ -2,7 +2,6 @@ package workers
 
 import (
 	"fmt"
-	"math/rand"
 	"strconv"
 
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
@@ -28,7 +27,7 @@ func NewProvider(imConfig broker.InfrastructureManager, regionsSupportingMachine
 }
 
 func (p *Provider) CreateAdditionalWorkers(values internal.ProviderValues, currentAdditionalWorkers map[string]gardener.Worker, additionalWorkerNodePools []pkg.AdditionalWorkerNodePool,
-	zones []string) ([]gardener.Worker, error) {
+	zones []string, planID string) ([]gardener.Worker, error) {
 	additionalWorkerNodePoolsMaxUnavailable := intstr.FromInt32(int32(0))
 	workers := make([]gardener.Worker, 0, len(additionalWorkerNodePools))
 
@@ -44,12 +43,16 @@ func (p *Provider) CreateAdditionalWorkers(values internal.ProviderValues, curre
 			if err != nil {
 				return []gardener.Worker{}, fmt.Errorf("while getting available zones from regions supporting machine: %w", err)
 			}
+
 			// If custom zones are found, use them instead of the Kyma workload zones.
 			if len(customAvailableZones) > 0 {
 				workerZones = customAvailableZones
 			}
-			if !additionalWorkerNodePool.HAZones {
-				rand.Shuffle(len(workerZones), func(i, j int) { workerZones[i], workerZones[j] = workerZones[j], workerZones[i] })
+			// limit to 3 zones (if there is more than 3 available)
+			if len(workerZones) > 3 {
+				workerZones = workerZones[:3]
+			}
+			if !additionalWorkerNodePool.HAZones || planID == broker.AzureLitePlanID {
 				workerZones = workerZones[:1]
 			}
 		}
