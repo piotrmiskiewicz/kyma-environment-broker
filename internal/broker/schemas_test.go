@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"strings"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 
 func TestNewSchemaService_validation(t *testing.T) {
 	// Given
-	plans := strings.NewReader(`
+	plans, err := configuration.NewPlanSpecifications(strings.NewReader(`
 aws,build-runtime-aws:
         regions:
             cf-eu11:
@@ -18,8 +19,9 @@ aws,build-runtime-aws:
             default:
                 - eu-west-1
 
-`)
-	providers := strings.NewReader(`
+`))
+	require.NoError(t, err)
+	providers, err := configuration.NewProviderSpec(strings.NewReader(`
 aws:
     regions:
        eu-central-1:
@@ -28,9 +30,9 @@ aws:
        eu-west-1:
             displayName: "eu-west-1"
             zones: ["a", "b", "c"]
-`)
-	svc, err := NewSchemaService(providers, plans, nil, Config{}, EnablePlans{"aws"})
+`))
 	require.NoError(t, err)
+	svc := NewSchemaService(providers, plans, nil, Config{}, EnablePlans{"aws"})
 
 	// When
 	err = svc.Validate()
@@ -41,7 +43,7 @@ aws:
 
 func TestNewSchemaService_validation_MissingRegion(t *testing.T) {
 	// Given
-	plans := strings.NewReader(`
+	plans, err := configuration.NewPlanSpecifications(strings.NewReader(`
 aws,build-runtime-aws:
         regions:
             cf-eu11:
@@ -49,15 +51,17 @@ aws,build-runtime-aws:
             default:
                 - eu-west-1
 
-`)
-	providers := strings.NewReader(`
+`))
+	require.NoError(t, err)
+	providers, err := configuration.NewProviderSpec(strings.NewReader(`
 aws:
     regions:
        eu-central-1:
             displayName: "eu-central-1"
             zones: ["a", "b"]
-`)
-	svc, err := NewSchemaService(providers, plans, nil, Config{}, EnablePlans{"aws"})
+`))
+	require.NoError(t, err)
+	svc := NewSchemaService(providers, plans, nil, Config{}, EnablePlans{"aws"})
 	require.NoError(t, err)
 
 	// When
@@ -69,7 +73,7 @@ aws:
 
 func TestNewSchemaService_validation_MissingProvider(t *testing.T) {
 	// Given
-	plans := strings.NewReader(`
+	plans, err := configuration.NewPlanSpecifications(strings.NewReader(`
 aws,build-runtime-aws:
         regions:
             cf-eu11:
@@ -77,16 +81,17 @@ aws,build-runtime-aws:
             default:
                 - eu-west-1
 
-`)
-	providers := strings.NewReader(`
+`))
+	require.NoError(t, err)
+	providers, err := configuration.NewProviderSpec(strings.NewReader(`
 gcp:
     regions:
        eu-central-1:
             displayName: "eu-central-1"
             zones: ["a", "b"]
-`)
-	svc, err := NewSchemaService(providers, plans, nil, Config{},
-		EnablePlans{"aws"})
+`))
+	require.NoError(t, err)
+	svc := NewSchemaService(providers, plans, nil, Config{}, EnablePlans{"aws"})
 	require.NoError(t, err)
 
 	// When
