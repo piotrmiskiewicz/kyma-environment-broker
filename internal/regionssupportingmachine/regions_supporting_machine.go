@@ -57,9 +57,6 @@ func (r RegionsSupportingMachine) AvailableZones(machineType, region, providerTy
 				return []string{}, nil
 			}
 			rand.Shuffle(len(zones), func(i, j int) { zones[i], zones[j] = zones[j], zones[i] })
-			if len(zones) > 3 {
-				zones = zones[:3]
-			}
 
 			var formattedZones []string
 			for _, zone := range zones {
