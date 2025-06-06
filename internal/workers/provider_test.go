@@ -38,6 +38,7 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 			currentAdditionalWorkers,
 			additionalWorkerNodePools,
 			[]string{"zone-x", "zone-y", "zone-z"},
+			broker.AWSPlanID,
 		)
 
 		// then
@@ -67,6 +68,7 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 			nil,
 			additionalWorkerNodePools,
 			[]string{"zone-a", "zone-b", "zone-c"},
+			broker.AWSPlanID,
 		)
 
 		// then
@@ -94,6 +96,7 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 			nil,
 			additionalWorkerNodePools,
 			[]string{"zone-a", "zone-b", "zone-c"},
+			broker.AWSPlanID,
 		)
 
 		// then
@@ -129,6 +132,7 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 			nil,
 			additionalWorkerNodePools,
 			[]string{"zone-x", "zone-y", "zone-z"},
+			broker.AWSPlanID,
 		)
 
 		// then
@@ -158,6 +162,7 @@ func TestCreateAdditionalWorkers(t *testing.T) {
 			nil,
 			additionalWorkerNodePools,
 			[]string{"zone-a", "zone-b", "zone-c"},
+			broker.AWSPlanID,
 		)
 
 		// then
