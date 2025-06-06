@@ -1,8 +1,9 @@
 package regionssupportingmachine
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -2,10 +2,11 @@ package regionssupportingmachine
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 	"math/rand"
 	"sort"
 	"strings"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/utils"
 )
