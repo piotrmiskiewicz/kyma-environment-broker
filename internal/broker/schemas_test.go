@@ -1,9 +1,10 @@
 package broker
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

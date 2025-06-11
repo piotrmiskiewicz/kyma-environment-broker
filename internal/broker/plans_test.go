@@ -3,10 +3,11 @@ package broker
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/stretchr/testify/assert"

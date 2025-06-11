@@ -2,12 +2,13 @@ package broker_test
 
 import (
 	"context"
-	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 	"io"
 	"log/slog"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal/broker"
