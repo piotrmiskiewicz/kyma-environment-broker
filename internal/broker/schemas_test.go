@@ -1,9 +1,10 @@
 package broker
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 
 	"github.com/kyma-project/kyma-environment-broker/internal/provider/configuration"
 
