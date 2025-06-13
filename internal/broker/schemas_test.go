@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"strings"
 	"testing"
 
@@ -100,4 +101,15 @@ gcp:
 
 	// then
 	assert.Error(t, err)
+}
+
+func TestSchemaPlans(t *testing.T) {
+	// Given
+	schemaService := createSchemaService(t)
+
+	// When
+	result := schemaService.Plans(PlansConfig{}, "cf-eu31", runtime.Azure)
+
+	assert.True(t, *result[AzurePlanID].PlanUpdatable)
+	assert.False(t, *result[BuildRuntimeAzurePlanID].PlanUpdatable)
 }
