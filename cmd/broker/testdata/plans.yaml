@@ -108,7 +108,8 @@ preview,aws,build-runtime-aws:
 
 azure:
   volumeSizeGb: 82
-  upgradableToPlans: build-runtime-azure
+  upgradableToPlans:
+   - build-runtime-azure
   regularMachines: &azure_regular_machines
     - "Standard_D2s_v5"
     - "Standard_D4s_v5"
@@ -140,7 +141,6 @@ azure:
     default: [ "eastus","centralus","westus2","uksouth","northeurope","westeurope","japaneast","southeastasia","australiaeast","brazilsouth","canadacentral" ]
 
 build-runtime-azure:
-    upgradableToPlans: azure
     volumeSizeGb: 80
     regularMachines: *azure_regular_machines
     additionalMachines: *azure_additional_machines
