@@ -110,6 +110,7 @@ func (b *UpdateEndpoint) Update(ctx context.Context, instanceID string, details 
 	logger.Info(fmt.Sprintf("Updating instanceID: %s", instanceID))
 	logger.Info(fmt.Sprintf("Updating asyncAllowed: %v", asyncAllowed))
 	logger.Info(fmt.Sprintf("Parameters: '%s'", string(details.RawParameters)))
+	logger.Info(fmt.Sprintf("Plan ID: '%s'", details.PlanID))
 	instance, err := b.instanceStorage.GetByID(instanceID)
 	if err != nil && dberr.IsNotFound(err) {
 		logger.Error(fmt.Sprintf("unable to get instance: %s", err.Error()))
