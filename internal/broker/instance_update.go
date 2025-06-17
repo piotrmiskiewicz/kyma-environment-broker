@@ -328,7 +328,7 @@ func (b *UpdateEndpoint) processUpdateParameters(ctx context.Context, instance *
 	}
 
 	var updateStorage []string
-	if details.PlanID != instance.ServicePlanID {
+	if details.PlanID != "" && details.PlanID != instance.ServicePlanID {
 		logger.Info(fmt.Sprintf("Plan change requested: %s -> %s", instance.ServicePlanID, details.PlanID))
 		if b.config.EnablePlanUpgrades && b.planSpec.IsUpgradableBetween(PlanNamesMapping[instance.ServicePlanID], PlanNamesMapping[details.PlanID]) {
 			logger.Info(fmt.Sprintf("Plan change accepted."))
