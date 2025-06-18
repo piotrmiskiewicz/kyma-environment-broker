@@ -196,7 +196,7 @@ func TestUpdatePlan(t *testing.T) {
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", iid),
 		`{
 				   "service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-				   "plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
+				   "plan_id": "6aae0ff3-89f7-4f12-86de-51466145422e",
 				   "context": {
 					   "sm_operator_credentials": {
 						   "clientid": "cid",
@@ -216,6 +216,14 @@ func TestUpdatePlan(t *testing.T) {
 	updateOperationID := suite.DecodeOperationID(resp)
 
 	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
+
+	gotInstance := suite.GetInstance(iid)
+	assert.Equal(t, "6aae0ff3-89f7-4f12-86de-51466145422e", gotInstance.ServicePlanID)
+	assert.Equal(t, "6aae0ff3-89f7-4f12-86de-51466145422e", gotInstance.Parameters.PlanID)
+	assert.Equal(t, "build-runtime-aws", gotInstance.ServicePlanName)
+
+	updateOperation := suite.GetOperation(updateOperationID)
+	assert.Equal(t, "6aae0ff3-89f7-4f12-86de-51466145422e", updateOperation.ProvisioningParameters.PlanID)
 
 	// todo: assert runtime cr labels (and kyma cr)
 }
