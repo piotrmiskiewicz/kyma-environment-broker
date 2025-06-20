@@ -1,8 +1,9 @@
 package runtime
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"reflect"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"

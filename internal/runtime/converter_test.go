@@ -1,10 +1,11 @@
 package runtime
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 
 	"github.com/kyma-project/kyma-environment-broker/common/runtime"
 	"github.com/kyma-project/kyma-environment-broker/internal"
