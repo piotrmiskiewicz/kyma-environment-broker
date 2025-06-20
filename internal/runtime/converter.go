@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"github.com/kyma-project/kyma-environment-broker/internal/broker"
 	"reflect"
 
 	pkg "github.com/kyma-project/kyma-environment-broker/common/runtime"
@@ -77,6 +78,10 @@ func (c *converter) applyOperation(source *internal.Operation, target *pkg.Opera
 		if !reflect.DeepEqual(source.LastError, kebError.LastError{}) {
 			target.Error = &source.LastError
 		}
+		if source.UpdatedPlanID != "" {
+			target.UpdatedPlanName = broker.PlanNamesMapping[source.UpdatedPlanID]
+		}
+
 	}
 }
 
