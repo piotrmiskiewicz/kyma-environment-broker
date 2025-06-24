@@ -1414,10 +1414,15 @@ func TestUpdateUnsupportedMachineInAdditionalWorkerNodePools(t *testing.T) {
 func TestUpdateGPUMachineForInternalUser(t *testing.T) {
 	// given
 	instance := fixture.FixInstance(instanceID)
+	instance.Parameters.Parameters.Region = ptr.String("uksouth")
 	st := storage.NewMemoryStorage()
 	err := st.Instances().Insert(instance)
 	require.NoError(t, err)
-	err = st.Operations().InsertProvisioningOperation(fixProvisioningOperation("provisioning01"))
+
+	op := fixProvisioningOperation("provisioning01")
+	op.ProvisioningParameters.Parameters.Region = ptr.String("uksouth")
+
+	err = st.Operations().InsertProvisioningOperation(op)
 	require.NoError(t, err)
 
 	handler := &handler{}
