@@ -1563,13 +1563,13 @@ func TestAvailableZonesValidationDuringUpdate(t *testing.T) {
 	// given
 	instance := fixture.FixInstance(instanceID)
 	instance.ServicePlanID = broker.AWSPlanID
+	instance.Parameters.PlanID = broker.AWSPlanID
 	st := storage.NewMemoryStorage()
 	err := st.Instances().Insert(instance)
 	require.NoError(t, err)
 	provisioning := fixProvisioningOperation("provisioning01")
-	provisioning.ProviderValues = &internal.ProviderValues{
-		ProviderType: "aws",
-	}
+	provisioning.ProvisioningParameters.PlanID = broker.AWSPlanID
+	provisioning.ProvisioningParameters.Parameters.Region = ptr.String("westeurope")
 	err = st.Operations().InsertProvisioningOperation(provisioning)
 	require.NoError(t, err)
 
