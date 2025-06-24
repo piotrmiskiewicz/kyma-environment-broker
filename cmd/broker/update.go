@@ -29,7 +29,7 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 	regions, err := provider.ReadPlatformRegionMappingFromFile(cfg.TrialRegionMappingFilePath)
 	valuesProvider := provider.NewPlanSpecificValuesProvider(cfg.InfrastructureManager, regions, schemaService, planSpec)
 
-	manager.DefineStages([]string{"cluster", "btp-operator", "btp-operator-check", "check", "runtime_resource", "check_runtime_resource", "kyma_resource"})
+	manager.DefineStages([]string{"edp", "cluster", "btp-operator", "btp-operator-check", "check", "runtime_resource", "check_runtime_resource", "kyma_resource"})
 	updateSteps := []struct {
 		disabled  bool
 		stage     string
@@ -39,6 +39,11 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 		{
 			stage: "cluster",
 			step:  update.NewInitialisationStep(db),
+		},
+		{
+			stage:    "edp",
+			step:     update.NewEDPUpdateStep(db.Operations(), cfg.EDP),
+			disabled: !cfg.Broker.EnablePlanUpgrades,
 		},
 		{
 			stage:     "runtime_resource",

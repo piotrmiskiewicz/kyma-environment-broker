@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/edp"
+	kebError "github.com/kyma-project/kyma-environment-broker/internal/error"
 	"github.com/kyma-project/kyma-environment-broker/internal/process"
 	"github.com/kyma-project/kyma-environment-broker/internal/process/provisioning"
+	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 	"log/slog"
 	"strings"
 	"time"
@@ -24,6 +26,15 @@ type EDPUpdateStep struct {
 	client           EDPUpdater
 	config           edp.Config
 	operationManager *process.OperationManager
+}
+
+func NewEDPUpdateStep(operations storage.Operations, config edp.Config) *EDPUpdateStep {
+	step := &EDPUpdateStep{
+		client: edp.NewClient(config),
+		config: config,
+	}
+	step.operationManager = process.NewOperationManager(operations, step.Name(), kebError.EDPDependency)
+	return step
 }
 
 func (s *EDPUpdateStep) Name() string {
