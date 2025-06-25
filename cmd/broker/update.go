@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/kyma-project/kyma-environment-broker/internal/edp"
 	"log/slog"
 
 	"github.com/kyma-project/kyma-environment-broker/internal"
@@ -42,7 +43,7 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 		},
 		{
 			stage:    "edp",
-			step:     update.NewEDPUpdateStep(db.Operations(), cfg.EDP),
+			step:     update.NewEDPUpdateStep(db.Operations(), cfg.EDP, edp.NewClient(cfg.EDP)),
 			disabled: !cfg.Broker.EnablePlanUpgrades || cfg.EDP.Disabled,
 		},
 		{
