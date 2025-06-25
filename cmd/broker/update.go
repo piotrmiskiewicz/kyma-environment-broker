@@ -43,7 +43,7 @@ func NewUpdateProcessingQueue(ctx context.Context, manager *process.StagedManage
 		{
 			stage:    "edp",
 			step:     update.NewEDPUpdateStep(db.Operations(), cfg.EDP),
-			disabled: !cfg.Broker.EnablePlanUpgrades,
+			disabled: !cfg.Broker.EnablePlanUpgrades || cfg.EDP.Disabled,
 		},
 		{
 			stage:     "runtime_resource",

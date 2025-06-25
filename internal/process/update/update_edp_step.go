@@ -29,9 +29,9 @@ type EDPUpdateStep struct {
 	operationManager *process.OperationManager
 }
 
-func NewEDPUpdateStep(operations storage.Operations, config edp.Config) *EDPUpdateStep {
+func NewEDPUpdateStep(operations storage.Operations, config edp.Config, client EDPUpdater) *EDPUpdateStep {
 	step := &EDPUpdateStep{
-		client: edp.NewClient(config),
+		client: client,
 		config: config,
 	}
 	step.operationManager = process.NewOperationManager(operations, step.Name(), kebError.EDPDependency)
