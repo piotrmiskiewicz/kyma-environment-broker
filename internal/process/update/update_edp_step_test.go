@@ -21,10 +21,11 @@ func TestUpdateEdp(t *testing.T) {
 	operation := fixture.FixUpdatingOperation("opid", "iid").Operation
 	operation.UpdatedPlanID = broker.BuildRuntimeAWSPlanID
 	sid := strings.ToLower(operation.ProvisioningParameters.ErsContext.SubAccountID)
-	cli.CreateMetadataTenant(sid, "test-env", edp.MetadataTenantPayload{
+	err := cli.CreateMetadataTenant(sid, "test-env", edp.MetadataTenantPayload{
 		Key:   edp.MaasConsumerServicePlan,
 		Value: "standard",
 	}, fixLogger())
+	require.NoError(t, err, "expected no error during metadata tenant creation")
 	step := NewEDPUpdateStep(ops, edp.Config{
 		Required:    false,
 		Disabled:    false,
