@@ -2,15 +2,16 @@ package update
 
 import (
 	"fmt"
+	"log/slog"
+	"strings"
+	"time"
+
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/edp"
 	kebError "github.com/kyma-project/kyma-environment-broker/internal/error"
 	"github.com/kyma-project/kyma-environment-broker/internal/process"
 	"github.com/kyma-project/kyma-environment-broker/internal/process/provisioning"
 	"github.com/kyma-project/kyma-environment-broker/internal/storage"
-	"log/slog"
-	"strings"
-	"time"
 )
 
 const (
