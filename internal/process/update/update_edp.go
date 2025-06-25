@@ -56,7 +56,7 @@ func (s *EDPUpdateStep) Run(operation internal.Operation, log *slog.Logger) (int
 		if s.config.Required {
 			return s.operationManager.RetryOperation(operation, "request to EDP failed", err, edpRetryInterval, edpRetryTimeout, log)
 		} else {
-			return s.operationManager.RetryOperationWithoutFail(operation, s.Name(), "request to EDP failed", edpRetryInterval, edpRetryTimeout, log, err)
+			return s.operationManager.RetryOperationWithoutFail(operation, s.Name(), "request to EDP failed", 200*time.Millisecond, 650*time.Millisecond, log, err)
 		}
 	}
 	log.Info(fmt.Sprintf("EDP metadata updated for subaccount %s with plan %s", subAccountID, maasConsumerServicePlan))
