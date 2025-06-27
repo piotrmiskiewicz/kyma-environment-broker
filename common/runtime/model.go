@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/url"
 	"strings"
@@ -152,14 +153,15 @@ func (p AutoScalerParameters) Validate(planMin, planMax int) error {
 }
 
 type OIDCConfigDTO struct {
-	ClientID       string   `json:"clientID" yaml:"clientID"`
-	GroupsClaim    string   `json:"groupsClaim" yaml:"groupsClaim"`
-	GroupsPrefix   string   `json:"groupsPrefix,omitempty" yaml:"groupsPrefix,omitempty"`
-	IssuerURL      string   `json:"issuerURL" yaml:"issuerURL"`
-	SigningAlgs    []string `json:"signingAlgs" yaml:"signingAlgs"`
-	UsernameClaim  string   `json:"usernameClaim" yaml:"usernameClaim"`
-	UsernamePrefix string   `json:"usernamePrefix" yaml:"usernamePrefix"`
-	RequiredClaims []string `json:"requiredClaims,omitempty" yaml:"requiredClaims,omitempty"`
+	ClientID         string   `json:"clientID" yaml:"clientID"`
+	GroupsClaim      string   `json:"groupsClaim" yaml:"groupsClaim"`
+	GroupsPrefix     string   `json:"groupsPrefix,omitempty" yaml:"groupsPrefix,omitempty"`
+	IssuerURL        string   `json:"issuerURL" yaml:"issuerURL"`
+	SigningAlgs      []string `json:"signingAlgs" yaml:"signingAlgs"`
+	UsernameClaim    string   `json:"usernameClaim" yaml:"usernameClaim"`
+	UsernamePrefix   string   `json:"usernamePrefix" yaml:"usernamePrefix"`
+	RequiredClaims   []string `json:"requiredClaims,omitempty" yaml:"requiredClaims,omitempty"`
+	EncodedJwksArray string   `json:"encodedJwksArray,omitempty" yaml:"encodedJwksArray,omitempty"`
 }
 
 const oidcValidSigningAlgs = "RS256,RS384,RS512,ES256,ES384,ES512,PS256,PS384,PS512"
@@ -209,6 +211,11 @@ func (o *OIDCConnectDTO) validateSingleOIDC(instanceOidcConfig *OIDCConnectDTO, 
 	}
 	o.validateSigningAlgs(o.OIDCConfigDTO.SigningAlgs, nil, errs)
 	o.validateRequiredClaims(o.OIDCConfigDTO.RequiredClaims, nil, errs)
+	if o.OIDCConfigDTO.EncodedJwksArray != "" && o.OIDCConfigDTO.EncodedJwksArray != "-" {
+		if _, err := base64.StdEncoding.DecodeString(o.OIDCConfigDTO.EncodedJwksArray); err != nil {
+			*errs = append(*errs, "encodedJwksArray must be a valid base64-encoded value or set to '-' to disable it if it was used previously")
+		}
+	}
 	return nil
 }
 
@@ -221,6 +228,11 @@ func (o *OIDCConnectDTO) validateOIDCList(errs *[]string) {
 			*errs = append(*errs, fmt.Sprintf("issuerURL must not be empty for OIDC at index %d", i))
 		} else {
 			o.validateIssuerURL(oidc.IssuerURL, &i, errs)
+		}
+		if oidc.EncodedJwksArray != "" {
+			if _, err := base64.StdEncoding.DecodeString(oidc.EncodedJwksArray); err != nil {
+				*errs = append(*errs, fmt.Sprintf("encodedJwksArray must be a valid base64 encoded value at index %d", i))
+			}
 		}
 		o.validateSigningAlgs(oidc.SigningAlgs, &i, errs)
 		o.validateRequiredClaims(oidc.RequiredClaims, &i, errs)
@@ -540,7 +552,6 @@ func (a AdditionalWorkerNodePool) ValidateHAZonesUnchanged(currentAdditionalWork
 	}
 	return nil
 }
-
 func (a AdditionalWorkerNodePool) ValidateMachineTypesUnchanged(currentAdditionalWorkerNodePools []AdditionalWorkerNodePool) error {
 	for _, currentAdditionalWorkerNodePool := range currentAdditionalWorkerNodePools {
 		if a.Name == currentAdditionalWorkerNodePool.Name {
