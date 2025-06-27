@@ -354,15 +354,6 @@ runtimeConfiguration: |-
         modules: []
     additional-components: []
 
-# Restricts where the SAP Cloud Infrastructure plan is available. If a region is not listed, the plan is not offered for that platform region
-sapConvergedCloudPlanRegionMappings: |-
-  cf-eu20-staging:
-    - eu-de-1
-    - eu-de-2
-  cf-eu21-staging:
-    - eu-de-3
-    - eu-de-4
-
 # Contains DNS provider configuration for SKR clusters
 skrDNSProvidersValues: |-
   providers: []
