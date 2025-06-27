@@ -20,7 +20,7 @@ When a new worker node pool is created, three zones are randomly selected from t
 |      `m8g`       | `ap-northeast-1` |      `[a, b]`       |  `[a, b, c]`   |  true  |     Error message saying that machine type is not available in 3 zones     |
 |      `m8g`       | `ap-northeast-1` |      `[a, b]`       |  `[a, b, c]`   | false  |   Worker node pool provisioned in a single random zone, for example, `a`   |
 
-The **regionsSupportingMachine** is a part of providersConfiguration and it can be defined for every provider, for example:
+The **regionsSupportingMachine** is a part of **providersConfiguration**, and you can define it for every provider. For example:
 
 ```yaml
 providersConfiguration:
