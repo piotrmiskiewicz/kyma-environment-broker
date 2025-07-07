@@ -62,6 +62,7 @@ type RuntimeDTO struct {
 	SubscriptionSecretName      *string                   `json:"subscriptionSecretName,omitempty"`
 	LicenseType                 *string                   `json:"licenseType,omitempty"`
 	CommercialModel             *string                   `json:"commercialModel,omitempty"`
+	Actions                     []Action                  `json:"actions,omitempty"`
 }
 
 type CloudProvider string
@@ -170,7 +171,7 @@ func (o *OIDCConnectDTO) IsProvided() bool {
 	if o == nil {
 		return false
 	}
-	if o.OIDCConfigDTO != nil && (o.OIDCConfigDTO.ClientID != "" || o.OIDCConfigDTO.IssuerURL != "" || o.OIDCConfigDTO.GroupsClaim != "" || o.OIDCConfigDTO.UsernamePrefix != "" || o.OIDCConfigDTO.UsernameClaim != "" || len(o.OIDCConfigDTO.SigningAlgs) > 0 || len(o.OIDCConfigDTO.RequiredClaims) > 0 || o.OIDCConfigDTO.GroupsPrefix != "") {
+	if o.OIDCConfigDTO != nil && (o.OIDCConfigDTO.ClientID != "" || o.OIDCConfigDTO.IssuerURL != "" || o.OIDCConfigDTO.GroupsClaim != "" || o.OIDCConfigDTO.UsernamePrefix != "" || o.OIDCConfigDTO.UsernameClaim != "" || len(o.OIDCConfigDTO.SigningAlgs) > 0 || len(o.OIDCConfigDTO.RequiredClaims) > 0 || o.OIDCConfigDTO.GroupsPrefix != "" || o.OIDCConfigDTO.EncodedJwksArray != "") {
 		return true
 	}
 	return o.List != nil
@@ -297,6 +298,9 @@ func (o *OIDCConnectDTO) validateSigningAlgs(signingAlgs []string, index *int, e
 
 func (o *OIDCConnectDTO) validateRequiredClaims(requiredClaims []string, index *int, errs *[]string) {
 	if len(requiredClaims) != 0 {
+		if index == nil && len(requiredClaims) == 1 && requiredClaims[0] == "-" {
+			return
+		}
 		for _, claim := range requiredClaims {
 			if !strings.Contains(claim, "=") {
 				if index != nil {
@@ -342,6 +346,23 @@ type BindingDTO struct {
 	ExpiresAt         time.Time `json:"expiresAt"`
 	KubeconfigExists  bool      `json:"kubeconfigExists"`
 	CreatedBy         string    `json:"createdBy"`
+}
+
+type ActionType string
+
+const (
+	PlanUpdateActionType         ActionType = "plan_update"
+	SubaccountMovementActionType ActionType = "subaccount_movement"
+)
+
+type Action struct {
+	ID         string     `json:"ID,omitempty"`
+	Type       ActionType `json:"type,omitempty"`
+	InstanceID string     `json:"-"`
+	Message    string     `json:"message,omitempty"`
+	OldValue   string     `json:"oldValue,omitempty"`
+	NewValue   string     `json:"newValue,omitempty"`
+	CreatedAt  time.Time  `json:"createdAt,omitempty"`
 }
 
 type RuntimeStatus struct {
@@ -412,6 +433,7 @@ const (
 	RuntimeConfigParam   = "runtime_config"
 	BindingsParam        = "bindings"
 	WithBindingsParam    = "with_bindings"
+	ActionsParam         = "actions"
 )
 
 type OperationDetail string
@@ -460,6 +482,8 @@ type ListParameters struct {
 	Expired bool
 	// Events parameter fetches tracing events per instance
 	Events string
+	// Actions specifies whether audit logs should be included in the response for each runtime
+	Actions bool
 }
 
 func (rt RuntimeDTO) LastOperation() Operation {
