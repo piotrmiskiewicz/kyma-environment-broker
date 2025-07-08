@@ -4,9 +4,9 @@ Kyma Environment Broker supports updating service plan. This feature allows to c
 
 # Configuration
 
-To enable plan changes you must do the following steps:
+To make changes to your plan, follow these steps:
 
-1. Enable the feature by setting the value: `enablePlanUpgrades: true`
+1. To enable the feature, set the value: `enablePlanUpgrades: true`
 2. Define allowed plan changes in the plans configuration, for example:
 ```yaml
 plansConfiguration:
@@ -15,9 +15,9 @@ plansConfiguration:
       - build-runtime-gcp
 ```
 
-# Plan update request
+## Plan Update Request
 
-The plan update request is similar to regular update request. The important part is the field `plan_id` which have the target plan ID, for example:
+The plan update request is similar to a regular update request. You must provide the target plan ID in the **plan_id** field. For example:
 
 ```http
 PATCH /oauth/v2/service_instances/"{INSTANCE_ID}"?accepts_incomplete=true
@@ -27,4 +27,4 @@ PATCH /oauth/v2/service_instances/"{INSTANCE_ID}"?accepts_incomplete=true
 }
 ```
 
-When the plan update is not allowed, the response is HTTP 400 Bad Request.
+When the plan update is not allowed, the response is `HTTP 400 Bad Request`.
