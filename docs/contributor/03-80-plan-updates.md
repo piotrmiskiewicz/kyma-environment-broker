@@ -1,13 +1,13 @@
 # Service Plan Updates
 
-Kyma Environment Broker supports updating service plans. This feature allows you to change the plan of an existing Kyma runtime. However, only some plan changes are possible because the new plan must use the same provider. For example, you cannot switch from Amazon Web Services to Microsoft Azure.
+Kyma Environment Broker (KEB) supports updating service plans. This feature allows you to change the plan of an existing Kyma runtime. However, only some plan changes are possible because the new plan must use the same provider. For example, you cannot switch from Amazon Web Services to Microsoft Azure.
 
 ## Configuration
 
 To make changes to your plan, follow these steps:
 
-1. To enable the feature, set the value: `enablePlanUpgrades: true`
-2. Define allowed plan changes in the plans configuration, for example:
+1. To enable the feature, set the value: `enablePlanUpgrades: true`.
+2. Define allowed plan changes in the plan configuration, for example:
 ```yaml
 plansConfiguration:
   gcp:
