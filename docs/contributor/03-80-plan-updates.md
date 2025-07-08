@@ -2,7 +2,7 @@
 
 Kyma Environment Broker supports updating service plan. This feature allows to change the plan of an existing Kyma runtime. Only some plan changes are possible because the new plan must use the same provider (it is not possible to change AWS to Azure).
 
-# Configuration
+## Configuration
 
 To make changes to your plan, follow these steps:
 
