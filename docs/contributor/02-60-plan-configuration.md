@@ -107,7 +107,7 @@ You can find more details in the [Kyma Bindings](../user/05-60-kyma-bindings.md)
 
 ## Kyma Custom Resource Template Configuration
 
-Kyma Environment Broker (KEB) uses the Kyma custom resource template to create a Kyma CR. If you want to define a custom Kyma CR template, define `runtimeConfiguration` setting according to [Kyma Template Configuration](03-90-kyma-template-configuration.md), for example:
+Kyma Environment Broker (KEB) uses the Kyma custom resource template to create a Kyma CR. If you want to define a custom Kyma CR template, define `runtimeConfiguration` setting according to [Kyma Template Configuration](02-40-broker-configuration-for-given-plan.md), for example:
 
 ````yaml
 runtimeConfiguration: |-
