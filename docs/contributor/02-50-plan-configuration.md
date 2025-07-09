@@ -11,14 +11,14 @@ According to the Open Service Broker API (OSB API) specification, KEB supports K
 
 ## Enabling plan
 
-The `enablePlans` contains a comma separated supported plan names. To enable plan add the name to the comma separated list of plans, for example:
+The `enablePlans` contains a comma separated supported plan names. To enable plan add the name to the list, for example:
 ```yaml
 enablePlans: "trial,aws,gcp"
 ```
 
 ## HAP Rules
 
-Each Kyma needs a subscription for the hyperscaler. The HAP Rule configuration allows you to define how the subsription is selected, for example:
+Each Kyma needs a subscription for the hyperscaler. The HAP Rule configuration allows you to define a rule how the subscription is selected, for example:
 
 ```yaml
 hap:
@@ -31,7 +31,7 @@ Every plan must have at least one HAP rule defined.
 
 ## Configure Plan Details
 
-Every plan has its own configuration which allows you to specify a details of a plan, for example:
+Every plan has its own configuration which allows you to specify a details of a plan. You can specify more than one plan if the configuration is the same, for example:
 
 ```yaml
 plansConfiguration:
