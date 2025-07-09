@@ -4,6 +4,7 @@ According to the Open Service Broker API (OSB API) specification, KEB supports K
 * [Regions Configuration](03-60-regions-configuration.md)
 * [Machine Types Configuration](03-70-machines-configuration.md)
 * [Regions Supporting Machine Types](03-50-regions-supporting-machine.md)
+* [Kyma Template Configuration](03-90-kyma-template-configuration.md)
 * [Plan Updates](03-80-plan-updates.md)
 * [Hyperscaler Account Pool Rules](03-11-hap-rules.md)
 * [Bindings](../user/05-60-kyma-bindings.md)
@@ -103,3 +104,23 @@ broker:
 ```
 > [!NOTE]
 > Bindings are not required to create a Kyma.
+
+## Kyma Custom Resource Template Configuration
+
+Kyma Environment Broker (KEB) uses the Kyma custom resource template to create a Kyma CR. If you want to define a custom Kyma CR template, define `runtimeConfiguration` setting according to [Kyma Template Configuration](03-90-kyma-template-configuration.md), for example:
+
+````yaml
+runtimeConfiguration: |-
+  default: |-
+    kyma-template: |-
+      apiVersion: operator.kyma-project.io/v1beta2
+      kind: Kyma
+      metadata:
+        labels:
+          "operator.kyma-project.io/managed-by": "lifecycle-manager"
+        name: tbd
+        namespace: kcp-system
+      spec:
+        channel: regular
+        modules: []
+````
