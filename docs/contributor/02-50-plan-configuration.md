@@ -1,13 +1,6 @@
 # Plan Configuration
 
-According to the Open Service Broker API (OSB API) specification, KEB supports Kyma's multiple plans. Each plan has its own configuration, which specifies allowed regions, zones, machine type and its display names. This document describes an overview of plans configuration. You can find more details in the following documents:
-* [Regions Configuration](03-60-regions-configuration.md)
-* [Machine Types Configuration](03-70-machines-configuration.md)
-* [Regions Supporting Machine Types](03-50-regions-supporting-machine.md)
-* [Kyma Template Configuration](03-90-kyma-template-configuration.md)
-* [Plan Updates](03-80-plan-updates.md)
-* [Hyperscaler Account Pool Rules](03-11-hap-rules.md)
-* [Bindings](../user/05-60-kyma-bindings.md)
+According to the Open Service Broker API (OSB API) specification, KEB supports Kyma's multiple plans. Each plan has its own configuration, which specifies allowed regions, zones, machine type and its display names. This document describes an overview of plans configuration.
 
 ## Enabling plan
 
@@ -28,8 +21,9 @@ hap:
 ```
 
 Every plan must have at least one HAP rule defined.
+You can find more details in the [Hyperscaler Account Pool Rules](03-11-hap-rules.md) document.
 
-## Configure Plan Details
+## Configure Plan and Provider Details
 
 Every plan has its own configuration which allows you to specify a details of a plan. You can specify more than one plan if the configuration is the same, for example:
 
@@ -66,8 +60,6 @@ plansConfiguration:
   
 ```
 
-## Configure Provider Details
-
 Each provider has its own configuration which defines provider details, for example:
 
 ```yaml
@@ -92,6 +84,11 @@ providersConfiguration:
           displayName: "eu-west-2 (Europe, London)"
           zones: ["a", "b", "c"]
 ```
+You can find more details in the following documents:
+ * [Regions Configuration](03-60-regions-configuration.md)
+ * [Machine Types Configuration](03-70-machines-configuration.md)
+ * [Regions Supporting Machine Types](03-50-regions-supporting-machine.md)
+ * [Plan Updates](03-80-plan-updates.md)
 
 ## Bindings
 
@@ -104,6 +101,8 @@ broker:
 ```
 > [!NOTE]
 > Bindings are not required to create a Kyma.
+
+YOu can find more details in the [Kyma Bindings](../user/05-60-kyma-bindings.md) document.
 
 ## Kyma Custom Resource Template Configuration
 
@@ -124,3 +123,5 @@ runtimeConfiguration: |-
         channel: regular
         modules: []
 ````
+
+ You can find more details in the [Kyma Template Configuration](02-40-broker-configuration-for-given-plan.md) document.
