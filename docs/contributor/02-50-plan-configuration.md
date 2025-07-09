@@ -4,7 +4,7 @@ According to the Open Service Broker API (OSB API) specification, KEB supports K
 
 ## Enabling plan
 
-The `enablePlans` contains a comma separated supported plan names. To enable plan add the name to the list, for example:
+The `enablePlans` property contains a comma separated supported plan names. To enable plan add the name to the list, for example:
 ```yaml
 enablePlans: "trial,aws,gcp"
 ```
@@ -25,7 +25,7 @@ You can find more details in the [Hyperscaler Account Pool Rules](03-11-hap-rule
 
 ## Configure Plan and Provider Details
 
-Every plan has its own configuration which allows you to specify a details of a plan. You can specify more than one plan if the configuration is the same, for example:
+Every plan has its own configuration which allows you to specify a details of a plan. You can specify more than one plan as a key if the configuration is the same, for example:
 
 ```yaml
 plansConfiguration:
@@ -99,10 +99,11 @@ broker:
   binding:
     bindablePlans: aws
 ```
+
 > [!NOTE]
 > Bindings are not required to create a Kyma.
 
-YOu can find more details in the [Kyma Bindings](../user/05-60-kyma-bindings.md) document.
+You can find more details in the [Kyma Bindings](../user/05-60-kyma-bindings.md) document.
 
 ## Kyma Custom Resource Template Configuration
 
