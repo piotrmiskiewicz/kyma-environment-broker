@@ -9,7 +9,7 @@ require (
 	github.com/Azure/go-autorest/autorest/adal v0.9.24
 	github.com/dlclark/regexp2 v1.11.5
 	github.com/dlmiddlecote/sqlstats v1.0.2
-	github.com/docker/docker v28.3.1+incompatible
+	github.com/docker/docker v28.3.2+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/gardener/gardener v1.122.1
 	github.com/go-co-op/gocron v1.37.0
@@ -25,7 +25,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.22.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
-	github.com/sebdah/goldie/v2 v2.6.0
+	github.com/sebdah/goldie/v2 v2.7.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vrischmann/envconfig v1.4.1
