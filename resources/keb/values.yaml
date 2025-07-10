@@ -189,7 +189,7 @@ broker:
   updateCustomResourcesLabelsOnAccountMove: "false"
   # If true, enables the new list-based OIDC schema, allowing multiple OIDC configurations for a runtime
   useAdditionalOIDCSchema: "false" # temporary feature flag
-  
+
 provisioning:
   # Maximum time a worker is allowed to process a step before it must return to the provisioning queue
   maxStepProcessingTime: 2m
@@ -319,7 +319,7 @@ metricsv2:
 multipleContexts: false
 
 plansConfiguration: {}
-  
+
 profiler:
   # Enables memory profiler (true/false)
   memory: false
