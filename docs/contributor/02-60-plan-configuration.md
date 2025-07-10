@@ -1,10 +1,10 @@
 # Plan Configuration
 
-According to the Open Service Broker API (OSB API) specification, KEB supports Kyma's multiple plans. Each plan has its own configuration, which specifies allowed regions, zones, machine type and its display names. This document describes an overview of plans configuration.
+According to the Open Service Broker API (OSB API) specification, KEB supports Kyma's multiple plans. Each plan has its own configuration, which specifies allowed regions, zones, machine types, and their display names. This document describes an overview of the plan configuration.
 
 ## Enabling plan
 
-The `enablePlans` property contains a comma separated supported plan names. To enable plan add the name to the list, for example:
+The `enablePlans` property contains a comma-separated supported plan names. To enable a plan, add the name to the list, for example:
 ```yaml
 enablePlans: "trial,aws,gcp"
 ```
@@ -25,7 +25,7 @@ You can find more details in the [Hyperscaler Account Pool Rules](03-11-hap-rule
 
 ## Configure Plan and Provider Details
 
-Every plan has its own configuration which allows you to specify a details of a plan. You can specify more than one plan as a key if the configuration is the same, for example:
+Every plan has its own configuration, which allows you to specify details of a plan. You can specify more than one plan as a key if the configuration is the same, for example:
 
 ```yaml
 plansConfiguration:
@@ -101,13 +101,13 @@ broker:
 ```
 
 > [!NOTE]
-> Bindings are not required to create a Kyma.
+> Bindings are not required to create a Kyma instance.
 
-You can find more details in the [Kyma Bindings](../user/05-60-kyma-bindings.md) document.
+For more information, see [Kyma Bindings](../user/05-60-kyma-bindings.md).
 
 ## Kyma Custom Resource Template Configuration
 
-Kyma Environment Broker (KEB) uses the Kyma custom resource template to create a Kyma CR. If you want to define a custom Kyma CR template, define `runtimeConfiguration` setting according to [Kyma Custom Resource Template Configuration](02-40-kyma-template.md), for example:
+Kyma Environment Broker (KEB) uses the Kyma custom resource template to create a Kyma CR. If you want to define a custom Kyma CR template, define the `runtimeConfiguration` setting according to [Kyma Custom Resource Template Configuration](02-40-kyma-template.md), for example:
 
 ````yaml
 runtimeConfiguration: |-
