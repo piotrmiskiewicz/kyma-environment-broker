@@ -118,6 +118,14 @@ func (p *AWSTrialInputProvider) Provide() internal.ProviderValues {
 	}
 }
 
+func (p *AWSInputProvider) FilterUP(dto internal.UpdatingParametersDTO) internal.UpdatingParametersDTO {
+	return dto
+}
+
+func (p *AWSInputProvider) FilterUP(dto internal.UpdatingParametersDTO) internal.UpdatingParametersDTO {
+	return internal.UpdatingParametersDTO{}
+}
+
 func (p *AWSTrialInputProvider) region() string {
 	if euaccess.IsEURestrictedAccess(p.ProvisioningParameters.PlatformRegion) {
 		return DefaultEuAccessAWSRegion
