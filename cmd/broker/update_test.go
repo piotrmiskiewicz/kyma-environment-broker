@@ -240,7 +240,7 @@ func TestUpdatePlan(t *testing.T) {
 	assert.NoError(t, err)
 	require.Len(t, actions, 1)
 	assert.Equal(t, actions[0].Type, pkg.PlanUpdateActionType)
-	assert.Equal(t, actions[0].Message, "Plan updated from 361c511f-f939-4621-b228-d0fb79a1fe15 to 6aae0ff3-89f7-4f12-86de-51466145422e.")
+	assert.Equal(t, actions[0].Message, "Plan updated from aws (PlanID: 361c511f-f939-4621-b228-d0fb79a1fe15) to build-runtime-aws (PlanID: 6aae0ff3-89f7-4f12-86de-51466145422e).")
 	assert.Equal(t, actions[0].OldValue, "361c511f-f939-4621-b228-d0fb79a1fe15")
 	assert.Equal(t, actions[0].NewValue, "6aae0ff3-89f7-4f12-86de-51466145422e")
 }
@@ -1618,10 +1618,10 @@ func TestUpdateAutoscalerParams(t *testing.T) {
 	defer suite.TearDown()
 	id := uuid.New().String()
 
-	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", id), `
+	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=361c511f-f939-4621-b228-d0fb79a1fe15&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"sm_operator_credentials": {
 			"clientid": "cid",
@@ -1634,6 +1634,7 @@ func TestUpdateAutoscalerParams(t *testing.T) {
 		"user_id": "john.smith@email.com"
 	},
 	"parameters": {
+		"region":"eu-central-1",
 		"name": "testing-cluster",
 		"autoScalerMin":5,
 		"autoScalerMax":7,
@@ -1650,7 +1651,7 @@ func TestUpdateAutoscalerParams(t *testing.T) {
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"globalaccount_id": "g-account-id",
 		"user_id": "jack.anvil@email.com"
@@ -1701,10 +1702,10 @@ func TestUpdateAutoscalerWrongParams(t *testing.T) {
 	defer suite.TearDown()
 	id := uuid.New().String()
 
-	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", id), `
+	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=361c511f-f939-4621-b228-d0fb79a1fe15&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"sm_operator_credentials": {
 			"clientid": "cid",
@@ -1717,6 +1718,7 @@ func TestUpdateAutoscalerWrongParams(t *testing.T) {
 		"user_id": "john.smith@email.com"
 	},
 	"parameters": {
+		"region":"eu-central-1",
 		"name": "testing-cluster",
 		"autoScalerMin":5,
 		"autoScalerMax":7,
@@ -1726,6 +1728,7 @@ func TestUpdateAutoscalerWrongParams(t *testing.T) {
 }`)
 
 	opID := suite.DecodeOperationID(resp)
+	assert.NotEmpty(t, opID)
 	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
@@ -1733,7 +1736,7 @@ func TestUpdateAutoscalerWrongParams(t *testing.T) {
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"globalaccount_id": "g-account-id",
 		"user_id": "jack.anvil@email.com"
@@ -1756,10 +1759,10 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	defer suite.TearDown()
 	id := uuid.New().String()
 
-	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=7d55d31d-35ae-4438-bf13-6ffdfa107d9f&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", id), `
+	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=361c511f-f939-4621-b228-d0fb79a1fe15&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"sm_operator_credentials": {
 			"clientid": "cid",
@@ -1772,6 +1775,7 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 		"user_id": "john.smith@email.com"
 	},
 	"parameters": {
+		"region":"eu-central-1",
 		"name": "testing-cluster"
 	}
 }`)
@@ -1780,28 +1784,28 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	suite.processKIMProvisioningByOperationID(opID)
 	suite.WaitForOperationState(opID, domain.Succeeded)
 
-	// when
+	// when autoScalerMin is updated with value greater than autoScalerMax
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"globalaccount_id": "g-account-id",
 		"user_id": "jack.anvil@email.com"
 	},
 	"parameters": {
-		"autoScalerMin":15
+		"autoScalerMin":25
 	}
 }`)
 
 	// then
-	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	// when
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"globalaccount_id": "g-account-id",
 		"user_id": "jack.anvil@email.com"
@@ -1826,7 +1830,7 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"globalaccount_id": "g-account-id",
 		"user_id": "jack.anvil@email.com"
@@ -1848,7 +1852,7 @@ func TestUpdateAutoscalerPartialSequence(t *testing.T) {
 	resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", id), `
 {
 	"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
-	"plan_id": "7d55d31d-35ae-4438-bf13-6ffdfa107d9f",
+	"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
 	"context": {
 		"globalaccount_id": "g-account-id",
 		"user_id": "jack.anvil@email.com"

@@ -259,6 +259,12 @@ func (b *UpdateEndpoint) processUpdateParameters(ctx context.Context, instance *
 		}
 		logger.Debug(fmt.Sprintf("Updating with params: %+v", params))
 	}
+	// TODO: remove once we implemented proper filtering of parameters - removing parameters that are not supported by the plan
+	if details.PlanID == TrialPlanID {
+		params.MachineType = nil
+		params.AutoScalerMin = nil
+		params.AutoScalerMax = nil
+	}
 
 	providerValues, err := b.valuesProvider.ValuesForPlanAndParameters(instance.Parameters)
 	if err != nil {
@@ -356,9 +362,9 @@ func (b *UpdateEndpoint) processUpdateParameters(ctx context.Context, instance *
 		} else {
 			logger.Info(fmt.Sprintf("Plan change not allowed."))
 			return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(
-				fmt.Errorf("plan upgrade from %s to %s is not allowed", instance.ServicePlanID, details.PlanID),
+				fmt.Errorf("plan upgrade from %s (planID: %s) to %s (planID: %s) is not allowed", PlanNamesMapping[instance.ServicePlanID], instance.ServicePlanID, PlanNamesMapping[details.PlanID], details.PlanID),
 				http.StatusBadRequest,
-				fmt.Sprintf("plan upgrade from %s to %s is not allowed", instance.ServicePlanID, details.PlanID),
+				fmt.Sprintf("plan upgrade from %s (planID: %s) to %s (planID: %s) is not allowed", PlanNamesMapping[instance.ServicePlanID], instance.ServicePlanID, PlanNamesMapping[details.PlanID], details.PlanID),
 			)
 		}
 	}
@@ -415,7 +421,9 @@ func (b *UpdateEndpoint) processUpdateParameters(ctx context.Context, instance *
 		}
 
 		if slices.Contains(updateStorage, "Plan change") {
-			message := fmt.Sprintf("Plan updated from %s to %s.", oldPlanID, details.PlanID)
+			oldPlan := PlanNamesMapping[oldPlanID]
+			newPlan := PlanNamesMapping[details.PlanID]
+			message := fmt.Sprintf("Plan updated from %s (PlanID: %s) to %s (PlanID: %s).", oldPlan, oldPlanID, newPlan, details.PlanID)
 			if err := b.actionStorage.InsertAction(
 				pkg.PlanUpdateActionType,
 				instance.InstanceID,
