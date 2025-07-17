@@ -222,9 +222,6 @@ func TestUpdatePlan(t *testing.T) {
 
 	suite.WaitForOperationState(updateOperationID, domain.Succeeded)
 
-	rs := suite.GetRuntimeResourceByInstanceID(iid)
-	fmt.Println(rs)
-
 	gotInstance := suite.GetInstance(iid)
 	assert.Equal(t, "6aae0ff3-89f7-4f12-86de-51466145422e", gotInstance.ServicePlanID)
 	assert.Equal(t, "6aae0ff3-89f7-4f12-86de-51466145422e", gotInstance.Parameters.PlanID)
