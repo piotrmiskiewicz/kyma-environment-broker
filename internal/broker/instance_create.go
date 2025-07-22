@@ -395,7 +395,7 @@ func (b *ProvisionEndpoint) validate(ctx context.Context, details domain.Provisi
 				return apiresponses.NewFailureResponse(err, http.StatusUnprocessableEntity, err.Error())
 			}
 		}
-		if IsExternalCustomer(provisioningParameters.ErsContext) {
+		if IsExternalLicenseType(provisioningParameters.ErsContext) {
 			if err := checkGPUMachinesUsage(parameters.AdditionalWorkerNodePools); err != nil {
 				return apiresponses.NewFailureResponse(err, http.StatusUnprocessableEntity, err.Error())
 			}
@@ -496,7 +496,7 @@ func validateIngressFiltering(provisioningParameters internal.ProvisioningParame
 			log.Info(fmt.Sprintf(IngressFilteringNotSupportedForPlanMsg, PlanNamesMapping[provisioningParameters.PlanID]))
 			return fmt.Errorf(IngressFilteringOptionIsNotSupported)
 		}
-		if IsExternalCustomer(provisioningParameters.ErsContext) && *ingressFilteringParameter {
+		if IsExternalLicenseType(provisioningParameters.ErsContext) && *ingressFilteringParameter {
 			log.Info(IngressFilteringNotSupportedForExternalCustomerMsg)
 			return fmt.Errorf(IngressFilteringOptionIsNotSupported)
 		}
@@ -533,8 +533,8 @@ func AreNamesUnique(pools []pkg.AdditionalWorkerNodePool) bool {
 	return true
 }
 
-func IsExternalCustomer(ersContext internal.ERSContext) bool {
-	return *ersContext.DisableEnterprisePolicyFilter()
+func IsExternalLicenseType(ersContext internal.ERSContext) bool {
+	return *ersContext.ExternalLicenseType()
 }
 
 func checkGPUMachinesUsage(additionalWorkerNodePools []pkg.AdditionalWorkerNodePool) error {

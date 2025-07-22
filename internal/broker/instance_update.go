@@ -327,7 +327,7 @@ func (b *UpdateEndpoint) processUpdateParameters(ctx context.Context, instance *
 				return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
 			}
 		}
-		if IsExternalCustomer(ersContext) {
+		if IsExternalLicenseType(ersContext) {
 			if err := checkGPUMachinesUsage(params.AdditionalWorkerNodePools); err != nil {
 				return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
 			}
