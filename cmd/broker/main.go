@@ -383,11 +383,7 @@ func main() {
 	svr := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rec := httputil.NewResponseRecorder(w)
 		router.ServeHTTP(rec, r)
-		path := r.URL.Path
-		if len(path) > 256 {
-			path = path[:256] // truncate path to avoid log flooding
-		}
-		log.Info(fmt.Sprintf("Call handled: method=%s url=%s statusCode=%d size=%d", r.Method, path, rec.StatusCode, rec.Size))
+		log.Info(fmt.Sprintf("Call handled: method=%s url=%s statusCode=%d size=%d", r.Method, r.URL.Path, rec.StatusCode, rec.Size))
 	})
 	fatalOnError(http.ListenAndServe(cfg.Broker.Host+":"+cfg.Broker.Port, svr), log)
 }
