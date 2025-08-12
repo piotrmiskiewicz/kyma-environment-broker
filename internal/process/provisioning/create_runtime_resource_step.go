@@ -327,7 +327,7 @@ func (s *CreateRuntimeResourceStep) createOIDCConfigList(oidcList []pkg.OIDCConf
 				GroupsClaim:    &oidcConfig.GroupsClaim,
 				UsernamePrefix: &oidcConfig.UsernamePrefix,
 				UsernameClaim:  &oidcConfig.UsernameClaim,
-				GroupsPrefix:   ptr.String("-"),
+				GroupsPrefix:   &oidcConfig.GroupsPrefix,
 				RequiredClaims: requiredClaims,
 			},
 		}
