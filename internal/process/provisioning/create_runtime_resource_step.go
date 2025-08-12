@@ -347,6 +347,9 @@ func (s *CreateRuntimeResourceStep) mergeOIDCConfig(defaultOIDC imv1.OIDCConfig,
 	if inputOIDC.GroupsClaim != "" {
 		defaultOIDC.GroupsClaim = &inputOIDC.GroupsClaim
 	}
+	if inputOIDC.GroupsPrefix != "" {
+		defaultOIDC.GroupsPrefix = &inputOIDC.GroupsPrefix
+	}
 	if inputOIDC.IssuerURL != "" {
 		defaultOIDC.IssuerURL = &inputOIDC.IssuerURL
 	}

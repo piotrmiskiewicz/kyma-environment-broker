@@ -31,7 +31,7 @@ const (
 
 func TestCatalog(t *testing.T) {
 	// this test is used for human-testing the catalog response
-	t.Skip()
+	//t.Skip()
 	catalogTestFile := "catalog-test.json"
 	catalogTestFilePerm := os.FileMode.Perm(0666)
 	outputToFile := true
@@ -1537,7 +1537,8 @@ func TestProvisioning_OIDCValues(t *testing.T) {
 							"issuerURL": "https://testurl.local",
 							"signingAlgs": ["RS256", "RS384"],
 							"usernameClaim": "fakeUsernameClaim",
-							"usernamePrefix": "::"
+							"usernamePrefix": "::",
+							"groupsPrefix": "SAPSE:"
 						}
 					}
 		}`, broker.AWSPlanID))
@@ -1556,6 +1557,7 @@ func TestProvisioning_OIDCValues(t *testing.T) {
 		assert.Equal(t, []string{"RS256", "RS384"}, (*gotOIDC)[0].SigningAlgs)
 		assert.Equal(t, "fakeUsernameClaim", *(*gotOIDC)[0].UsernameClaim)
 		assert.Equal(t, "::", *(*gotOIDC)[0].UsernamePrefix)
+		assert.Equal(t, "SAPSE:", *(*gotOIDC)[0].GroupsPrefix)
 	})
 
 	t.Run("should apply default OIDC values when all OIDC object's fields are not present", func(t *testing.T) {
