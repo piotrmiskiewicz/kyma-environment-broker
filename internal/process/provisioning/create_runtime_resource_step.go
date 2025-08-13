@@ -319,6 +319,10 @@ func (s *CreateRuntimeResourceStep) createOIDCConfigList(oidcList []pkg.OIDCConf
 
 	for _, oidcConfig := range oidcList {
 		requiredClaims := s.parseRequiredClaims(oidcConfig.RequiredClaims)
+		groupsPrefix := s.oidcDefaultValues.GroupsPrefix
+		if oidcConfig.GroupsPrefix != "" {
+			groupsPrefix = oidcConfig.GroupsPrefix
+		}
 		oidc := imv1.OIDCConfig{
 			OIDCConfig: gardener.OIDCConfig{
 				ClientID:       &oidcConfig.ClientID,
@@ -327,7 +331,7 @@ func (s *CreateRuntimeResourceStep) createOIDCConfigList(oidcList []pkg.OIDCConf
 				GroupsClaim:    &oidcConfig.GroupsClaim,
 				UsernamePrefix: &oidcConfig.UsernamePrefix,
 				UsernameClaim:  &oidcConfig.UsernameClaim,
-				GroupsPrefix:   &oidcConfig.GroupsPrefix,
+				GroupsPrefix:   &groupsPrefix,
 				RequiredClaims: requiredClaims,
 			},
 		}
