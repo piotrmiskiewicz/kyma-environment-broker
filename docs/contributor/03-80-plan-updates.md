@@ -19,7 +19,7 @@ plansConfiguration:
 ```
 
 > [!NOTE]
-> The `upgradableToPlans` field is a list of plan names that the current plan can be upgraded to. If the value is an empty list (or not defined) or the list contains only the name of the configured plan (`gcp` in the above example), the plan cannot be updated and the `plan_updateable` in the response of `catalog` endpoint is set to false.
+> The **upgradableToPlans** field is a list of plan names to which you can upgrade the current plan. If the value is an empty (or not defined) list, or the list contains only the name of the configured plan (like `gcp` in the above example), the plan cannot be updated, and the **plan_updateable** field in the response of the `catalog` endpoint is set to `false`.
 
 ## Plan Update Request
 
