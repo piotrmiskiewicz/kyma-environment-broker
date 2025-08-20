@@ -64,7 +64,6 @@ Use the following environment variables to configure the application:
 
 
 ### Subaccount Cleanup CronJob v1
-### Subaccount Cleanup CronJob v1
 
 | Environment Variable | Current Value | Description |
 |---------------------|------------------------------|---------------------------------------------------------------|
@@ -86,5 +85,4 @@ Use the following environment variables to configure the application:
 | **APP_DATABASE_&#x200b;SSLROOTCERT** | <code>/secrets/cloudsql-sslrootcert/server-ca.pem</code> | Path to the Cloud SQL SSL root certificate file. |
 | **APP_DATABASE_USER** | None | Specifies the username for the database. |
 | **DATABASE_EMBEDDED** | <code>true</code> | - |
-
 
