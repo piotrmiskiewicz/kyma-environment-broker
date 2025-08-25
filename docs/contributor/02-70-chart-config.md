@@ -69,7 +69,6 @@
 | broker.binding.<br>minExpirationSeconds | Minimum allowed expiration time (in seconds) for a binding. Can't be lower than 600 seconds. Forced by Gardener. | `600` |
 | broker.<br>defaultRequestRegion | Default platform region for requests if not specified. | `cf-eu10` |
 | broker.<br>disableSapConvergedCloud | If true, disables the SAP Cloud Infrastructure plan in KEB. When set to true, users cannot provision SAP Cloud Infrastructure clusters. | `False` |
-| broker.enableJwks | If true, enables the handling of the encoded JWKS array, temporary feature flag. | `false` |
 | broker.enablePlans | Comma-separated list of plan names enabled and available for provisioning in KEB. | `azure,gcp,azure_lite,trial,aws` |
 | broker.<br>enablePlanUpgrades | If true, allows users to upgrade their plans (if a plan supports upgrades). | `false` |
 | broker.freeDocsURL | URL to the documentation of free Kyma runtimes. Used in API responses and UI labels to direct users to help or documentation about free plans | `https://help.sap.com/docs/btp/sap-business-technology-platform/using-free-service-plans?version=Cloud` |
@@ -89,7 +88,6 @@
 | broker.<br>subaccountsIdsToShowTrialExpirationInfo | Shows trial expiration information for specific subaccounts in the UI and API responses. | `a45be5d8-eddc-4001-91cf-48cc644d571f` |
 | broker.trialDocsURL | URL to the documentation for trial Kyma runtimes. Used in API responses and UI labels. | `https://help.sap.com/docs/` |
 | broker.<br>updateCustomResourcesLabelsOnAccountMove | If true, updates runtimeCR labels when moving subaccounts. | `false` |
-| broker.<br>useAdditionalOIDCSchema | If true, enables the new list-based OIDC schema, allowing multiple OIDC configurations for a runtime. | `false` |
 | provisioning.<br>maxStepProcessingTime | Maximum time a worker is allowed to process a step before it must return to the provisioning queue. | `2m` |
 | provisioning.<br>workersAmount | Number of workers in provisioning queue. | `20` |
 | update.<br>maxStepProcessingTime | Maximum time a worker is allowed to process a step before it must return to the update queue. | `2m` |
@@ -134,7 +132,6 @@
 | metricsv2.<br>operationResultPollingInterval | Frequency of polling for operation results. | `1m` |
 | metricsv2.<br>operationResultRetentionPeriod | Duration of retaining operation results. | `1h` |
 | metricsv2.<br>operationStatsPollingInterval | Frequency of polling for operation statistics. | `1m` |
-| multipleContexts | If true, generates kubeconfig files with multiple contexts (if possible) instead of a single context. | `False` |
 | profiler.memory | Enables memory profiler (true/false). | `False` |
 | quotaLimitCheck.<br>enabled | If true, validates during provisioning that the assigned quota for the subaccount is not exceeded. | `False` |
 | quotaLimitCheck.<br>interval | The interval between requests to the Entitlements API in case of errors. | `1s` |
