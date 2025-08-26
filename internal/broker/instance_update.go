@@ -317,9 +317,6 @@ func (b *UpdateEndpoint) processUpdateParameters(ctx context.Context, instance *
 			if err := additionalWorkerNodePool.ValidateHAZonesUnchanged(instance.Parameters.Parameters.AdditionalWorkerNodePools); err != nil {
 				return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
 			}
-			//if err := additionalWorkerNodePool.ValidateMachineTypesUnchanged(instance.Parameters.Parameters.AdditionalWorkerNodePools); err != nil {
-			//	return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
-			//}
 			if err := checkAvailableZones(regionsSupportingMachine, additionalWorkerNodePool, providerValues.Region, details.PlanID); err != nil {
 				return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
 			}
