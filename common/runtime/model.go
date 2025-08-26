@@ -3,8 +3,8 @@ package runtime
 import (
 	"encoding/base64"
 	"fmt"
-	"golang.org/x/exp/slices"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
