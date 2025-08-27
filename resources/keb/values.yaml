@@ -47,31 +47,31 @@ global:
       path: europe-docker.pkg.dev/kyma-project/prod
     kyma_environment_broker:
       dir:
-      version: "1.21.25"
+      version: "1.21.28"
     kyma_environment_broker_schema_migrator:
       dir:
-      version: 1.21.25
+      version: 1.21.28
     kyma_environments_subaccount_cleanup_job:
       dir:
-      version: "1.21.25"
+      version: "1.21.28"
     kyma_environment_expirator_job:
       dir:
-      version: "1.21.25"
+      version: "1.21.28"
     kyma_environment_deprovision_retrigger_job:
       dir:
-      version: "1.21.25"
+      version: "1.21.28"
     kyma_environment_runtime_reconciler:
       dir:
-      version: "1.21.25"
+      version: "1.21.28"
     kyma_environment_subaccount_sync:
       dir:
-      version: "1.21.25"
+      version: "1.21.28"
     kyma_environment_globalaccounts:
       dir:
-      version: "1.21.25"
+      version: "1.21.28"
     kyma_environment_service_binding_cleanup_job:
       dir:
-      version: 1.21.25
+      version: 1.21.28
   ingress:
     domainName: localhost
   istio:
@@ -147,8 +147,6 @@ broker:
   defaultRequestRegion: "cf-eu10"
   # If true, disables the SAP Cloud Infrastructure plan in KEB. When set to true, users cannot provision SAP Cloud Infrastructure clusters.
   disableSapConvergedCloud: false
-  # If true, enables the handling of the encoded JWKS array, temporary feature flag.
-  enableJwks: "false"
   # Comma-separated list of plan names enabled and available for provisioning in KEB.
   enablePlans: "azure,gcp,azure_lite,trial,aws"
   # If true, allows users to upgrade their plans (if a plan supports upgrades).
@@ -190,8 +188,6 @@ broker:
   trialDocsURL: "https://help.sap.com/docs/"
   # If true, updates runtimeCR labels when moving subaccounts.
   updateCustomResourcesLabelsOnAccountMove: "false"
-  # If true, enables the new list-based OIDC schema, allowing multiple OIDC configurations for a runtime.
-  useAdditionalOIDCSchema: "false" # temporary feature flag.
 
 provisioning:
   # Maximum time a worker is allowed to process a step before it must return to the provisioning queue.
@@ -324,9 +320,6 @@ metricsv2:
   operationResultRetentionPeriod: 1h
   # Frequency of polling for operation statistics.
   operationStatsPollingInterval: 1m
-
-# If true, generates kubeconfig files with multiple contexts (if possible) instead of a single context.
-multipleContexts: false
 
 plansConfiguration: {}
 
