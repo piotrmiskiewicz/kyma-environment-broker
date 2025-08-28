@@ -2931,7 +2931,66 @@ func TestUpdateAdditionalWorkerNodePools(t *testing.T) {
 						}
    			}`)
 		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	})
 
+	t.Run("should update additional worker node pool when initial machine type is a regular one", func(t *testing.T) {
+		// given
+		cfg := fixConfig()
+
+		suite := NewBrokerSuiteTestWithConfig(t, cfg)
+		defer suite.TearDown()
+		iid := uuid.New().String()
+
+		resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true&plan_id=361c511f-f939-4621-b228-d0fb79a1fe15&service_id=47c9dcbf-ff30-448e-ab36-d3bad66ba281", iid),
+			`{
+				   		"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+				   		"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
+				   		"context": {
+					   		"globalaccount_id": "g-account-id",
+					   		"subaccount_id": "sub-id",
+					   		"user_id": "john.smith@email.com"
+				   		},
+						"parameters": {
+							"name": "testing-cluster",
+							"region": "us-east-1",
+                            "additionalWorkerNodePools": [
+								{
+									"name": "name-11",
+									"machineType": "m5.xlarge",
+									"haZones": true,
+									"autoScalerMin": 4,
+									"autoScalerMax": 21
+								}
+							]
+						}
+   			}`)
+		opID := suite.DecodeOperationID(resp)
+		suite.waitForRuntimeAndMakeItReady(opID)
+		suite.WaitForOperationState(opID, domain.Succeeded)
+
+		// try to update with a regular machine type m5.large
+		// OSB update:
+		resp = suite.CallAPI("PATCH", fmt.Sprintf("oauth/cf-eu10/v2/service_instances/%s?accepts_incomplete=true", iid),
+			`{
+       					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
+       					"plan_id": "361c511f-f939-4621-b228-d0fb79a1fe15",
+       					"context": {
+           					"globalaccount_id": "g-account-id",
+           					"user_id": "john.smith@email.com"
+       					},
+						"parameters": {
+							"additionalWorkerNodePools": [
+								{
+									"name": "name-11",
+									"machineType": "m5.xlarge",
+									"haZones": true,
+									"autoScalerMin": 4,
+									"autoScalerMax": 21
+								}
+							]
+						}
+   			}`)
+		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 	})
 }
 
