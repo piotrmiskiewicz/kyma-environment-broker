@@ -2982,7 +2982,7 @@ func TestUpdateAdditionalWorkerNodePools(t *testing.T) {
 							"additionalWorkerNodePools": [
 								{
 									"name": "name-11",
-									"machineType": "m5.xlarge",
+									"machineType": "m5.large",
 									"haZones": true,
 									"autoScalerMin": 4,
 									"autoScalerMax": 21
