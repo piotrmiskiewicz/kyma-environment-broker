@@ -229,7 +229,7 @@ func NewBrokerSuiteTestWithConfig(t *testing.T, cfg *Config, version ...string) 
 	deprovisionManager := process.NewStagedManager(db.Operations(), eventBroker, time.Hour, cfg.Deprovisioning, log.With("deprovisioning", "manager"))
 
 	deprovisioningQueue := NewDeprovisioningProcessingQueue(ctx, workersAmount, deprovisionManager, cfg, db,
-		accountProvider, k8sClientProvider, cli, configProvider, log)
+		accountProvider, k8sClientProvider, cli, configProvider, gardenerClient, "kyma", log)
 	deprovisionManager.SpeedUp(testSuiteSpeedUpFactor)
 
 	deprovisioningQueue.SpeedUp(testSuiteSpeedUpFactor)

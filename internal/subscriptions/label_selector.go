@@ -55,6 +55,17 @@ func NewLabelSelectorFromRuleset(rule ParsedRule) *LabelSelectorBuilder {
 	return selector
 }
 
+// NewLabelSelectorForReleasingSubscription creates a label selector to find a secret binding to be released.
+// It is not a full selector as it does not include labels like the hyperscaler type or euAccess. It must be used together a selection by secret name (SecretBinding.SecretRefName).
+func NewLabelSelectorForReleasingSubscription(tenant string) string {
+	selector := &LabelSelectorBuilder{builder: strings.Builder{}}
+	selector.builder.WriteString(fmt.Sprintf(tenantNameReqFmt, tenant))
+	selector.with(notSharedReq)
+	selector.with(notDirtyReq)
+	selector.with(notInternalReq)
+	return selector.builder.String()
+}
+
 func (l *LabelSelectorBuilder) with(s string) {
 	if l.builder.Len() == 0 {
 		l.builder.WriteString(s)
