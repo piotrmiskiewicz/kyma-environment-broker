@@ -26,50 +26,50 @@ const (
 )
 
 type LabelSelectorBuilder struct {
-	strings.Builder
-	shared bool
+	builder strings.Builder
+	shared  bool
 }
 
 func NewLabelSelectorFromRuleset(rule provisioning.ParsedRule) *LabelSelectorBuilder {
-	selector := &LabelSelectorBuilder{}
+	selector := &LabelSelectorBuilder{builder: strings.Builder{}}
 	selector.shared = rule.IsShared()
-	selector.WriteString(fmt.Sprintf(hyperscalerTypeReqFmt, rule.Hyperscaler()))
+	selector.builder.WriteString(fmt.Sprintf(hyperscalerTypeReqFmt, rule.Hyperscaler()))
 	if rule.IsEUAccess() {
-		selector.With(euAccessReq)
+		selector.with(euAccessReq)
 	} else {
-		selector.With(notEUAccessReq)
+		selector.with(notEUAccessReq)
 	}
 	if rule.IsShared() {
-		selector.With(sharedReq)
+		selector.with(sharedReq)
 		return selector
 	}
-	selector.With(notDirtyReq)
+	selector.with(notDirtyReq)
 
 	return selector
 }
 
-func (l *LabelSelectorBuilder) With(s string) {
-	if l.Len() == 0 {
-		l.WriteString(s)
+func (l *LabelSelectorBuilder) with(s string) {
+	if l.builder.Len() == 0 {
+		l.builder.WriteString(s)
 		return
 	}
-	l.WriteString("," + s)
+	l.builder.WriteString("," + s)
 }
 
 func (l *LabelSelectorBuilder) BuildForTenantMatching(tenant string) string {
 	if l.shared {
-		return l.String()
+		return l.builder.String()
 	}
-	base := l.String()
+	base := l.builder.String()
 	tenantSelector := fmt.Sprintf(tenantNameReqFmt, tenant)
-	return base + "," + tenantSelector
+	return fmt.Sprintf("%s,%s", base, tenantSelector)
 }
 
 func (l *LabelSelectorBuilder) BuildAnySubscription() string {
-	return l.String()
+	return l.builder.String()
 }
 
 func (l *LabelSelectorBuilder) BuildForSecretBindingClaim() string {
-	base := l.String()
+	base := l.builder.String()
 	return fmt.Sprintf("%s,%s,%s", base, notTenantNamedReq, notSharedReq)
 }
