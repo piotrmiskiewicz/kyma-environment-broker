@@ -1,7 +1,8 @@
-package subscriptions
+package subscriptions_test
 
 import (
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
+	"github.com/kyma-project/kyma-environment-broker/internal/subscriptions"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -18,7 +19,7 @@ func TestSelectNotShared(t *testing.T) {
 		},
 	}
 
-	selector := NewLabelSelectorFromRuleset(result)
+	selector := subscriptions.NewLabelSelectorFromRuleset(result)
 
 	// when
 	labels := selector.BuildForTenantMatching("tenant-a")
