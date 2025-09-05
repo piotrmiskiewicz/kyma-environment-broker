@@ -2,8 +2,9 @@ package subscriptions
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"strings"
+
+	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 )
 
 type ParsedRule interface {
