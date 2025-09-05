@@ -2,10 +2,11 @@ package provisioning
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma-environment-broker/internal/subscriptions"
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal/subscriptions"
 
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler/rules"
