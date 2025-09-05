@@ -318,7 +318,7 @@ func (reconciler *stateReconcilerType) deleteRuntimeFromState(subaccountID subac
 // 2. At t1 we fetch the state from CIS and set betaEnabled to "false" for SA1, we start goroutine G1 to update the state to "false"
 // 3. At t2 user changes the betaEnabled label to "true" for SA1
 // 4. At t3 we fetch the events from the event window and we get the event from t2, we start goroutine G2 to update the state to "true"
-// There is no guarantee that G1 will finish before G2 and the final state will be "true". with the updater we are sure that the state will be updated in the correct order.
+// There is no guarantee that G1 will finish before G2 and the final state will be "true". With the updater we are sure that the state will be updated in the correct order.
 
 func (reconciler *stateReconcilerType) enqueueSubaccountIfOutdated(subaccountID subaccountIDType, state subaccountStateType) {
 	if reconciler.isResourceOutdated(subaccountID, state) {
