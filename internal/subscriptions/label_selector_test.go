@@ -44,7 +44,7 @@ func TestSelectNotSharedEuAccess(t *testing.T) {
 		},
 	}
 
-	selector := NewLabelSelectorFromRuleset(result)
+	selector := subscriptions.NewLabelSelectorFromRuleset(result)
 
 	// when
 	labels := selector.BuildForTenantMatching("tenant-a")
@@ -69,7 +69,7 @@ func TestSelectShared(t *testing.T) {
 		},
 	}
 
-	selector := NewLabelSelectorFromRuleset(result)
+	selector := subscriptions.NewLabelSelectorFromRuleset(result)
 
 	// when
 	labels := selector.BuildForTenantMatching("tenant-a")
