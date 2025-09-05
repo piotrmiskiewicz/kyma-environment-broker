@@ -3,9 +3,15 @@ package subscriptions
 import (
 	"fmt"
 	"github.com/kyma-project/kyma-environment-broker/common/gardener"
-	"github.com/kyma-project/kyma-environment-broker/internal/process/provisioning"
 	"strings"
 )
+
+type ParsedRule interface {
+	Hyperscaler() string
+	IsShared() bool
+	IsEUAccess() bool
+	Rule() string
+}
 
 // SecretBinding selector requirements
 const (
@@ -30,7 +36,7 @@ type LabelSelectorBuilder struct {
 	shared  bool
 }
 
-func NewLabelSelectorFromRuleset(rule provisioning.ParsedRule) *LabelSelectorBuilder {
+func NewLabelSelectorFromRuleset(rule ParsedRule) *LabelSelectorBuilder {
 	selector := &LabelSelectorBuilder{builder: strings.Builder{}}
 	selector.shared = rule.IsShared()
 	selector.builder.WriteString(fmt.Sprintf(hyperscalerTypeReqFmt, rule.Hyperscaler()))

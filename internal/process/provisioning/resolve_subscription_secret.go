@@ -16,13 +16,6 @@ import (
 	"github.com/kyma-project/kyma-environment-broker/internal/storage"
 )
 
-type ParsedRule interface {
-	Hyperscaler() string
-	IsShared() bool
-	IsEUAccess() bool
-	Rule() string
-}
-
 type ResolveSubscriptionSecretStep struct {
 	operationManager *process.OperationManager
 	gardenerClient   *gardener.Client
@@ -130,7 +123,7 @@ func (s *ResolveSubscriptionSecretStep) provisioningAttributesFromOperationData(
 	}
 }
 
-func (s *ResolveSubscriptionSecretStep) matchProvisioningAttributesToRule(attr *rules.ProvisioningAttributes) (ParsedRule, error) {
+func (s *ResolveSubscriptionSecretStep) matchProvisioningAttributesToRule(attr *rules.ProvisioningAttributes) (subscriptions.ParsedRule, error) {
 	result, found := s.rulesService.MatchProvisioningAttributesWithValidRuleset(attr)
 	if !found {
 		return nil, fmt.Errorf("no matching rule for provisioning attributes %q", attr)
