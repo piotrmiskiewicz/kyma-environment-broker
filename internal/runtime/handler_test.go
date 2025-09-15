@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"testing"
 	"time"
 
@@ -585,7 +586,8 @@ func TestRuntimeHandler(t *testing.T) {
 
 func TestRuntimeHandler_WithKimOnlyDrivenInstances(t *testing.T) {
 	runtimeObj := fixRuntimeResource(t, "runtime-test1", "kcp-system")
-	k8sClient := fake.NewClientBuilder().WithRuntimeObjects(runtimeObj.obj).Build()
+	k8sClient := fake.NewClientBuilder().Build()
+	k8sClient.Create(t.Context(), runtimeObj.obj, &client.CreateOptions{})
 
 	log := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
