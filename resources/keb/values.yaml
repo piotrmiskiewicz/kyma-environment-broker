@@ -100,7 +100,7 @@ nameOverride: "kyma-environment-broker"
 resources:
   { }
 
-# If true, use HAP for deprovisioning.
+# If true, uses HAP for deprovisioning.
 useHAPForDeprovisioning: false
 
 runtimeAllowedPrincipals: |-
