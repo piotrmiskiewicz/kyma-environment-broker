@@ -53,6 +53,7 @@
 | manageSecrets | If true, this Helm chart creates and manages Kubernetes Secret resources for credentials. Set to false if you want to manage these Secrets externally or manually, and prevent the chart from creating them. | `True` |
 | namePrefix | - | `kcp` |
 | nameOverride | - | `kyma-environment-broker` |
+| useHAPForDeprovisioning | If true, uses HAP for deprovisioning. | `False` |
 | runtimeAllowedPrincipals | - | `- cluster.local/ns/kcp-system/sa/kcp-kyma-metrics-collector` |
 | service.port | - | `80` |
 | service.type | - | `ClusterIP` |

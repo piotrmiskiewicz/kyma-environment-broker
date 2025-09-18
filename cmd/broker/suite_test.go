@@ -303,6 +303,7 @@ func fixConfig() *Config {
 		PlansConfigurationFilePath:          "testdata/plans.yaml",
 		RuntimeConfigurationConfigMapName:   "keb-runtime-config",
 		QuotaWhitelistedSubaccountsFilePath: "testdata/quota_whitelist.yaml",
+		UseHapForDeprovisioning:             true,
 	}
 }
 

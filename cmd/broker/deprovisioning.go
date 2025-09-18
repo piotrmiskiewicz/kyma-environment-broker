@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"time"
 
+	"k8s.io/client-go/dynamic"
+
 	"github.com/kyma-project/kyma-environment-broker/internal/config"
 
 	"github.com/kyma-project/kyma-environment-broker/common/hyperscaler"
@@ -17,7 +19,7 @@ import (
 func NewDeprovisioningProcessingQueue(ctx context.Context, workersAmount int, deprovisionManager *process.StagedManager,
 	cfg *Config, db storage.BrokerStorage,
 	accountProvider hyperscaler.AccountProvider,
-	k8sClientProvider K8sClientProvider, kcpClient client.Client, configProvider config.Provider, logs *slog.Logger) *process.Queue {
+	k8sClientProvider K8sClientProvider, kcpClient client.Client, configProvider config.Provider, gardenerClient dynamic.Interface, gardenerNamespace string, logs *slog.Logger) *process.Queue {
 
 	deprovisioningSteps := []struct {
 		disabled bool
@@ -42,7 +44,12 @@ func NewDeprovisioningProcessingQueue(ctx context.Context, workersAmount int, de
 			step: deprovisioning.NewCheckRuntimeResourceDeletionStep(db, kcpClient, cfg.StepTimeouts.CheckRuntimeResourceDeletion),
 		},
 		{
-			step: deprovisioning.NewReleaseSubscriptionStep(db, accountProvider),
+			step:     deprovisioning.NewReleaseSubscriptionStep(db, accountProvider),
+			disabled: cfg.UseHapForDeprovisioning,
+		},
+		{
+			step:     deprovisioning.NewFreeSubscriptionStep(db.Operations(), db.Instances(), gardenerClient, gardenerNamespace),
+			disabled: !cfg.UseHapForDeprovisioning,
 		},
 		{
 			disabled: !cfg.ArchivingEnabled,

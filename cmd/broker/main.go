@@ -134,6 +134,9 @@ type Config struct {
 
 	Quota                               quota.Config
 	QuotaWhitelistedSubaccountsFilePath string
+
+	// temporary FF
+	UseHapForDeprovisioning bool `envconfig:"default=false"`
 }
 
 type ProfilerConfig struct {
@@ -311,7 +314,7 @@ func main() {
 
 	deprovisionManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.Broker.OperationTimeout, cfg.Deprovisioning, log.With("deprovisioning", "manager"))
 	deprovisionQueue := NewDeprovisioningProcessingQueue(ctx, cfg.Deprovisioning.WorkersAmount, deprovisionManager, &cfg, db, accountProvider,
-		skrK8sClientProvider, kcpK8sClient, configProvider, log)
+		skrK8sClientProvider, kcpK8sClient, configProvider, dynamicGardener, gardenerNamespace, log)
 
 	updateManager := process.NewStagedManager(db.Operations(), eventBroker, cfg.Broker.OperationTimeout, cfg.Update, log.With("update", "manager"))
 	updateQueue := NewUpdateProcessingQueue(ctx, updateManager, cfg.Update.WorkersAmount, db, cfg, kcpK8sClient, log, workersProvider, schemaService, plansSpec, configProvider, providerSpec, gardenerClient, aws.NewFactory())
