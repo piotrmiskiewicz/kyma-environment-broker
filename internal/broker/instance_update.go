@@ -387,9 +387,15 @@ func (b *UpdateEndpoint) processUpdateParameters(ctx context.Context, instance *
 			); err != nil {
 				return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
 			}
+		}
+		multiError := pkg.MachineTypeMultiError{}
+		for _, additionalWorkerNodePool := range params.AdditionalWorkerNodePools {
 			if err := additionalWorkerNodePool.ValidateMachineTypeChange(instance.Parameters.Parameters.AdditionalWorkerNodePools, b.planSpec.RegularMachines(PlanNamesMapping[details.PlanID])); err != nil {
 				return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(err, http.StatusBadRequest, err.Error())
 			}
+		}
+		if multiError.IsError() {
+			return domain.UpdateServiceSpec{}, apiresponses.NewFailureResponse(&multiError, http.StatusBadRequest, multiError.Error())
 		}
 	}
 
