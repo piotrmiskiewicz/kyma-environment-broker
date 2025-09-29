@@ -440,15 +440,15 @@ func CreateGardenerClient() *gardener.Client {
 	sb4 := createSecretBinding(GCPEUAccessSharedSecretName, namespace, secretName4, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "gcp",
 		gardener.EUAccessLabelKey:        "true",
-		gardener.SharedLabelKey:          "true",
+		//gardener.SharedLabelKey:          "true",
 	})
 	sb5 := createSecretBinding(AWSMostUsedSharedSecretName, namespace, secretName5, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "aws",
-		gardener.SharedLabelKey:          "true",
+		//gardener.SharedLabelKey:          "true",
 	})
 	sb6 := createSecretBinding(AWSLeastUsedSharedSecretName, namespace, secretName6, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "aws",
-		gardener.SharedLabelKey:          "true",
+		//gardener.SharedLabelKey:          "true",
 	})
 	sb7 := createSecretBinding("", namespace, secretName7, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "gcp",
