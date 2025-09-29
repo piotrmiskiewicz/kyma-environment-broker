@@ -95,6 +95,7 @@
 | update.workersAmount | Number of workers in update queue. | `20` |
 | deprovisioning.<br>maxStepProcessingTime | Maximum time a worker is allowed to process a step before it must return to the deprovisioning queue. | `2m` |
 | deprovisioning.<br>workersAmount | Number of workers in deprovisioning queue. | `20` |
+| catalog.<br>documentationUrl | Documentation URL used in the service catalog metadata | `https://help.sap.com/docs/btp/sap-business-technology-platform/provisioning-and-update-parameters-in-kyma-environment` |
 | cleaning.dryRun | If true, the cleaning process runs in dry-run mode and does not actually delete any data from the database. | `True` |
 | cleaning.enabled | If true, enables the cleaning process, which removes all data about deprovisioned instances from the database. | `False` |
 | configPaths.catalog | Path to the service catalog configuration file. | `/config/catalog.yaml` |
