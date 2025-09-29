@@ -39,6 +39,7 @@ const (
 	MonitoringPassword             = "password"
 	AWSTenantName                  = "aws-tenant-1"
 	AzureTenantName                = "azure-tenant-2"
+	AWSSecretName                  = "aws-secret"
 	AWSEUAccessClaimedSecretName   = "aws-euaccess-tenant-1"
 	AzureEUAccessClaimedSecretName = "azure-euaccess-tenant-2"
 	AzureUnclaimedSecretName       = "azure-unclaimed"
@@ -416,6 +417,7 @@ func CreateGardenerClient() *gardener.Client {
 		secretName5 = "secret-5"
 		secretName6 = "secret-6"
 		secretName7 = "secret-7"
+		secretName8 = "secret-8"
 	)
 	s1 := createSecret(secretName1, namespace)
 	s2 := createSecret(secretName2, namespace)
@@ -424,6 +426,7 @@ func CreateGardenerClient() *gardener.Client {
 	s5 := createSecret(secretName5, namespace)
 	s6 := createSecret(secretName6, namespace)
 	s7 := createSecret(secretName7, namespace)
+	s8 := createSecret(secretName8, namespace)
 	sb1 := createSecretBinding(AWSEUAccessClaimedSecretName, namespace, secretName1, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "aws",
 		gardener.EUAccessLabelKey:        "true",
@@ -440,24 +443,28 @@ func CreateGardenerClient() *gardener.Client {
 	sb4 := createSecretBinding(GCPEUAccessSharedSecretName, namespace, secretName4, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "gcp",
 		gardener.EUAccessLabelKey:        "true",
-		//gardener.SharedLabelKey:          "true",
+		gardener.SharedLabelKey:          "true",
 	})
 	sb5 := createSecretBinding(AWSMostUsedSharedSecretName, namespace, secretName5, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "aws",
-		//gardener.SharedLabelKey:          "true",
+		gardener.SharedLabelKey:          "true",
 	})
 	sb6 := createSecretBinding(AWSLeastUsedSharedSecretName, namespace, secretName6, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "aws",
-		//gardener.SharedLabelKey:          "true",
+		gardener.SharedLabelKey:          "true",
 	})
 	sb7 := createSecretBinding("", namespace, secretName7, map[string]string{
 		gardener.HyperscalerTypeLabelKey: "gcp",
+	})
+	sb8 := createSecretBinding(AWSSecretName, namespace, secretName8, map[string]string{
+		gardener.HyperscalerTypeLabelKey: "aws",
+		gardener.TenantNameLabelKey:      AWSTenantName,
 	})
 	shoot1 := createShoot("shoot-1", namespace, AWSMostUsedSharedSecretName)
 	shoot2 := createShoot("shoot-2", namespace, AWSMostUsedSharedSecretName)
 	shoot3 := createShoot("shoot-3", namespace, AWSLeastUsedSharedSecretName)
 
-	fakeGardenerClient := gardener.NewDynamicFakeClient(s1, s2, s3, s4, s5, s6, s7, sb1, sb2, sb3, sb4, sb5, sb6, sb7, shoot1, shoot2, shoot3)
+	fakeGardenerClient := gardener.NewDynamicFakeClient(s1, s2, s3, s4, s5, s6, s7, s8, sb1, sb2, sb3, sb4, sb5, sb6, sb7, sb8, shoot1, shoot2, shoot3)
 
 	return gardener.NewClient(fakeGardenerClient, namespace)
 }
