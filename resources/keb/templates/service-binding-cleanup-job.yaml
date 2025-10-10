@@ -61,13 +61,13 @@ spec:
                       key: {{ .Values.global.database.managedGCP.sslModeSecretKey }}
                 - name: APP_DATABASE_SSLROOTCERT
                   value: "{{ .Values.configPaths.cloudsqlSSLRootCert }}"
+                - name: APP_DATABASE_TIMEZONE
+                  value: "{{ .Values.global.database.timezone }}"
                 - name: APP_DATABASE_USER
                   valueFrom:
                     secretKeyRef:
                       name: {{ .Values.global.database.managedGCP.secretName }}
                       key: {{ .Values.global.database.managedGCP.userNameSecretKey }}
-                - name: APP_DATABASE_TIMEZONE
-                  value: "{{ .Values.global.database.timezone }}"
                 - name: APP_JOB_DRY_RUN
                   value: "{{ .Values.serviceBindingCleanup.dryRun }}"
                 - name: APP_JOB_REQUEST_RETRIES
