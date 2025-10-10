@@ -66,6 +66,8 @@ spec:
                     secretKeyRef:
                       name: {{ .Values.global.database.managedGCP.secretName }}
                       key: {{ .Values.global.database.managedGCP.userNameSecretKey }}
+                - name: APP_DATABASE_TIMEZONE
+                  value: "{{ .Values.global.database.timezone }}"
                 - name: APP_JOB_DRY_RUN
                   value: "{{ .Values.serviceBindingCleanup.dryRun }}"
                 - name: APP_JOB_REQUEST_RETRIES
