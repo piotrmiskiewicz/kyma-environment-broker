@@ -155,7 +155,7 @@ func TestProvisioningForAlicloud(t *testing.T) {
 	defer suite.TearDown()
 	iid := uuid.New().String()
 	// when
-	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu21/v2/service_instances/%s?accepts_incomplete=true", iid),
+	resp := suite.CallAPI("PUT", fmt.Sprintf("oauth/cf-eu40/v2/service_instances/%s?accepts_incomplete=true", iid),
 		`{
 					"service_id": "47c9dcbf-ff30-448e-ab36-d3bad66ba281",
 					"plan_id": "9f2c3b4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
@@ -166,7 +166,7 @@ func TestProvisioningForAlicloud(t *testing.T) {
 					},
 					"parameters": {
 						"name": "testing-cluster",
-						"region": "cn-beijing"
+						"region": "eu-central-1"
 					}
 		}`)
 
@@ -2609,10 +2609,10 @@ func TestProvisioning_ResolveSubscriptionSecretStepEnabled(t *testing.T) {
 			expectedProvider:         "openstack",
 			expectedSubscriptionName: "sb-openstack_eu-de-2",
 		},
-		"alicloud cn-beijing": {
+		"alicloud eu-central-1": {
 			planID:         broker.AlicloudPlanID,
-			region:         "cn-beijing",
-			platformRegion: "cf-eu21",
+			region:         "eu-central-1",
+			platformRegion: "cf-eu40",
 
 			expectedProvider:         "alicloud",
 			expectedSubscriptionName: "sb-alicloud",
