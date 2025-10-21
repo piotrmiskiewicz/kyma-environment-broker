@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"log/slog"
+
 	"github.com/kyma-project/kyma-environment-broker/internal"
 	"github.com/kyma-project/kyma-environment-broker/internal/process/steps"
 	"github.com/stretchr/testify/assert"
-	"log/slog"
 )
 
 func TestHolderStep_Run(t *testing.T) {

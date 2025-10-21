@@ -1,10 +1,11 @@
 package steps
 
 import (
-	"github.com/kyma-project/kyma-environment-broker/internal"
-	"github.com/kyma-project/kyma-environment-broker/internal/process"
 	"log/slog"
 	"time"
+
+	"github.com/kyma-project/kyma-environment-broker/internal"
+	"github.com/kyma-project/kyma-environment-broker/internal/process"
 )
 
 type HolderStep struct {
