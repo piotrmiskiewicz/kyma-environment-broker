@@ -22,8 +22,6 @@ type FreeSubscriptionStep struct {
 
 	gardenerClient dynamic.Interface
 	gardenerNS     string
-
-	hold bool
 }
 
 const freeSubscriptionStepName = "Free_Subscription_Step"

@@ -64,13 +64,9 @@ func (m *MockStep) Run(operation internal.Operation, _ *slog.Logger) (internal.O
 }
 
 func (m *MockStep) assertRunCalled(t *testing.T) {
-	if !m.called {
-		t.Errorf("Expected Run to be called, but it was not")
-	}
+	assert.True(t, m.called, "Expected Run to be called, but it was not")
 }
 
 func (m *MockStep) assertRunNotCalled(t *testing.T) {
-	if m.called {
-		t.Errorf("Expected Run to be called, but it was not")
-	}
+	assert.False(t, m.called, "Expected Run not to be called, but it was")
 }
