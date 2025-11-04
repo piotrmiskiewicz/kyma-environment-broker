@@ -15,7 +15,7 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-type FreeCredentialsBidningStep struct {
+type FreeCredentialsBindingStep struct {
 	operationManager *process.OperationManager
 	instanceStorage  storage.Instances
 	operationStorage storage.Operations
@@ -26,10 +26,10 @@ type FreeCredentialsBidningStep struct {
 
 const freeCredentialsBindingStepName = "Free_Credentials_Binding_Step"
 
-var _ process.Step = &FreeCredentialsBidningStep{}
+var _ process.Step = &FreeCredentialsBindingStep{}
 
-func NewFreeCredentialsBindingStep(os storage.Operations, is storage.Instances, gardenerClient dynamic.Interface, namespace string) *FreeCredentialsBidningStep {
-	return &FreeCredentialsBidningStep{
+func NewFreeCredentialsBindingStep(os storage.Operations, is storage.Instances, gardenerClient dynamic.Interface, namespace string) *FreeCredentialsBindingStep {
+	return &FreeCredentialsBindingStep{
 		operationManager: process.NewOperationManager(os, freeSubscriptionStepName, kebErr.KEBDependency),
 		instanceStorage:  is,
 		operationStorage: os,
@@ -38,11 +38,11 @@ func NewFreeCredentialsBindingStep(os storage.Operations, is storage.Instances, 
 	}
 }
 
-func (s *FreeCredentialsBidningStep) Name() string {
+func (s *FreeCredentialsBindingStep) Name() string {
 	return freeCredentialsBindingStepName
 }
 
-func (s *FreeCredentialsBidningStep) Run(operation internal.Operation, logger *slog.Logger) (internal.Operation, time.Duration, error) {
+func (s *FreeCredentialsBindingStep) Run(operation internal.Operation, logger *slog.Logger) (internal.Operation, time.Duration, error) {
 	// The flow is:
 	// - find the credentials binding
 	// - check if the subscription is shared or not - if yes - do nothing
@@ -115,7 +115,7 @@ func (s *FreeCredentialsBidningStep) Run(operation internal.Operation, logger *s
 	return operation, 0, nil
 }
 
-func (s *FreeCredentialsBidningStep) findCredentialsBindingName(operation internal.Operation, logger *slog.Logger) (string, error) {
+func (s *FreeCredentialsBindingStep) findCredentialsBindingName(operation internal.Operation, logger *slog.Logger) (string, error) {
 	instance, err := s.instanceStorage.GetByID(operation.InstanceID)
 	if err != nil {
 		return "", err
