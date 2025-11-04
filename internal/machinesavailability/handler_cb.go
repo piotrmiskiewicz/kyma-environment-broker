@@ -137,10 +137,10 @@ func (h *HandlerCB) clientCredentials(provider string) (string, string, error) {
 		return "", "", err
 	}
 
-	h.logger.Info(fmt.Sprintf("getting subscription secret with name %s/%s", crednetialsBinding.GetSecretRefNamespace(), crednetialsBinding.GetSecretRefName()))
-	secret, err := h.gardenerClient.GetSecret(crednetialsBinding.GetSecretRefNamespace(), crednetialsBinding.GetSecretRefName())
+	h.logger.Info(fmt.Sprintf("getting subscription secret with name %s/%s", credentialsBinding.GetSecretRefNamespace(), credentialsBinding.GetSecretRefName()))
+	secret, err := h.gardenerClient.GetSecret(credentialsBinding.GetSecretRefNamespace(), credentialsBinding.GetSecretRefName())
 	if err != nil {
-		return "", "", fmt.Errorf("unable to get secret %s/%s", crednetialsBinding.GetSecretRefNamespace(), crednetialsBinding.GetSecretRefName())
+		return "", "", fmt.Errorf("unable to get secret %s/%s", credentialsBinding.GetSecretRefNamespace(), credentialsBinding.GetSecretRefName())
 	}
 
 	accessKeyID, secretAccessKey, err := aws.ExtractCredentials(secret)
