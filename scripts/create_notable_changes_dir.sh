@@ -19,6 +19,8 @@ if [ -z "$( ls -A ${SOURCE_DIR} )" ]; then
    exit 0
 fi
 
+echo "Creating notable changes"
+
 # create target directory
 mkdir -p ${TARGET_DIR}
 
