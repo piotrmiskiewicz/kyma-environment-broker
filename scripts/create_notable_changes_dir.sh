@@ -25,4 +25,3 @@ mkdir -p ${TARGET_DIR}
 # move current notable changes to the target (versioned directory)
 mv ${SOURCE_DIR}* ${TARGET_DIR}
 
-git add ${TARGET_DIR}/*
