@@ -248,34 +248,34 @@ jobs:
       - name: Generate environment docs
         run: make generate-env-docs   
 
-      - name: Check if any PR was merged during release
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          COMMIT_SHA=$(gh api repos/${{ env.KYMA_ENVIRONMENT_BROKER_REPO }}/commits -q '.[0].sha')
-          echo "Latest commit sha: $COMMIT_SHA"
-          echo "Workflow sha: ${{ github.sha }}"
-          if [ "$COMMIT_SHA" != "${{ github.sha }}" ]; then
-            echo "::error ::a PR was merged during the release. Don't rerun this workflow, create a new release with the same version"
-            exit 1
-          fi
-
-      - name: Create PR if anything changed
-        if: ${{ !inputs.skip-sec-file-and-chart-bump }}
-        env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
-        run: |
-          prs=$(gh pr list -A ${{ env.GIT_NAME }} --state open --json headRefName | jq -r '.[] | .headRefName')
-          if echo $prs | tr " " '\n' | grep -F -q -x ${{ env.BUMP_CHART_AND_IMAGES }}; then
-            echo "PR already exists, no need to create a new one"
-            echo "PR_NUMBER=$(gh pr list --search "base:main head:${{ env.BUMP_CHART_AND_IMAGES }}" --json number | jq -r '.[] | .number')" >> $GITHUB_ENV
-          elif [ -z "$(git status --porcelain)" ]; then
-            echo "Nothing changed, no need to create PR"
-            echo "PR_NUMBER=-1" >> $GITHUB_ENV
-          else
-            PR_STATUS=$(scripts/create_bump_pr.sh ${{ inputs.name }})
-            echo "PR_NUMBER=$(echo "$PR_STATUS" | tail -n 1)" >> $GITHUB_ENV
-          fi
+#      - name: Check if any PR was merged during release
+#        env:
+#            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          COMMIT_SHA=$(gh api repos/${{ env.KYMA_ENVIRONMENT_BROKER_REPO }}/commits -q '.[0].sha')
+#          echo "Latest commit sha: $COMMIT_SHA"
+#          echo "Workflow sha: ${{ github.sha }}"
+#          if [ "$COMMIT_SHA" != "${{ github.sha }}" ]; then
+#            echo "::error ::a PR was merged during the release. Don't rerun this workflow, create a new release with the same version"
+#            exit 1
+#          fi
+#
+#      - name: Create PR if anything changed
+#        if: ${{ !inputs.skip-sec-file-and-chart-bump }}
+#        env:
+#          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+#        run: |
+#          prs=$(gh pr list -A ${{ env.GIT_NAME }} --state open --json headRefName | jq -r '.[] | .headRefName')
+#          if echo $prs | tr " " '\n' | grep -F -q -x ${{ env.BUMP_CHART_AND_IMAGES }}; then
+#            echo "PR already exists, no need to create a new one"
+#            echo "PR_NUMBER=$(gh pr list --search "base:main head:${{ env.BUMP_CHART_AND_IMAGES }}" --json number | jq -r '.[] | .number')" >> $GITHUB_ENV
+#          elif [ -z "$(git status --porcelain)" ]; then
+#            echo "Nothing changed, no need to create PR"
+#            echo "PR_NUMBER=-1" >> $GITHUB_ENV
+#          else
+#            PR_STATUS=$(scripts/create_bump_pr.sh ${{ inputs.name }})
+#            echo "PR_NUMBER=$(echo "$PR_STATUS" | tail -n 1)" >> $GITHUB_ENV
+#          fi
 
       - name: Merge PR
         if: ${{ !inputs.skip-sec-file-and-chart-bump }}
