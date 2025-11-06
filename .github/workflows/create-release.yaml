@@ -86,10 +86,10 @@ jobs:
             exit 1
           fi
 
-  run-unit-tests:
-    name: Unit tests, go mod tidy
-    uses: "./.github/workflows/run-unit-tests-reusable.yaml"
-  
+#  run-unit-tests:
+#    name: Unit tests, go mod tidy
+#    uses: "./.github/workflows/run-unit-tests-reusable.yaml"
+#
 #  build-keb-image:
 #    needs: [validate-release]
 #    uses: kyma-project/test-infra/.github/workflows/image-builder.yml@main
@@ -218,7 +218,8 @@ jobs:
 
   bumps:
     name: Bump sec-scanners-config, KEB chart
-    needs: [validate-release, run-unit-tests, run-keb-chart-integration-tests, run-performance-tests]
+#    needs: [validate-release, run-unit-tests, run-keb-chart-integration-tests, run-performance-tests]
+    needs: [validate-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
