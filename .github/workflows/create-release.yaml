@@ -246,8 +246,7 @@ jobs:
           cache: 'pip'
 
       - name: Generate environment docs
-        run: make generate-env-docs   
-
+        run: make generate-env-docs
 #      - name: Check if any PR was merged during release
 #        env:
 #            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
