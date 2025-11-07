@@ -244,7 +244,6 @@ jobs:
         with:
           python-version: '3.9'
           cache: 'pip'
-
       - name: Generate environment docs
         run: make generate-env-docs
 #      - name: Check if any PR was merged during release
@@ -258,7 +257,6 @@ jobs:
 #            echo "::error ::a PR was merged during the release. Don't rerun this workflow, create a new release with the same version"
 #            exit 1
 #          fi
-
       - name: Create PR if anything changed
         if: ${{ !inputs.skip-sec-file-and-chart-bump }}
         env:
