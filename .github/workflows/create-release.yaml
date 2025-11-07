@@ -273,8 +273,8 @@ jobs:
 #            echo "Nothing changed, no need to create PR"
 #            echo "PR_NUMBER=-1" >> $GITHUB_ENV
 #          else
-            PR_STATUS=$(scripts/create_bump_pr.sh ${{ inputs.name }})
-            echo "PR_NUMBER=$(echo "$PR_STATUS" | tail -n 1)" >> $GITHUB_ENV
+          PR_STATUS=$(scripts/create_bump_pr.sh ${{ inputs.name }})
+          echo "PR_NUMBER=$(echo "$PR_STATUS" | tail -n 1)" >> $GITHUB_ENV
 #          fi
 
 
