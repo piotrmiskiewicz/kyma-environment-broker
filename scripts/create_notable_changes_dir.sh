@@ -26,7 +26,7 @@ mkdir -p ${TARGET_DIR}
 
 # move current notable changes to the target (versioned directory)
 mv ${SOURCE_DIR}* ${TARGET_DIR}
-rm ${TARGET_DIR}README.md
+rm -f ${TARGET_DIR}README.md
 
 mkdir -p ${SOURCE_DIR}
 touch ${SOURCE_DIR}README.md
