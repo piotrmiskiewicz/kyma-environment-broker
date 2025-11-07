@@ -246,17 +246,7 @@ jobs:
           cache: 'pip'
       - name: Generate environment docs
         run: make generate-env-docs
-#      - name: Check if any PR was merged during release
-#        env:
-#            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          COMMIT_SHA=$(gh api repos/${{ env.KYMA_ENVIRONMENT_BROKER_REPO }}/commits -q '.[0].sha')
-#          echo "Latest commit sha: $COMMIT_SHA"
-#          echo "Workflow sha: ${{ github.sha }}"
-#          if [ "$COMMIT_SHA" != "${{ github.sha }}" ]; then
-#            echo "::error ::a PR was merged during the release. Don't rerun this workflow, create a new release with the same version"
-#            exit 1
-#          fi
+
       - name: Create PR if anything changed
         if: ${{ !inputs.skip-sec-file-and-chart-bump }}
         env:
