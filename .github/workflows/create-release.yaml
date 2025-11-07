@@ -259,7 +259,7 @@ jobs:
 #            echo "::error ::a PR was merged during the release. Don't rerun this workflow, create a new release with the same version"
 #            exit 1
 #          fi
-#
+
       - name: Create PR if anything changed
         if: ${{ !inputs.skip-sec-file-and-chart-bump }}
         env:
