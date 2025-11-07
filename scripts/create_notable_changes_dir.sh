@@ -14,7 +14,7 @@ SOURCE_DIR="notable-changes-to-release/"
 TARGET_DIR="notable-changes/$1/"
 
 # check if there is anything to move
-if [ -z "$( ls -A ${SOURCE_DIR} )" ]; then
+if [ -z "$( find ${SOURCE_DIR} -type f -not -name README.md )" ]; then
    echo "No notable changes to move"
    exit 0
 fi
@@ -24,11 +24,9 @@ echo "Creating notable changes"
 # create target directory
 mkdir -p ${TARGET_DIR}
 
-# move current notable changes to the target (versioned directory)
-mv ${SOURCE_DIR}* ${TARGET_DIR}
+# move current notable changes to the target (versioned directory) except README.md
+find ${SOURCE_DIR} -type f -not -name README.md -exec mv {} ${TARGET_DIR} \;
 
-# The README.md should stay in the source directory
-mv ${TARGET_DIR}README.md ${SOURCE_DIR}
 
 
 
