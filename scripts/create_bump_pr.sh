@@ -26,7 +26,7 @@ git add docs/contributor/02-70-chart-config.md
 if [ -d "notable-changes/${TAG}" ]; then
    echo "Adding notable changes to the PR"
    git add notable-changes/${TAG}/*
-   git add notable-changes-to-release/*
+   git add -A notable-changes-to-release/*
 fi
 
 #stash staged changes
@@ -47,7 +47,7 @@ git add docs/contributor/02-70-chart-config.md
 if [ -d "notable-changes/${TAG}" ]; then
    echo "Adding notable changes to the PR"
    git add notable-changes/${TAG}/*
-   git add notable-changes-to-release/*
+   git add -A notable-changes-to-release/*
 fi
 
 #configure git
