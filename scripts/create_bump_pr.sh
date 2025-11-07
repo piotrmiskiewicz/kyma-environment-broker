@@ -39,6 +39,7 @@ git add utils/kyma-environments-cleanup-job/kyma-environments-cleanup-job.yaml
 git add docs/contributor/02-70-chart-config.md
 
 if [ -d "notable-changes/${TAG}" ]; then
+   echo "Adding notable changes to the PR"
    git add notable-changes/${TAG}/*
 fi
 
