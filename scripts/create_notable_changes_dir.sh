@@ -26,9 +26,10 @@ mkdir -p ${TARGET_DIR}
 
 # move current notable changes to the target (versioned directory)
 mv ${SOURCE_DIR}* ${TARGET_DIR}
+
+# The README.md should stay in the source directory
 mv ${TARGET_DIR}README.md ${SOURCE_DIR}
 
-mkdir -p ${SOURCE_DIR}
 
 
 
