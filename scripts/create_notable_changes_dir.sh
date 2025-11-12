@@ -26,8 +26,3 @@ mkdir -p ${TARGET_DIR}
 
 # move current notable changes to the target (versioned directory) except README.md
 find ${SOURCE_DIR} -type f -not -name README.md -exec mv {} ${TARGET_DIR} \;
-
-
-
-
-
