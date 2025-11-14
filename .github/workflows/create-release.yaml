@@ -82,7 +82,7 @@ jobs:
       - name: Validate notable changes
         run: |
           if [ -d "notable-changes/${{ inputs.name }}" ]; then
-            echo "Notable changes for release ${{ inputs.name }} already exist"
+            echo "Notable changes for release ${{ inputs.name }} already exist. Please remove the folder and run the release pipeline again."
             exit 1
           fi
 
