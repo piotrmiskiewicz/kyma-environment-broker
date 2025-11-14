@@ -46,11 +46,12 @@ When introducing a KEB change that requires operator action, perform the followi
         ```
 
    2. Clearly describe the impact, required actions, and any relevant details.
+
 2. Within the same directory, include supporting files, such as migration scripts or configuration examples.
 
 ## Integration with Release Notes
 
-When a [notable-changes-to-release](../notable-changes-to-release) directory contains at least one file, a release GitHub action creates a corresponding directory in the [notable-changes](../notable-changes) directory for the specific KEB release version (e.g., `notable-changes/1.22.1`).
+When a [notable-changes-to-release](../../notable-changes-to-release) directory contains at least one file, a release GitHub action creates a corresponding directory in the [notable-changes](../../notable-changes) directory for the specific KEB release version (e.g., `notable-changes/1.22.1`).
 
 All notable changes are also bundled into the bi-weekly KCP package.
 For example, if the previous KEB version included in a KCP package was 1.21.30 and the next is 1.21.39, all notable changes from versions 1.21.31 through 1.21.39 will be included in that KCP package’s release notes.
