@@ -61,3 +61,10 @@ type InstanceERSContextStatsEntry struct {
 	LicenseType sql.NullString
 	Total       int
 }
+
+type InstanceUpdateStatEntry struct {
+	InstanceID string
+
+	UpdateOperationsTotal int
+	EmptyUpdatesTotal     int
+}

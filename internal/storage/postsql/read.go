@@ -514,6 +514,61 @@ func (r readSession) GetActiveInstanceStats() ([]dbmodel.InstanceByGlobalAccount
 	return rows, err
 }
 
+func (r readSession) GetUpdatesInstanceStats() ([]dbmodel.InstanceUpdateStatEntry, error) {
+	// find information about how many update operations have given instance and how many empty updates was performed for given instanace
+	type row struct {
+		Total      int
+		InstanceID string
+	}
+
+	// select i.instance_id, count(*) from instances i, operations o where o.instance_id=i.instance_id and o.type='update' group by i.instance_id;
+	stmt := r.session.
+		Select(fmt.Sprintf("%s.instance_id", InstancesTableName), "count(*) as total").
+		From(InstancesTableName).
+		Join(dbr.I(OperationTableName).As("o"), fmt.Sprintf("%s.instance_id = o.instance_id", InstancesTableName)).
+		Where("type = 'update'").
+		GroupBy(fmt.Sprintf("%s.sub_account_id", InstancesTableName)).
+		Having("count(*) > 0")
+
+	rows := []row{}
+	_, err := stmt.Load(&rows)
+	if err != nil {
+		return nil, err
+	}
+
+	data := map[string]dbmodel.InstanceUpdateStatEntry{}
+	for _, r := range rows {
+		entry := dbmodel.InstanceUpdateStatEntry{}
+		entry.InstanceID = r.InstanceID
+		entry.UpdateOperationsTotal = r.Total
+		data[r.InstanceID] = entry
+	}
+
+	// find information about how many empty update operations was performed for given instance
+	stmt = r.session.
+		Select(fmt.Sprintf("%s.instance_id", InstancesTableName), "empty_updates as total").
+		From(InstancesTableName).
+		Where("empty_updates > 0")
+	emptyUpdateRows := []row{}
+	_, err = stmt.Load(&emptyUpdateRows)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range emptyUpdateRows {
+		if entry, exists := data[r.InstanceID]; exists {
+			entry.EmptyUpdatesTotal = r.Total
+			data[r.InstanceID] = entry
+		} else {
+			entry := dbmodel.InstanceUpdateStatEntry{}
+			entry.InstanceID = r.InstanceID
+			entry.EmptyUpdatesTotal = r.Total
+			data[r.InstanceID] = entry
+		}
+	}
+
+}
+
 func (r readSession) GetSubaccountsInstanceStats() ([]dbmodel.InstanceBySubAccountIDStatEntry, error) {
 	var rows []dbmodel.InstanceBySubAccountIDStatEntry
 	var stmt *dbr.SelectStmt
