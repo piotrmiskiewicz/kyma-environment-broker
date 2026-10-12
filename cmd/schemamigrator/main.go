@@ -223,18 +223,21 @@ func buildConnectionString() (string, error) {
 
 	dbName := os.Getenv("DB_NAME")
 
-	_, present := os.LookupEnv("DB_SSL")
+	sslMode, present := os.LookupEnv("DB_SSL")
 	if present {
-		dbName = fmt.Sprintf("%s?sslmode=%s", dbName, os.Getenv("DB_SSL"))
+		dbName = fmt.Sprintf("%s?sslmode=%s", dbName, sslMode)
 
 		_, present := os.LookupEnv("DB_SSLROOTCERT")
-		if present {
+		if present && sslMode != "disable" {
 			dbName = fmt.Sprintf("%s&sslrootcert=%s", dbName, os.Getenv("DB_SSLROOTCERT"))
 		}
-	}
 
-	// hard-wire time zone as UTC to avoid issues with different time zones
-	dbName += "&timezone=UTC"
+		// hard-wire time zone as UTC to avoid issues with different time zones
+		dbName += "&timezone=UTC"
+	} else {
+		// hard-wire time zone as UTC to avoid issues with different time zones
+		dbName += "?timezone=UTC"
+	}
 
 	hostPort := net.JoinHostPort(
 		os.Getenv("DB_HOST"),

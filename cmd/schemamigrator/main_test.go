@@ -197,7 +197,7 @@ func Test_buildConnectionString(t *testing.T) {
 
 		// then
 		assert.Nil(t, err)
-		assert.Equal(t, "postgres://user:pass@host:5432/dbname&timezone=UTC", connString)
+		assert.Equal(t, "postgres://user:pass@host:5432/dbname?timezone=UTC", connString)
 	})
 
 	t.Run("Should build connection string with SSL", func(t *testing.T) {
