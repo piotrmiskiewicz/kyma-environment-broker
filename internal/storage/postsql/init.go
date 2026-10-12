@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/gocraft/dbr"
-
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 const (
@@ -59,7 +59,7 @@ func CheckIfDatabaseInitialized(db *dbr.Connection) (bool, error) {
 	err := row.Scan(&tableName)
 
 	if err != nil {
-		psqlErr, converted := err.(*pq.Error)
+		psqlErr, converted := err.(*pgconn.PgError)
 
 		if converted && psqlErr.Code == TableNotExistsError {
 			return false, nil
@@ -78,7 +78,7 @@ func WaitForDatabaseAccess(connString string, retryCount int, sleepTime time.Dur
 	slog.Info("Connecting to database")
 
 	for ; retryCount > 0; retryCount-- {
-		connection, err = dbr.Open("postgres", connString, nil)
+		connection, err = dbr.Open("pgx", connString, nil)
 		if err != nil {
 			return nil, fmt.Errorf("invalid connection string: %w", err)
 		}

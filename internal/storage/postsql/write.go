@@ -10,11 +10,8 @@ import (
 
 	"github.com/gocraft/dbr"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
-)
-
-const (
-	UniqueViolationErrorCode = "23505"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type writeSession struct {
@@ -58,8 +55,8 @@ func (ws writeSession) InsertBinding(binding dbmodel.BindingDTO) dberr.Error {
 		Exec()
 
 	if err != nil {
-		if err, ok := err.(*pq.Error); ok {
-			if err.Code == UniqueViolationErrorCode {
+		if err, ok := err.(*pgconn.PgError); ok {
+			if err.Code == pgerrcode.UniqueViolation {
 				return dberr.AlreadyExists("binding with id %s already exist for runtime %s", binding.ID, binding.InstanceID)
 			}
 		}
@@ -107,8 +104,8 @@ func (ws writeSession) InsertInstanceArchived(instance dbmodel.InstanceArchivedD
 		Exec()
 
 	if err != nil {
-		if err, ok := err.(*pq.Error); ok {
-			if err.Code == UniqueViolationErrorCode {
+		if err, ok := err.(*pgconn.PgError); ok {
+			if err.Code == pgerrcode.UniqueViolation {
 				return dberr.AlreadyExists("instance archived with id %s already exist", instance.InstanceID)
 			}
 		}
@@ -141,8 +138,8 @@ func (ws writeSession) InsertInstance(instance dbmodel.InstanceDTO) dberr.Error 
 		Exec()
 
 	if err != nil {
-		if err, ok := err.(*pq.Error); ok {
-			if err.Code == UniqueViolationErrorCode {
+		if err, ok := err.(*pgconn.PgError); ok {
+			if err.Code == pgerrcode.UniqueViolation {
 				return dberr.AlreadyExists("operation with id %s already exist", instance.InstanceID)
 			}
 		}
@@ -217,8 +214,8 @@ func (ws writeSession) InsertOperation(op dbmodel.OperationDTO) dberr.Error {
 		Exec()
 
 	if err != nil {
-		if err, ok := err.(*pq.Error); ok {
-			if err.Code == UniqueViolationErrorCode {
+		if err, ok := err.(*pgconn.PgError); ok {
+			if err.Code == pgerrcode.UniqueViolation {
 				return dberr.AlreadyExists("operation with id %s already exist", op.ID)
 			}
 		}
