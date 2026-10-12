@@ -1,6 +1,7 @@
 package postsql
 
 import (
+	"errors"
 	"time"
 
 	"github.com/kyma-project/kyma-environment-broker/common/events"
@@ -55,10 +56,9 @@ func (ws writeSession) InsertBinding(binding dbmodel.BindingDTO) dberr.Error {
 		Exec()
 
 	if err != nil {
-		if err, ok := err.(*pgconn.PgError); ok {
-			if err.Code == pgerrcode.UniqueViolation {
-				return dberr.AlreadyExists("binding with id %s already exist for runtime %s", binding.ID, binding.InstanceID)
-			}
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return dberr.AlreadyExists("binding with id %s already exist for runtime %s", binding.ID, binding.InstanceID)
 		}
 		return dberr.Internal("Failed to insert record to Binding table: %s", err)
 	}
@@ -104,10 +104,9 @@ func (ws writeSession) InsertInstanceArchived(instance dbmodel.InstanceArchivedD
 		Exec()
 
 	if err != nil {
-		if err, ok := err.(*pgconn.PgError); ok {
-			if err.Code == pgerrcode.UniqueViolation {
-				return dberr.AlreadyExists("instance archived with id %s already exist", instance.InstanceID)
-			}
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return dberr.AlreadyExists("instance archived with id %s already exist", instance.InstanceID)
 		}
 		return dberr.Internal("Failed to insert record to Instance table: %s", err)
 	}
@@ -138,10 +137,9 @@ func (ws writeSession) InsertInstance(instance dbmodel.InstanceDTO) dberr.Error 
 		Exec()
 
 	if err != nil {
-		if err, ok := err.(*pgconn.PgError); ok {
-			if err.Code == pgerrcode.UniqueViolation {
-				return dberr.AlreadyExists("operation with id %s already exist", instance.InstanceID)
-			}
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return dberr.AlreadyExists("operation with id %s already exist", instance.InstanceID)
 		}
 		return dberr.Internal("Failed to insert record to Instance table: %s", err)
 	}
@@ -214,10 +212,9 @@ func (ws writeSession) InsertOperation(op dbmodel.OperationDTO) dberr.Error {
 		Exec()
 
 	if err != nil {
-		if err, ok := err.(*pgconn.PgError); ok {
-			if err.Code == pgerrcode.UniqueViolation {
-				return dberr.AlreadyExists("operation with id %s already exist", op.ID)
-			}
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return dberr.AlreadyExists("operation with id %s already exist", op.ID)
 		}
 		return dberr.Internal("Failed to insert record to operations table: %s", err)
 	}
